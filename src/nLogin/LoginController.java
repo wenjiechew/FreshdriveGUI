@@ -80,7 +80,7 @@ public class LoginController implements Initializable{
 	
 	@Override // This method is called by the FXMLLoader when initialization is complete
     public void initialize(URL fxmlFileLocation, ResourceBundle resources) {
-        System.out.println("Controller.initialize()");
+        System.out.println("LoginController.initialize()");
 //        assert loginBtn != null : "fx:id=\"loginBtn\" was not injected: check your FXML file 'login.fxml'.";
         // initialize your logic here: all @FXML variables will have been injected
         

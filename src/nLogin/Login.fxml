@@ -10,7 +10,8 @@
 <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="243.0" prefWidth="365.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1"
 		fx:controller="nLogin.LoginController">
    <children>
-      <JFXButton fx:id="loginBtn" buttonType="RAISED" layoutX="159.0" layoutY="177.0" style="-fx-background-color: Blue;" text="Login" textFill="WHITE" onAction="#handleLoginBtn"/>
+      <JFXButton fx:id="loginBtn" buttonType="RAISED" layoutX="159.0" layoutY="177.0" style="-fx-background-color: Blue;" text="Login" textFill="WHITE" 
+      		onAction="#handleLoginBtn"/>
       <JFXTextField fx:id="userTextBox" layoutX="108.0" layoutY="72.0" promptText="username" />
       <JFXPasswordField fx:id="passTextBox" layoutX="108.0" layoutY="122.0" promptText="password" />
       <Label fx:id="displayMsg" layoutX="115.0" layoutY="43.0" text="Label" />

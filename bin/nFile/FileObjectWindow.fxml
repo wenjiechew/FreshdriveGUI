@@ -12,7 +12,8 @@
       <Pane prefHeight="75.0" prefWidth="600.0" BorderPane.alignment="CENTER">
          <children>
             <JFXProgressBar fx:id="progressBar" layoutX="200.0" layoutY="60.0" />
-            <JFXButton fx:id="logoutBtn" layoutX="14.0" layoutY="14.0" style="-fx-background-color: blue;" text="Logout" textFill="WHITE" />
+            <JFXButton fx:id="logoutBtn" layoutX="14.0" layoutY="14.0" style="-fx-background-color: blue;" text="Logout" textFill="WHITE" 
+            		onAction="#handleLogoutBtn" />
             <JFXButton fx:id="uploadBtn" layoutX="87.0" layoutY="14.0" style="-fx-background-color: blue;" text="Upload" textFill="WHITE" />
             <JFXButton fx:id="shareBtn" layoutX="160.0" layoutY="14.0" style="-fx-background-color: blue;" text="Share" textFill="WHITE" />
          </children></Pane>
