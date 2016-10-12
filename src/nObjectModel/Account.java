@@ -4,6 +4,15 @@ public class Account {
 	private String _id;
 	private String username;
 	private String password;
+	private String _token;
+
+	public String get_token() {
+		return _token;
+	}
+
+	public void set_token(String _token) {
+		this._token = _token;
+	}
 
 	public String get_id() {
 		return _id;

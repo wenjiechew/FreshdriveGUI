@@ -1,15 +1,12 @@
 package nLogin;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ResourceBundle;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -37,9 +34,9 @@ public class LoginController implements Initializable{
 	@FXML
 	private Label displayMsg;
 	
+	private String result;
 	
-
-	public void handleLoginBtn(ActionEvent event){
+	public void handleLoginBtn(ActionEvent event){		
 		try {	
 			URL url = new URL(nURLConstants.Constants.loginURL);
 			HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -53,34 +50,35 @@ public class LoginController implements Initializable{
 			out.writeBytes(	"username="+ userTextBox.getText().toString() + "&password=" + passTextBox.getText().toString() );
 			out.flush();
 			out.close();
-						
 			
 			//Response from Server
 			BufferedReader in = 
-                new BufferedReader( new InputStreamReader(	con.getInputStream() ) );
-            
+                new BufferedReader( new InputStreamReader(	con.getInputStream() ) );			
             String response;
+            
             while ( (response = in.readLine()) != null ) {
-                displayMsg.setText(response);
+                result = response;
             }
-            in.close();
+			in.close();		
+
+			System.out.println(result);
             
-            
-            
-            //Check for PROPER RESULTS .. tO EDITED!! 
-            
-            // 1 = Failed
-            
-            if(displayMsg.getText().toString().contentEquals("U're Validated") ){
-//            	Parent FilePageParent = FXMLLoader.load( getClass().getResource("/nFile/FileObjectWindow.fxml") );
-//            	Scene FilePageScene = new Scene(FilePageParent);
-//            	Stage app_stage = (Stage) ( (Node) event.getSource() ).getScene().getWindow();
-//            	app_stage.setScene(FilePageScene);
-//            	app_stage.show();
-            	
+            // 1 = Failed            
+            if(		result.contentEquals("1")	) {
             	
             }
-            
+            else {
+            	Account account = new Account();
+            	account.setUsername(userTextBox.getText());
+            	account.set_token(result);
+            	// To Pass object to the next scene
+            	
+            	Parent FilePageParent = FXMLLoader.load( getClass().getResource("/nFile/FileObjectWindow.fxml") );
+            	Scene FilePageScene = new Scene(FilePageParent);
+            	Stage app_stage = (Stage) ( (Node) event.getSource() ).getScene().getWindow();
+            	app_stage.setScene(FilePageScene);
+            	app_stage.show(); 
+            }           
 			           
             
             
