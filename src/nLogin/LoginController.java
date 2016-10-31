@@ -1,18 +1,13 @@
 package nLogin;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ResourceBundle;
-
-import javax.net.ssl.HttpsURLConnection;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -22,12 +17,11 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import nObjectModel.Account;
 
-
-
-public class LoginController implements Initializable{
+public class LoginController implements Initializable {
 	@FXML
 	private Button loginBtn;
 	@FXML
@@ -36,70 +30,80 @@ public class LoginController implements Initializable{
 	private PasswordField passTextBox;
 	@FXML
 	private Label displayMsg;
-	
-	
+	@FXML
+	private Hyperlink registerLink;
 
-	public void handleLoginBtn(ActionEvent event){
-		try {	
+	private String result;
+
+	public void handleLoginBtn(ActionEvent event) {
+		try {
 			URL url = new URL(nURLConstants.Constants.loginURL);
 			HttpURLConnection con = (HttpURLConnection) url.openConnection();
-			
-			//Adding Header
+
+			// Adding Header
 			con.setRequestMethod("POST");
-			
-			//Send Post
+
+			// Send Post
 			con.setDoOutput(true);
-			DataOutputStream out = new DataOutputStream(	con.getOutputStream()	);
-			out.writeBytes(	"username="+ userTextBox.getText().toString() + "&password=" + passTextBox.getText().toString() );
+			DataOutputStream out = new DataOutputStream(con.getOutputStream());
+			out.writeBytes(
+					"username=" + userTextBox.getText().toString() + "&password=" + passTextBox.getText().toString());
 			out.flush();
 			out.close();
-						
-			
-			//Response from Server
-			BufferedReader in = 
-                new BufferedReader( new InputStreamReader(	con.getInputStream() ) );
-            
-            String response;
-            while ( (response = in.readLine()) != null ) {
-                displayMsg.setText(response);
-            }
-            in.close();
-            
-            
-            
-            //Check for PROPER RESULTS .. tO EDITED!! 
-            
-            // 1 = Failed
-            
-            if(displayMsg.getText().toString().contentEquals("U're Validated") ){
-//            	Parent FilePageParent = FXMLLoader.load( getClass().getResource("/nFile/FileObjectWindow.fxml") );
-//            	Scene FilePageScene = new Scene(FilePageParent);
-//            	Stage app_stage = (Stage) ( (Node) event.getSource() ).getScene().getWindow();
-//            	app_stage.setScene(FilePageScene);
-//            	app_stage.show();
-            	
-            	
-            }
-            
-			           
-            
-            
-        }
-        catch ( MalformedURLException ex ) {
-            // a real program would need to handle this exception
-        }
-        catch ( IOException ex ) {
-            // a real program would need to handle this exception
-        }
+
+			// Response from Server
+			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+			String response;
+
+			while ((response = in.readLine()) != null) {
+				result = response;
+			}
+			in.close();
+
+			System.out.println(result);
+
+			// 1 = Failed
+			if (result.contentEquals("1")) {
+				displayMsg.setTextFill(Color.web("#FF0000"));
+				displayMsg.setText("Login failed.");
+				// Optionally display number of attempts left (if doing account lock)
+			} else {
+				Account account = new Account();
+				account.setUsername(userTextBox.getText());
+				account.set_token(result);
+
+				// To Pass object to the next scene
+				Parent FilePageParent = FXMLLoader.load(getClass().getResource("/nFile/FileObjectWindow.fxml"));
+				Scene FilePageScene = new Scene(FilePageParent);
+				Stage app_stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+				app_stage.setScene(FilePageScene);
+				app_stage.show();
+			}
+
+		} catch (MalformedURLException ex) {
+			// a real program would need to handle this exception
+		} catch (IOException ex) {
+			// a real program would need to handle this exception
+		}
 	}
 
-	
-	
+	public void handleRegistration(ActionEvent event) {
+		// Move to Registration page
+		try {
+			Parent registerPageParent = FXMLLoader.load(getClass().getResource("/nRegister/Register.fxml"));
+			Scene registerScene = new Scene(registerPageParent);
+			Stage app_stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+			app_stage.setScene(registerScene);
+			app_stage.show();
+		} catch (IOException ex) {
+			System.err.println("Caught IOException: " + ex.getMessage());
+		}
+	}
+
 	@Override // This method is called by the FXMLLoader when initialization is complete
-    public void initialize(URL fxmlFileLocation, ResourceBundle resources) {
-        System.out.println("LoginController.initialize()");
-//        assert loginBtn != null : "fx:id=\"loginBtn\" was not injected: check your FXML file 'login.fxml'.";
-        // initialize your logic here: all @FXML variables will have been injected
-        
-    }
+	public void initialize(URL fxmlFileLocation, ResourceBundle resources) {
+		System.out.println("LoginController.initialize()");
+		// assert loginBtn != null : "fx:id=\"loginBtn\" was not injected: check your FXML file 'login.fxml'.";
+		// initialize your logic here: all @FXML variables will have been injected
+	}
 }
