@@ -3,6 +3,7 @@ package nObjectModel;
 public class Account {
 	private String _id;
 	private String username;
+	private String email;
 	private String password;
 	private String _token;
 
@@ -37,6 +38,14 @@ public class Account {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 	
