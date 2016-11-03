@@ -59,7 +59,8 @@ public class LoginController implements Initializable {
 				result = response;
 			}
 			in.close();
-
+			
+			//Where result is either error or the token key
 			System.out.println(result);
 
 			// 1 = Failed
@@ -67,8 +68,13 @@ public class LoginController implements Initializable {
 				displayMsg.setTextFill(Color.web("#FF0000"));
 				displayMsg.setText("Login failed.");
 				// Optionally display number of attempts left (if doing account lock)
-			} else {
-				Account account = new Account();
+			} 
+			else if(result.contentEquals("active-token")){
+				displayMsg.setTextFill(Color.web("#FF0000"));
+				displayMsg.setText("Account already logged in.");
+			}
+			else {
+				Account account = Account.getAccount();
 				account.setUsername(userTextBox.getText());
 				account.set_token(result);
 
