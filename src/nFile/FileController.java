@@ -45,7 +45,7 @@ public class FileController implements Initializable {
 
 	public void handleUploadButton(ActionEvent event) throws IOException {
 
-//		// TODO:find out what's the stage here.is it primarystage or what
+//		// TODO:find out what's the stage here.is it primarystage or app_stage or filepagescene
 //		File file = fileChooser.showOpenDialog(stage);
 //		
 //		//once file is chosen,put in the filescan parameter
