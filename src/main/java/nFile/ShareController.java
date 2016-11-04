@@ -103,12 +103,19 @@ public class ShareController implements Initializable {
 			
 			if (result != null)
 			{
-				String userString = result.substring(1, result.length()-1);
-				errorLabel.setText(userString + " does not exist.");
-				userList.removeAll(userList);
-				String[] userErrorList = userString.split(", ");
-				for (int i = 0; i < userErrorList.length; i++){
-					userList.add(userErrorList[i]);
+				if (result.equals("File"))
+				{
+					errorLabel.setText("Error in uploading file, please click 'Back' and try again.");
+				}
+				else
+				{
+					String userString = result.substring(1, result.length()-1);
+					errorLabel.setText(userString + " does not exist.");
+					userList.removeAll(userList);
+					String[] userErrorList = userString.split(", ");
+					for (int i = 0; i < userErrorList.length; i++){
+						userList.add(userErrorList[i]);
+					}
 				}
 			}
 			else {
