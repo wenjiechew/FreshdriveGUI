@@ -111,6 +111,7 @@ public class FileController implements Initializable {
 					System.out.println("File is virus infected");
 				}
 			} catch (Exception e) {
+				e.printStackTrace();
 				System.out.println("Invalid File");
 			}
 		} else {
@@ -119,6 +120,14 @@ public class FileController implements Initializable {
 
 	}
 
+	public void moveToShareScreen(ActionEvent event) throws IOException{
+		Parent FilePageParent = FXMLLoader.load( getClass().getResource("/nFile/FileShareWindow.fxml") );
+    	Scene FilePageScene = new Scene(FilePageParent);
+    	Stage app_stage = (Stage) ( (Node) event.getSource() ).getScene().getWindow();
+    	app_stage.setScene(FilePageScene);
+    	app_stage.show();
+	}
+	
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		System.out.println("FileController.initialize()");
