@@ -43,53 +43,54 @@ public class FileController implements Initializable {
 	private Stage app_stage;
 	public void handleLogoutBtn(ActionEvent event) throws IOException {
 		try{
-		URL url = new URL(nURLConstants.Constants.logoutURL);
-		HttpURLConnection con = (HttpURLConnection) url.openConnection();
-
-		// Adding Header
-		con.setRequestMethod("POST");
-		
-		// Send Post
-		con.setDoOutput(true);
-		DataOutputStream out = new DataOutputStream(con.getOutputStream());
-		out.writeBytes("username=" + account.getUsername());
-		out.flush();
-		out.close();
-
-		// Response from Server
-		BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-		String response;
-
-		while ((response = in.readLine()) != null) {
-			result = response;
+			URL url = new URL(nURLConstants.Constants.logoutURL);
+			HttpURLConnection con = (HttpURLConnection) url.openConnection();
+	
+			// Adding Header
+			con.setRequestMethod("POST");
+			
+			// Send Post
+			con.setDoOutput(true);
+			DataOutputStream out = new DataOutputStream(con.getOutputStream());
+			out.writeBytes("username=" + account.getUsername());
+			out.flush();
+			out.close();
+	
+			// Response from Server
+			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+			String response;
+	
+			while ((response = in.readLine()) != null) {
+				result = response;
+			}
+			in.close();
+			
+			System.out.println(result);
+	
+			// 1 = Failed
+			if (result.contentEquals("1")) {
+				Alert alert = new Alert(AlertType.ERROR);
+				alert.setTitle("ERROR");
+				alert.setHeaderText("Unable to logout");
+				alert.setContentText("There was an error logging out.\nPlease try again!");
+				alert.showAndWait();
+			}
+			else {
+				//Clear Account instance
+				account.clearInstance();
+				//Back to login screen
+				Parent FilePageParent = FXMLLoader.load(getClass().getResource("/nLogin/Login.fxml"));
+				Scene FilePageScene = new Scene(FilePageParent);
+				app_stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+				app_stage.setScene(FilePageScene);
+				app_stage.show();
+			}
+	
+		} catch (MalformedURLException ex) {
+			// a real program would need to handle this exception
+		} catch (IOException ex) {
+			// a real program would need to handle this exception
 		}
-		in.close();
-		
-		System.out.println(result);
-
-		// 1 = Failed
-		if (result.contentEquals("1")) {
-			Alert alert = new Alert(AlertType.ERROR);
-			alert.setTitle("ERROR");
-			alert.setHeaderText("Unable to logout");
-			alert.setContentText("There was an error logging out.\nPlease try again!");
-			alert.showAndWait();
-		}
-		else {
-			//Clear Account instance
-			account.clearInstance();
-			//Back to login screen
-			Parent FilePageParent = FXMLLoader.load(getClass().getResource("/nLogin/Login.fxml"));
-			Scene FilePageScene = new Scene(FilePageParent);
-			app_stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-			app_stage.setScene(FilePageScene);
-			app_stage.show();
-		}
-
-	} catch (MalformedURLException ex) {
-		// a real program would need to handle this exception
-	} catch (IOException ex) {
-		// a real program would need to handle this exception
 	}
 
 	public void handleUploadButton(ActionEvent event) throws IOException {
@@ -105,6 +106,7 @@ public class FileController implements Initializable {
 				// this result determines whether the file has a virus or not
 				if (!filescan.isFileInfected()) {
 					// TODO: if file is not infected do necessary
+					System.out.println("File is ok to go");
 				} else {
 					System.out.println("File is virus infected");
 				}
