@@ -41,6 +41,8 @@ public class FileController implements Initializable {
 	
 	Account account = Account.getAccount();
 	private Stage app_stage;
+	
+	
 	public void handleLogoutBtn(ActionEvent event) throws IOException {
 		try{
 			URL url = new URL(nURLConstants.Constants.logoutURL);
