@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.*?>
 <?import com.jfoenix.controls.*?>
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
@@ -15,11 +16,25 @@
          <children>
             <JFXProgressBar fx:id="progressBar" layoutX="200.0" layoutY="60.0" />
             <JFXButton fx:id="logoutBtn" layoutX="14.0" layoutY="14.0" onAction="#handleLogoutBtn" style="-fx-background-color: blue;" text="Logout" textFill="WHITE" />
-            <JFXButton fx:id="uploadBtn" layoutX="87.0" layoutY="14.0" onAction="#handleUploadButton" style="-fx-background-color: blue;" text="Upload" textFill="WHITE" />
-            <JFXButton fx:id="shareBtn" layoutX="160.0" layoutY="14.0" style="-fx-background-color: blue;" text="Share" textFill="WHITE" onAction="#moveToShareScreen"/>
+            <JFXButton fx:id="shareBtn" layoutX="160.0" layoutY="14.0" onAction="#moveToShareScreen" style="-fx-background-color: blue;" text="Share" textFill="WHITE" />
          </children></Pane>
    </top>
    <center>
       <JFXListView fx:id="listView" BorderPane.alignment="CENTER" />
    </center>
+   <left>
+      <Pane prefHeight="125.0" prefWidth="284.0" BorderPane.alignment="CENTER">
+         <children>
+            <JFXButton fx:id="uploadBtn" layoutX="183.0" layoutY="35.0" onAction="#handleUploadButton" style="-fx-background-color: blue;" text="Choose File" textFill="WHITE" />
+            <Label layoutX="14.0" layoutY="39.0" text="File: " />
+            <Label fx:id="uploadedFileLabel" layoutX="51.0" layoutY="39.0" prefHeight="17.0" prefWidth="119.0" text="No file uploaded" />
+            <Button fx:id="uploadFileBtn" onAction="#handleUploadFileBtn" layoutX="205.0" layoutY="86.0" mnemonicParsing="false" text="Upload" />
+            <DatePicker fx:id="expiryDatePicker" layoutX="9.0" layoutY="86.0" />
+            <Label layoutX="12.0" layoutY="63.0" text="Expiry Date: " />
+         </children>
+      </Pane>
+   </left>
+   <bottom>
+      <ListView fx:id="fileListView" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+   </bottom>
 </BorderPane>

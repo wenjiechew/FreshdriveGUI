@@ -5,4 +5,5 @@ public class Constants {
 	public final static String logoutURL = "http://localhost:8080/FreshdriveServer/Logout";
 	public final static String regURL = "http://localhost:8080/FreshdriveServer/Register";
 	public final static String sharingURL = "http://localhost:8080/FreshdriveServer/ShareFile";
+	public final static String uploadURL = "http://localhost:8080/FreshdriveServer/Upload";
 }
