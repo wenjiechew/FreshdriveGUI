@@ -61,6 +61,7 @@ public class FileController implements Initializable {
 	
 	Account account = Account.getAccount();
 	private Stage app_stage;
+	private String username = account.getUsername();
 	public void handleLogoutBtn(ActionEvent event) throws IOException {
 		try{
 			URL url = new URL(nURLConstants.Constants.logoutURL);
@@ -132,9 +133,11 @@ public class FileController implements Initializable {
 			con.setRequestProperty("filePath", filePath);
 			con.setRequestProperty("fileName", uploadFile.getName());
 			con.setRequestProperty("fileLength", String.valueOf(uploadFile.length()));
+			con.setRequestProperty("username", account.getUsername());
 			System.out.println("File to upload: " + filePath);
 			System.out.println("File Name: " + uploadFile.getName());
 			System.out.println("File Length: " +  String.valueOf(uploadFile.length()));
+			System.out.println("USERNAME: " + account.getUsername()) ;
 			
 			// opens output stream of the HTTP connection for writing data
 			OutputStream out = con.getOutputStream();
@@ -179,9 +182,10 @@ public class FileController implements Initializable {
 		} catch (IOException ex) {
 			// a real program would need to handle this exception
 		}
+//		initializeListView();
 	}
 
-	public void handleUploadButton(ActionEvent event) throws IOException {
+	public void handleUploadButton(ActionEvent event) throws IOException, DbxException {
 
 		// opens up file dialog for user to choose
 		File file = fileChooser.showOpenDialog(app_stage);
@@ -210,6 +214,8 @@ public class FileController implements Initializable {
 		} else {
 			System.out.println("Invalid File");
 		}
+		
+		
 
 	}
 
@@ -225,7 +231,17 @@ public class FileController implements Initializable {
 	public void initialize(URL location, ResourceBundle resources) {
 		System.out.println("FileController.initialize()");
 		// TODO Auto-generated method stub
+		
 		progressBar.setVisible(false);
+		try {
+			initializeListView();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (DbxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public void initializeListView() throws IOException, DbxException {
@@ -241,7 +257,7 @@ public class FileController implements Initializable {
 
 		client = new DbxClient(config, accessToken);
 		System.out.println("Logged on to dropbox");
-		DbxEntry.WithChildren listing = client.getMetadataWithChildren("/");
+		DbxEntry.WithChildren listing = client.getMetadataWithChildren("/"+username);
 		System.out.println("Files in the root path:");
 		ObservableList<String> data = FXCollections.observableArrayList();
 		for (DbxEntry child : listing.children) {
