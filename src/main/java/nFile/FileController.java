@@ -3,14 +3,19 @@ package nFile;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 import fileScan.FileScan;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -25,6 +30,9 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import nObjectModel.Account;
 
+import com.dropbox.core.*;
+import com.dropbox.core.DbxException;
+
 public class FileController implements Initializable {
 	@FXML
 	private Button logoutBtn;
@@ -36,7 +44,19 @@ public class FileController implements Initializable {
 	private ProgressBar progressBar;
 	@FXML
 	private ListView<Account> listView;
+	@FXML
+	private DatePicker expiryDatePicker;
+	@FXML
+	private Label uploadedFileLabel;
+	@FXML
+	private Button uploadFileBtn;
+	@FXML
+	private ListView<String> fileListView;
+	
 	private String result;
+	private File inputFile;
+	static final int BUFFER_SIZE = 524288000;
+	private static DbxClient client;
 	final FileChooser fileChooser = new FileChooser();
 	
 	Account account = Account.getAccount();
@@ -94,24 +114,97 @@ public class FileController implements Initializable {
 			// a real program would need to handle this exception
 		}
 	}
+	
+	public void handleUploadFileBtn(ActionEvent event) throws IOException, DbxException {
+		try {
+			URL url = new URL(nURLConstants.Constants.uploadURL);
+			HttpURLConnection con = (HttpURLConnection) url.openConnection();
+			con.setDoOutput(true);
+			con.setUseCaches(false);
+			// Adding Header
+			con.setRequestMethod("POST");
+			//get the filepath from inputFile
+			String filePath = inputFile.getPath();
+			//replace the single backslash with double backslash
+			filePath = filePath.replace("\\", "\\\\");
+			File uploadFile = new File(filePath);
+			// Send Post
+			
+			//get the properties for the files information
+			con.setRequestProperty("filePath", filePath);
+			con.setRequestProperty("fileName", uploadFile.getName());
+			con.setRequestProperty("fileLength", String.valueOf(uploadFile.length()));
+			System.out.println("File to upload: " + filePath);
+			System.out.println("File Name: " + uploadFile.getName());
+			System.out.println("File Length: " +  String.valueOf(uploadFile.length()));
+			
+			// opens output stream of the HTTP connection for writing data
+			OutputStream out = con.getOutputStream();
+
+			// Opens input stream of the file for reading data
+			FileInputStream inputStream = new FileInputStream(uploadFile);
+
+			byte[] buffer = new byte[BUFFER_SIZE];
+			int bytesRead = -1;
+
+			System.out.println("Start writing data...");
+			
+			//write the file into the outputstream
+			while ((bytesRead = inputStream.read(buffer)) != -1) {
+				out.write(buffer, 0, bytesRead);
+			}
+
+			System.out.println("Data was written.");
+			out.close();
+			inputStream.close();
+
+			// Response from Server
+			int responseCode = con.getResponseCode();
+//			String error = con.getErrorStream().toString();
+			if (responseCode == con.HTTP_OK) {
+				BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+				String response;
+
+				while ((response = in.readLine()) != null) {
+					result = response;
+				}
+				in.close();
+
+				System.out.println(result);
+				System.out.println("Server's response: " + response);
+			}else{
+				System.out.println("Server returned non-OK code: " + responseCode);
+			}
+
+		} catch (MalformedURLException ex) {
+			// a real program would need to handle this exception
+		} catch (IOException ex) {
+			// a real program would need to handle this exception
+		}
+	}
 
 	public void handleUploadButton(ActionEvent event) throws IOException {
 
 		// opens up file dialog for user to choose
 		File file = fileChooser.showOpenDialog(app_stage);
-
+		inputFile = file;
+		uploadedFileLabel.setText(inputFile.getName());
 		// check if valid file
 		if (file != null) {
 			try {
 				// does the virus scan
 				FileScan filescan = new FileScan(file);
 				// this result determines whether the file has a virus or not
-				if (!filescan.isFileInfected()) {
-					// TODO: if file is not infected do necessary
-					System.out.println("File is ok to go");
-				} else {
-					System.out.println("File is virus infected");
-				}
+				
+//				if (!filescan.isFileInfected()) {
+//					// TODO: if file is not infected do necessary
+//					inputFile = file;
+//					
+//					System.out.println("File selected: " + inputFile.getAbsolutePath());
+//					System.out.println("File is ok to go");
+//				} else {
+//					System.out.println("File is virus infected");
+//				}
 			} catch (Exception e) {
 				e.printStackTrace();
 				System.out.println("Invalid File");
@@ -135,6 +228,33 @@ public class FileController implements Initializable {
 		System.out.println("FileController.initialize()");
 		// TODO Auto-generated method stub
 		progressBar.setVisible(false);
+	}
+	
+	public void initializeListView() throws IOException, DbxException {
+
+		final String APP_KEY = "hlxjjkypee9pfx6";
+		final String APP_SECRET = "a9akptnjcley8jk";
+
+		DbxAppInfo appInfo = new DbxAppInfo(APP_KEY, APP_SECRET);
+		DbxRequestConfig config = new DbxRequestConfig("FreshDrive", Locale.getDefault().toString());
+
+		// access token for the dropbox account. may need to encrypt this
+		String accessToken = "-TcOHePlr9AAAAAAAAAACMWGsYvDXPTDcThy6nM8r0hwG-Mz5cEqtDxcDygkg9i3";
+
+		client = new DbxClient(config, accessToken);
+		System.out.println("Logged on to dropbox");
+		DbxEntry.WithChildren listing = client.getMetadataWithChildren("/");
+		System.out.println("Files in the root path:");
+		ObservableList<String> data = FXCollections.observableArrayList();
+		for (DbxEntry child : listing.children) {
+
+			data.add(child.name);
+			System.out.println("	" + child.name);
+		}
+		// listView.setItems(data);
+		fileListView.setItems(data);
+		System.out.println("Refresh List View");
+
 	}
 
 }
