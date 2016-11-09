@@ -82,6 +82,7 @@ public class FileScan {
 		try {
 			HttpEntity entity1 = response1.getEntity();
 			String responseBody = responseAsString(response1);
+			System.out.println(responseBody);
 			int responseStatus = response1.getStatusLine().getStatusCode();
 			JSONObject jObject = new JSONObject(responseBody); // json
 			positives = jObject.getInt("positives");
