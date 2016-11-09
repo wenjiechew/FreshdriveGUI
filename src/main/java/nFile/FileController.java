@@ -184,15 +184,14 @@ public class FileController implements Initializable {
 		} catch (IOException ex) {
 			// a real program would need to handle this exception
 		}
-//		initializeListView();
+		initializeListView();
 	}
 
 	public void handleUploadButton(ActionEvent event) throws IOException, DbxException {
 
 		// opens up file dialog for user to choose
 		File file = fileChooser.showOpenDialog(app_stage);
-		inputFile = file;
-		uploadedFileLabel.setText(inputFile.getName());
+		
 		// check if valid file
 		if (file != null) {
 			try {
@@ -201,15 +200,16 @@ public class FileController implements Initializable {
 				System.out.println(filescan.isFileInfected());
 				// this result determines whether the file has a virus or not
 				
-//				if (!filescan.isFileInfected()) {
-//					// TODO: if file is not infected do necessary
-//					inputFile = file;
-//					
-//					System.out.println("File selected: " + inputFile.getAbsolutePath());
-//					System.out.println("File is ok to go");
-//				} else {
-//					System.out.println("File is virus infected");
-//				}
+				if (!filescan.isFileInfected()) {
+					
+					inputFile = file;
+					uploadedFileLabel.setText(inputFile.getName());
+					System.out.println("File selected: " + inputFile.getAbsolutePath());
+					System.out.println("File is ok to go");
+				} else {
+					System.out.println("File is virus infected");
+					uploadedFileLabel.setText("Invalid File. Try another file.");
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 				System.out.println("Invalid File");
@@ -240,7 +240,7 @@ public class FileController implements Initializable {
 			initializeListView();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+//			e.printStackTrace();
 		} catch (DbxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
