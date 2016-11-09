@@ -10,6 +10,11 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -129,17 +134,41 @@ public class FileController implements Initializable {
 			//replace the single backslash with double backslash
 			filePath = filePath.replace("\\", "\\\\");
 			File uploadFile = new File(filePath);
+			
+			
+			
 			// Send Post
 			
 			//get the properties for the files information
-			con.setRequestProperty("filePath", filePath);
+			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+			Date date = new Date();
+			String currentDate = dateFormat.format(date).toString();
+			LocalDate expiryDate = expiryDatePicker.getValue();
+			String expireDate;
+			if(expiryDate != null){
+				expireDate = expiryDate.format(formatter);
+			}else{
+				expireDate = "";
+			}
+			
 			con.setRequestProperty("fileName", uploadFile.getName());
 			con.setRequestProperty("fileLength", String.valueOf(uploadFile.length()));
-			con.setRequestProperty("username", account.getUsername());
-			System.out.println("File to upload: " + filePath);
+			con.setRequestProperty("username", account.getUsername());			
+			con.setRequestProperty("filePath", "/"+account.getUsername()+"/"+uploadFile.getName());
+			con.setRequestProperty("ownerID", account.get_id());
+			con.setRequestProperty("createdOn", currentDate);
+			con.setRequestProperty("expiryDate", expireDate);
 			System.out.println("File Name: " + uploadFile.getName());
 			System.out.println("File Length: " +  String.valueOf(uploadFile.length()));
-			System.out.println("USERNAME: " + account.getUsername()) ;
+			System.out.println("USERNAME: " + account.getUsername());
+			System.out.println("File to upload: " + filePath);
+			System.out.println("File created on: " + dateFormat.format(date) );
+			System.out.println("Expiry date: " + expireDate);
+			System.out.println("Owner ID: " + account.get_id());
+			
+			
+			
 			
 			// opens output stream of the HTTP connection for writing data
 			OutputStream out = con.getOutputStream();
@@ -171,12 +200,21 @@ public class FileController implements Initializable {
 				while ((response = in.readLine()) != null) {
 					result = response;
 				}
+				if(result.equals("File already exist")){
+					Alert alert = new Alert(AlertType.WARNING);
+					alert.setTitle("Warning Dialog");
+					alert.setHeaderText("Warning!");
+					alert.setContentText("File already exists. Please choose another file or rename your file.");
+
+					alert.showAndWait();
+				}
 				in.close();
 
 				System.out.println(result);
-				System.out.println("Server's response: " + response);
+				System.out.println("Server's response: " + result);
 			}else{
 				System.out.println("Server returned non-OK code: " + responseCode);
+				
 			}
 
 		} catch (MalformedURLException ex) {
@@ -184,7 +222,7 @@ public class FileController implements Initializable {
 		} catch (IOException ex) {
 			// a real program would need to handle this exception
 		}
-		initializeListView();
+//		initializeListView();
 	}
 
 	public void handleUploadButton(ActionEvent event) throws IOException, DbxException {
@@ -197,7 +235,7 @@ public class FileController implements Initializable {
 			try {
 				// does the virus scan
 				FileScan filescan = new FileScan(file);
-				System.out.println(filescan.isFileInfected());
+//				System.out.println(filescan.isFileInfected());
 				// this result determines whether the file has a virus or not
 				
 				if (!filescan.isFileInfected()) {
@@ -212,6 +250,7 @@ public class FileController implements Initializable {
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
+				uploadedFileLabel.setText("Invalid File. Try another file.");
 				System.out.println("Invalid File");
 			}
 		} else {
@@ -236,41 +275,41 @@ public class FileController implements Initializable {
 		// TODO Auto-generated method stub
 		
 		progressBar.setVisible(false);
-		try {
-			initializeListView();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+//		try {
+//			initializeListView();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+////			e.printStackTrace();
+//		} catch (DbxException e) {
+//			// TODO Auto-generated catch block
 //			e.printStackTrace();
-		} catch (DbxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		}
 	}
 	
 	public void initializeListView() throws IOException, DbxException {
 
-		final String APP_KEY = "hlxjjkypee9pfx6";
-		final String APP_SECRET = "a9akptnjcley8jk";
-
-		DbxAppInfo appInfo = new DbxAppInfo(APP_KEY, APP_SECRET);
-		DbxRequestConfig config = new DbxRequestConfig("FreshDrive", Locale.getDefault().toString());
-
-		// access token for the dropbox account. may need to encrypt this
-		String accessToken = "-TcOHePlr9AAAAAAAAAACMWGsYvDXPTDcThy6nM8r0hwG-Mz5cEqtDxcDygkg9i3";
-
-		client = new DbxClient(config, accessToken);
-		System.out.println("Logged on to dropbox");
-		DbxEntry.WithChildren listing = client.getMetadataWithChildren("/"+username);
-		System.out.println("Files in the root path:");
-		ObservableList<String> data = FXCollections.observableArrayList();
-		for (DbxEntry child : listing.children) {
-
-			data.add(child.name);
-			System.out.println("	" + child.name);
-		}
-		// listView.setItems(data);
-		fileListView.setItems(data);
-		System.out.println("Refresh List View");
+//		final String APP_KEY = "hlxjjkypee9pfx6";
+//		final String APP_SECRET = "a9akptnjcley8jk";
+//
+//		DbxAppInfo appInfo = new DbxAppInfo(APP_KEY, APP_SECRET);
+//		DbxRequestConfig config = new DbxRequestConfig("FreshDrive", Locale.getDefault().toString());
+//
+//		// access token for the dropbox account. may need to encrypt this
+//		String accessToken = "-TcOHePlr9AAAAAAAAAACMWGsYvDXPTDcThy6nM8r0hwG-Mz5cEqtDxcDygkg9i3";
+//
+//		client = new DbxClient(config, accessToken);
+//		System.out.println("Logged on to dropbox");
+//		DbxEntry.WithChildren listing = client.getMetadataWithChildren("/"+username);
+//		System.out.println("Files in the root path:");
+//		ObservableList<String> data = FXCollections.observableArrayList();
+//		for (DbxEntry child : listing.children) {
+//
+//			data.add(child.name);
+//			System.out.println("	" + child.name);
+//		}
+//		// listView.setItems(data);
+//		fileListView.setItems(data);
+//		System.out.println("Refresh List View");
 
 	}
 

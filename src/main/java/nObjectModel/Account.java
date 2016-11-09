@@ -15,7 +15,7 @@ public class Account {
 	      }
 	      return instance;
    }
-
+	
 	//When log out, reset all variables before user logs in again, possibly to another account.
 	public void clearInstance(){
 		instance.set_id(null);
