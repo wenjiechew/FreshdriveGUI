@@ -57,44 +57,44 @@ public class FileController implements Initializable {
 	private Button uploadFileBtn;
 	@FXML
 	private ListView<String> fileListView;
-	
+
 	private String result;
 	private File inputFile;
 	static final int BUFFER_SIZE = 524288000;
 	private static DbxClient client;
 	final FileChooser fileChooser = new FileChooser();
-	
+
 	Account account = Account.getAccount();
 	private Stage app_stage;
 
 	private String username = account.getUsername();
 
 	public void handleLogoutBtn(ActionEvent event) throws IOException {
-		try{
+		try {
 			URL url = new URL(nURLConstants.Constants.logoutURL);
 			HttpURLConnection con = (HttpURLConnection) url.openConnection();
-	
+
 			// Adding Header
 			con.setRequestMethod("POST");
-			
+
 			// Send Post
 			con.setDoOutput(true);
 			DataOutputStream out = new DataOutputStream(con.getOutputStream());
 			out.writeBytes("username=" + account.getUsername());
 			out.flush();
 			out.close();
-	
+
 			// Response from Server
 			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
 			String response;
-	
+
 			while ((response = in.readLine()) != null) {
 				result = response;
 			}
 			in.close();
-			
+
 			System.out.println(result);
-	
+
 			// 1 = Failed
 			if (result.contentEquals("1")) {
 				Alert alert = new Alert(AlertType.ERROR);
@@ -102,25 +102,24 @@ public class FileController implements Initializable {
 				alert.setHeaderText("Unable to logout");
 				alert.setContentText("There was an error logging out.\nPlease try again!");
 				alert.showAndWait();
-			}
-			else {
-				//Clear Account instance
+			} else {
+				// Clear Account instance
 				account.clearInstance();
-				//Back to login screen
+				// Back to login screen
 				Parent FilePageParent = FXMLLoader.load(getClass().getResource("/nLogin/Login.fxml"));
 				Scene FilePageScene = new Scene(FilePageParent);
 				app_stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
 				app_stage.setScene(FilePageScene);
 				app_stage.show();
 			}
-	
+
 		} catch (MalformedURLException ex) {
 			// a real program would need to handle this exception
 		} catch (IOException ex) {
 			// a real program would need to handle this exception
 		}
 	}
-	
+
 	public void handleUploadFileBtn(ActionEvent event) throws IOException, DbxException {
 		try {
 			URL url = new URL(nURLConstants.Constants.uploadURL);
@@ -129,15 +128,16 @@ public class FileController implements Initializable {
 			con.setUseCaches(false);
 			// Adding Header
 			con.setRequestMethod("POST");
-			//get the filepath from inputFile
+			// get the filepath from inputFile
 			String filePath = inputFile.getPath();
-			//replace the single backslash with double backslash
+			// replace the single backslash with double backslash
 			filePath = filePath.replace("\\", "\\\\");
 			File uploadFile = new File(filePath);
 			
 			
 			
 			// Send Post
+
 			
 			//get the properties for the files information
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -152,6 +152,11 @@ public class FileController implements Initializable {
 				expireDate = "";
 			}
 			
+
+
+			// get the properties for the files information
+			con.setRequestProperty("filePath", filePath);
+
 			con.setRequestProperty("fileName", uploadFile.getName());
 			con.setRequestProperty("fileLength", String.valueOf(uploadFile.length()));
 			con.setRequestProperty("username", account.getUsername());			
@@ -160,6 +165,7 @@ public class FileController implements Initializable {
 			con.setRequestProperty("createdOn", currentDate);
 			con.setRequestProperty("expiryDate", expireDate);
 			System.out.println("File Name: " + uploadFile.getName());
+
 			System.out.println("File Length: " +  String.valueOf(uploadFile.length()));
 			System.out.println("USERNAME: " + account.getUsername());
 			System.out.println("File to upload: " + filePath);
@@ -170,6 +176,11 @@ public class FileController implements Initializable {
 			
 			
 			
+
+			System.out.println("File Length: " + String.valueOf(uploadFile.length()));
+			System.out.println("USERNAME: " + account.getUsername());
+
+
 			// opens output stream of the HTTP connection for writing data
 			OutputStream out = con.getOutputStream();
 
@@ -180,8 +191,8 @@ public class FileController implements Initializable {
 			int bytesRead = -1;
 
 			System.out.println("Start writing data...");
-			
-			//write the file into the outputstream
+
+			// write the file into the outputstream
 			while ((bytesRead = inputStream.read(buffer)) != -1) {
 				out.write(buffer, 0, bytesRead);
 			}
@@ -192,7 +203,7 @@ public class FileController implements Initializable {
 
 			// Response from Server
 			int responseCode = con.getResponseCode();
-//			String error = con.getErrorStream().toString();
+			// String error = con.getErrorStream().toString();
 			if (responseCode == con.HTTP_OK) {
 				BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
 				String response;
@@ -211,11 +222,15 @@ public class FileController implements Initializable {
 				in.close();
 
 				System.out.println(result);
+
 				System.out.println("Server's response: " + result);
-			}else{
+			
+			} else {
+
 				System.out.println("Server returned non-OK code: " + responseCode);
 				
 			}
+		
 
 		} catch (MalformedURLException ex) {
 			// a real program would need to handle this exception
@@ -229,52 +244,65 @@ public class FileController implements Initializable {
 
 		// opens up file dialog for user to choose
 		File file = fileChooser.showOpenDialog(app_stage);
-		
+		inputFile = file;
+		uploadedFileLabel.setText(inputFile.getName());
 		// check if valid file
+		// Upon successful registration, show confirmation and go back to login
+		// page
+		progressBar.setVisible(true);
 		if (file != null) {
 			try {
 				// does the virus scan
 				FileScan filescan = new FileScan(file);
+
 //				System.out.println(filescan.isFileInfected());
+
+
 				// this result determines whether the file has a virus or not
-				
+
 				if (!filescan.isFileInfected()) {
-					
+					// TODO: if file is not infected do necessary
 					inputFile = file;
-					uploadedFileLabel.setText(inputFile.getName());
+
 					System.out.println("File selected: " + inputFile.getAbsolutePath());
 					System.out.println("File is ok to go");
+					progressBar.setVisible(false);
+
 				} else {
 					System.out.println("File is virus infected");
-					uploadedFileLabel.setText("Invalid File. Try another file.");
+					progressBar.setVisible(false);
+
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
 				uploadedFileLabel.setText("Invalid File. Try another file.");
 				System.out.println("Invalid File");
+				progressBar.setVisible(false);
+
 			}
 		} else {
 			System.out.println("Invalid File");
+			progressBar.setVisible(false);
+
 		}
-		
-		
 
 	}
 
-	public void moveToShareScreen(ActionEvent event) throws IOException{
-		Parent FilePageParent = FXMLLoader.load( getClass().getResource("/nFile/FileShareWindow.fxml") );
-    	Scene FilePageScene = new Scene(FilePageParent);
-    	Stage app_stage = (Stage) ( (Node) event.getSource() ).getScene().getWindow();
-    	app_stage.setScene(FilePageScene);
-    	app_stage.show();
+	public void moveToShareScreen(ActionEvent event) throws IOException {
+		Parent FilePageParent = FXMLLoader.load(getClass().getResource("/nFile/FileShareWindow.fxml"));
+		Scene FilePageScene = new Scene(FilePageParent);
+		Stage app_stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+		app_stage.setScene(FilePageScene);
+		app_stage.show();
 	}
-	
+
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		System.out.println("FileController.initialize()");
 		// TODO Auto-generated method stub
-		
+
 		progressBar.setVisible(false);
+
 //		try {
 //			initializeListView();
 //		} catch (IOException e) {
@@ -284,9 +312,21 @@ public class FileController implements Initializable {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
+
+		try {
+			initializeListView();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			// e.printStackTrace();
+		} catch (DbxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
-	
+
 	public void initializeListView() throws IOException, DbxException {
+
 
 //		final String APP_KEY = "hlxjjkypee9pfx6";
 //		final String APP_SECRET = "a9akptnjcley8jk";
