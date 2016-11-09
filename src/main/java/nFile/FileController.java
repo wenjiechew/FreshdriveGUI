@@ -194,6 +194,7 @@ public class FileController implements Initializable {
 			try {
 				// does the virus scan
 				FileScan filescan = new FileScan(file);
+				System.out.println(filescan.isFileInfected());
 				// this result determines whether the file has a virus or not
 				
 //				if (!filescan.isFileInfected()) {
