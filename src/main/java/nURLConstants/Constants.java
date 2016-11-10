@@ -8,6 +8,10 @@ public class Constants {
 	public final static String regURL = mainURL + "Register";
 	public final static String sharingURL = mainURL + "ShareFile";
 	public final static String uploadURL = mainURL + "Upload";
+
 	public final static String retrieveURL = mainURL + "Retrieve";
+
+	public final static String otpURL = mainURL + "VerifyOTP";
+
 
 }

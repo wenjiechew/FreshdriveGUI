@@ -42,7 +42,6 @@ import com.dropbox.core.*;
 import com.dropbox.core.DbxException;
 import com.google.gson.Gson;
 
-
 public class FileController implements Initializable {
 	@FXML
 	private Button logoutBtn;
@@ -72,8 +71,8 @@ public class FileController implements Initializable {
 	Account account = Account.getAccount();
 	private Stage app_stage;
 
-//	private String username = account.getUsername();
-//	private String userID = account.get_id();
+	// private String username = account.getUsername();
+	// private String userID = account.get_id();
 
 	public void handleLogoutBtn(ActionEvent event) throws IOException {
 		try {
@@ -139,53 +138,43 @@ public class FileController implements Initializable {
 			// replace the single backslash with double backslash
 			filePath = filePath.replace("\\", "\\\\");
 			File uploadFile = new File(filePath);
-			
-			
-			
+
 			// Send Post
 
-			
-			//get the properties for the files information
+			// get the properties for the files information
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 			Date date = new Date();
 			String currentDate = dateFormat.format(date).toString();
 			LocalDate expiryDate = expiryDatePicker.getValue();
 			String expireDate;
-			if(expiryDate != null){
+			if (expiryDate != null) {
 				expireDate = expiryDate.format(formatter);
-			}else{
+			} else {
 				expireDate = "";
 			}
-			
-
 
 			// get the properties for the files information
 			con.setRequestProperty("filePath", filePath);
 
 			con.setRequestProperty("fileName", uploadFile.getName());
 			con.setRequestProperty("fileLength", String.valueOf(uploadFile.length()));
-			con.setRequestProperty("username", account.getUsername());			
-			con.setRequestProperty("filePath", "/"+account.getUsername()+"/"+uploadFile.getName());
+			con.setRequestProperty("username", account.getUsername());
+			con.setRequestProperty("filePath", "/" + account.getUsername() + "/" + uploadFile.getName());
 			con.setRequestProperty("ownerID", account.get_id());
 			con.setRequestProperty("createdOn", currentDate);
 			con.setRequestProperty("expiryDate", expireDate);
 			System.out.println("File Name: " + uploadFile.getName());
 
-			System.out.println("File Length: " +  String.valueOf(uploadFile.length()));
+			System.out.println("File Length: " + String.valueOf(uploadFile.length()));
 			System.out.println("USERNAME: " + account.getUsername());
 			System.out.println("File to upload: " + filePath);
-			System.out.println("File created on: " + dateFormat.format(date) );
+			System.out.println("File created on: " + dateFormat.format(date));
 			System.out.println("Expiry date: " + expireDate);
 			System.out.println("Owner ID: " + account.get_id());
-			
-			
-			
-			
 
 			System.out.println("File Length: " + String.valueOf(uploadFile.length()));
 			System.out.println("USERNAME: " + account.getUsername());
-
 
 			// opens output stream of the HTTP connection for writing data
 			OutputStream out = con.getOutputStream();
@@ -217,7 +206,7 @@ public class FileController implements Initializable {
 				while ((response = in.readLine()) != null) {
 					result = response;
 				}
-				if(result.equals("File already exist")){
+				if (result.equals("File already exist")) {
 					Alert alert = new Alert(AlertType.WARNING);
 					alert.setTitle("Warning Dialog");
 					alert.setHeaderText("Warning!");
@@ -230,13 +219,12 @@ public class FileController implements Initializable {
 				System.out.println(result);
 
 				System.out.println("Server's response: " + result);
-			
+
 			} else {
 
 				System.out.println("Server returned non-OK code: " + responseCode);
-				
+
 			}
-		
 
 		} catch (MalformedURLException ex) {
 			// a real program would need to handle this exception
@@ -250,48 +238,60 @@ public class FileController implements Initializable {
 
 		// opens up file dialog for user to choose
 		File file = fileChooser.showOpenDialog(app_stage);
-		inputFile = file;
-		uploadedFileLabel.setText(inputFile.getName());
+		// inputFile = file;
+
 		// check if valid file
 		// Upon successful registration, show confirmation and go back to login
 		// page
 		progressBar.setVisible(true);
 		if (file != null) {
-			try {
-				// does the virus scan
-				FileScan filescan = new FileScan(file);
+			if (file.length() <= BUFFER_SIZE) {				
+				try {
+					// does the virus scan
+					FileScan filescan = new FileScan(file);
 
-//				System.out.println(filescan.isFileInfected());
+					// System.out.println(filescan.isFileInfected());
 
+					// this result determines whether the file has a virus or
+					// not
 
-				// this result determines whether the file has a virus or not
+					if (!filescan.isFileInfected()) {
+						// TODO: if file is not infected do necessary
+						inputFile = file;
+						uploadedFileLabel.setText(inputFile.getName());
+						System.out.println("File selected: " + inputFile.getAbsolutePath());
+						System.out.println("File is ok to go");
+						progressBar.setVisible(false);
 
-				if (!filescan.isFileInfected()) {
-					// TODO: if file is not infected do necessary
-					inputFile = file;
+					} else {
+						System.out.println("File is virus infected");
+						progressBar.setVisible(false);
 
-					System.out.println("File selected: " + inputFile.getAbsolutePath());
-					System.out.println("File is ok to go");
-					progressBar.setVisible(false);
-
-				} else {
-					System.out.println("File is virus infected");
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					uploadedFileLabel.setText("Invalid File. Try another file.");
+					System.out.println("Invalid File");
 					progressBar.setVisible(false);
 
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
-				uploadedFileLabel.setText("Invalid File. Try another file.");
-				System.out.println("Invalid File");
+			} else {
 				progressBar.setVisible(false);
+				System.out.println("File too big");
+				
+				Alert alert = new Alert(AlertType.WARNING);
+				alert.setTitle("Warning Dialog");
+				alert.setHeaderText("Warning!");
+				alert.setContentText("File size exceeds 500MB. Please choose another file.");
+
+				alert.showAndWait();
 
 			}
-		} else {
+		}else {
+			
 			System.out.println("Invalid File");
 			progressBar.setVisible(false);
-
 		}
-
 	}
 
 	public void moveToShareScreen(ActionEvent event) throws IOException {
@@ -309,15 +309,15 @@ public class FileController implements Initializable {
 
 		progressBar.setVisible(false);
 
-//		try {
-//			initializeListView();
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-////			e.printStackTrace();
-//		} catch (DbxException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+		// try {
+		// initializeListView();
+		// } catch (IOException e) {
+		// // TODO Auto-generated catch block
+		//// e.printStackTrace();
+		// } catch (DbxException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
 
 		try {
 			initializeListView();
@@ -339,57 +339,59 @@ public class FileController implements Initializable {
 		System.out.println("INITIALIZE LIST VIEW");
 		// Send Post
 		con.setDoOutput(true);
-//		con.setRequestProperty("username", account.getUsername());
+		// con.setRequestProperty("username", account.getUsername());
 		DataOutputStream out = new DataOutputStream(con.getOutputStream());
-		out.writeBytes(
-				"userID=" + account.get_id());
+		out.writeBytes("userID=" + account.get_id());
 		out.flush();
 		out.close();
-		
+
 		BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
 		String response;
 		String jsonString = "";
-//		JSONArray array =(JSONArray();
-		
+		// JSONArray array =(JSONArray();
+
 		while ((response = in.readLine()) != null) {
 			jsonString = response;
-			
+
 		}
-		
+
 		JSONObject jsonObj = new JSONObject(jsonString);
 		JSONArray arrayJson = jsonObj.getJSONArray("fileNames");
 		ObservableList<String> data = FXCollections.observableArrayList();
 		for (int i = 0; i < arrayJson.length(); i++) {
-		    data.add(arrayJson.getString(i));
-//			System.out.println("file name: " + arrayJson.getString(i));
-		    // Do something with each error here
+			data.add(arrayJson.getString(i));
+			// System.out.println("file name: " + arrayJson.getString(i));
+			// Do something with each error here
 		}
 		fileListView.setItems(data);
-		
-//		System.out.println("init list view response: "+ jsonString);
+
+		// System.out.println("init list view response: "+ jsonString);
 		in.close();
-//		final String APP_KEY = "hlxjjkypee9pfx6";
-//		final String APP_SECRET = "a9akptnjcley8jk";
-//
-//		DbxAppInfo appInfo = new DbxAppInfo(APP_KEY, APP_SECRET);
-//		DbxRequestConfig config = new DbxRequestConfig("FreshDrive", Locale.getDefault().toString());
-//
-//		// access token for the dropbox account. may need to encrypt this
-//		String accessToken = "-TcOHePlr9AAAAAAAAAACMWGsYvDXPTDcThy6nM8r0hwG-Mz5cEqtDxcDygkg9i3";
-//
-//		client = new DbxClient(config, accessToken);
-//		System.out.println("Logged on to dropbox");
-//		DbxEntry.WithChildren listing = client.getMetadataWithChildren("/"+username);
-//		System.out.println("Files in the root path:");
-//		ObservableList<String> data = FXCollections.observableArrayList();
-//		for (DbxEntry child : listing.children) {
-//
-//			data.add(child.name);
-//			System.out.println("	" + child.name);
-//		}
-//		// listView.setItems(data);
-//		fileListView.setItems(data);
-//		System.out.println("Refresh List View");
+		// final String APP_KEY = "hlxjjkypee9pfx6";
+		// final String APP_SECRET = "a9akptnjcley8jk";
+		//
+		// DbxAppInfo appInfo = new DbxAppInfo(APP_KEY, APP_SECRET);
+		// DbxRequestConfig config = new DbxRequestConfig("FreshDrive",
+		// Locale.getDefault().toString());
+		//
+		// // access token for the dropbox account. may need to encrypt this
+		// String accessToken =
+		// "-TcOHePlr9AAAAAAAAAACMWGsYvDXPTDcThy6nM8r0hwG-Mz5cEqtDxcDygkg9i3";
+		//
+		// client = new DbxClient(config, accessToken);
+		// System.out.println("Logged on to dropbox");
+		// DbxEntry.WithChildren listing =
+		// client.getMetadataWithChildren("/"+username);
+		// System.out.println("Files in the root path:");
+		// ObservableList<String> data = FXCollections.observableArrayList();
+		// for (DbxEntry child : listing.children) {
+		//
+		// data.add(child.name);
+		// System.out.println(" " + child.name);
+		// }
+		// // listView.setItems(data);
+		// fileListView.setItems(data);
+		// System.out.println("Refresh List View");
 
 	}
 
