@@ -18,6 +18,9 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import fileScan.FileScan;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -37,6 +40,8 @@ import nObjectModel.Account;
 
 import com.dropbox.core.*;
 import com.dropbox.core.DbxException;
+import com.google.gson.Gson;
+
 
 public class FileController implements Initializable {
 	@FXML
@@ -67,7 +72,8 @@ public class FileController implements Initializable {
 	Account account = Account.getAccount();
 	private Stage app_stage;
 
-	private String username = account.getUsername();
+//	private String username = account.getUsername();
+//	private String userID = account.get_id();
 
 	public void handleLogoutBtn(ActionEvent event) throws IOException {
 		try {
@@ -237,7 +243,7 @@ public class FileController implements Initializable {
 		} catch (IOException ex) {
 			// a real program would need to handle this exception
 		}
-//		initializeListView();
+		initializeListView();
 	}
 
 	public void handleUploadButton(ActionEvent event) throws IOException, DbxException {
@@ -327,7 +333,41 @@ public class FileController implements Initializable {
 
 	public void initializeListView() throws IOException, DbxException {
 
-
+		URL url = new URL(nURLConstants.Constants.retrieveURL);
+		HttpURLConnection con = (HttpURLConnection) url.openConnection();
+		con.setRequestMethod("POST");
+		System.out.println("INITIALIZE LIST VIEW");
+		// Send Post
+		con.setDoOutput(true);
+//		con.setRequestProperty("username", account.getUsername());
+		DataOutputStream out = new DataOutputStream(con.getOutputStream());
+		out.writeBytes(
+				"userID=" + account.get_id());
+		out.flush();
+		out.close();
+		
+		BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+		String response;
+		String jsonString = "";
+//		JSONArray array =(JSONArray();
+		
+		while ((response = in.readLine()) != null) {
+			jsonString = response;
+			
+		}
+		
+		JSONObject jsonObj = new JSONObject(jsonString);
+		JSONArray arrayJson = jsonObj.getJSONArray("fileNames");
+		ObservableList<String> data = FXCollections.observableArrayList();
+		for (int i = 0; i < arrayJson.length(); i++) {
+		    data.add(arrayJson.getString(i));
+//			System.out.println("file name: " + arrayJson.getString(i));
+		    // Do something with each error here
+		}
+		fileListView.setItems(data);
+		
+//		System.out.println("init list view response: "+ jsonString);
+		in.close();
 //		final String APP_KEY = "hlxjjkypee9pfx6";
 //		final String APP_SECRET = "a9akptnjcley8jk";
 //
