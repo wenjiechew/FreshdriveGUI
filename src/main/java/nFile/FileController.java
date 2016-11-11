@@ -72,6 +72,7 @@ public class FileController implements Initializable {
 	static final int BUFFER_SIZE = 524288000;
 //	private static DbxClient client;
 	final FileChooser fileChooser = new FileChooser();
+	String[] fileIdArray;
 
 	Account account = Account.getAccount();
 	private Stage app_stage;
@@ -302,8 +303,8 @@ public class FileController implements Initializable {
 	}
 
 	public void moveToShareScreen(ActionEvent event) throws IOException{
-		String selectedFile = fileListView.getSelectionModel().getSelectedItem();
-		if (selectedFile == null){
+		int selectedFile = fileListView.getSelectionModel().getSelectedIndex();
+		if (selectedFile == -1){
 			Alert alert = new Alert(AlertType.INFORMATION);
 			alert.setTitle("Information");
 			alert.setHeaderText(null);
@@ -311,18 +312,57 @@ public class FileController implements Initializable {
 			alert.showAndWait();
 		}
 		else{
-			//TODO: Get FileID from List View
-			String fileName = selectedFile;
-	    	FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/nFile/FileShareWindow.fxml"));
-	    	Parent root = (Parent)fxmlLoader.load();          
-	    	ShareController controller = fxmlLoader.<ShareController>getController();
-			controller.setFile(fileName);
-			controller.setFileOwnerID(Integer.parseInt(account.get_id()));
-			System.out.println("Moving to ShareController");
-	    	Scene scene = new Scene(root); 
-	    	Stage app_stage = (Stage) ( (Node) event.getSource() ).getScene().getWindow();
-	    	app_stage.setScene(scene);
-	    	app_stage.show();   
+			int fileID = Integer.parseInt(fileIdArray[selectedFile]);
+			String result = null;
+			try {	
+				URL url = new URL(nURLConstants.Constants.ownershipURL);
+				HttpURLConnection con = (HttpURLConnection) url.openConnection();
+				
+				//Adding Header
+				con.setRequestMethod("POST");
+				
+				//Send Post
+				con.setDoOutput(true);
+				DataOutputStream out = new DataOutputStream(con.getOutputStream());
+				out.writeBytes("userID="+ account.get_id()+"&fileID=" + fileID);
+				out.flush();
+				out.close();
+				
+				//Response from Server
+				BufferedReader in = 
+	                new BufferedReader( new InputStreamReader(con.getInputStream()));			
+	            String response;
+	            
+	            while ((response = in.readLine()) != null) {
+	                result = response;
+	            }
+				in.close();
+				
+				if (result.equals("true"))
+				{
+					// If user is the owner of the selected file, move on to sharing options
+			    	FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/nFile/FileShareWindow.fxml"));
+			    	Parent root = (Parent)fxmlLoader.load();          
+			    	ShareController controller = fxmlLoader.<ShareController>getController();
+			    	controller.setFileID(fileID);
+					System.out.println("Moving to ShareController");
+			    	Scene scene = new Scene(root); 
+			    	Stage app_stage = (Stage) ( (Node) event.getSource() ).getScene().getWindow();
+			    	app_stage.setScene(scene);
+			    	app_stage.show();   
+				}
+				else {
+					// If user is not the owner of the selected file, prompt alert to notify
+					Alert alert = new Alert(AlertType.WARNING);
+					alert.setTitle("Warning: Permission Denied");
+					alert.setHeaderText(null);
+					alert.setContentText("Only file owners have the option to share files.");
+					alert.showAndWait();
+				}
+	        }
+	        catch (Exception ex) {
+	            System.out.print("moveToShareScreen(): " + ex);
+	        }
 		}
 	}
 
@@ -383,13 +423,13 @@ public class FileController implements Initializable {
 		JSONArray arrayJson = jsonObj.getJSONArray("fileNames");
 		System.out.println("jsonObj: "+jsonObj);
 		System.out.println("arrayJson: "+arrayJson);
-		System.out.println("get arrayjson[1]: "+arrayJson.get(1));
+		System.out.println("get arrayjson[1]: "+arrayJson.get(0));
 //		JSONObject obj = new JSONObject(arrayJson.get(1).toString());
 //		System.out.println("obj : "+ obj);
 //		System.out.println("obj ID: "+ obj.getString("fileId"));
 //		System.out.println("obj NAME: "+ obj.getString("fileName"));
 		ObservableList<String> data = FXCollections.observableArrayList();
-		String[] fileIdArray = new String[arrayJson.length()];
+		fileIdArray = new String[arrayJson.length()];
 		for (int i = 0; i < arrayJson.length(); i++) {
 			JSONObject obj = new JSONObject(arrayJson.get(i).toString());
 			data.add(obj.getString("fileName"));
