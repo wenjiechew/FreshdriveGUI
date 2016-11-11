@@ -65,7 +65,7 @@ public class FileController implements Initializable {
 	private String result;
 	private File inputFile;
 	static final int BUFFER_SIZE = 524288000;
-	private static DbxClient client;
+//	private static DbxClient client;
 	final FileChooser fileChooser = new FileChooser();
 
 	Account account = Account.getAccount();
@@ -262,6 +262,7 @@ public class FileController implements Initializable {
 						System.out.println("File selected: " + inputFile.getAbsolutePath());
 						System.out.println("File is ok to go");
 						progressBar.setVisible(false);
+						uploadFileBtn.setDisable(false);
 
 					} else {
 						System.out.println("File is virus infected");
@@ -308,7 +309,7 @@ public class FileController implements Initializable {
 		// TODO Auto-generated method stub
 
 		progressBar.setVisible(false);
-
+		uploadFileBtn.setDisable(true);
 		// try {
 		// initializeListView();
 		// } catch (IOException e) {
