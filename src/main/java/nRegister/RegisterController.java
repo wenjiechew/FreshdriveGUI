@@ -44,8 +44,6 @@ public class RegisterController implements Initializable{
 	private Pane pane;
 	private String result;
 	public void doRegistration(ActionEvent event){
-		//TODO possibly send email verification?
-		//TODO possibly sanitize input to check for SQL injections (seems needless at this point?)
 		
 		//Validate that all fields are filled in
 		if(usernameField.getText().trim().isEmpty() || passwordField.getText().isEmpty() ||
