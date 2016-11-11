@@ -294,12 +294,29 @@ public class FileController implements Initializable {
 		}
 	}
 
-	public void moveToShareScreen(ActionEvent event) throws IOException {
-		Parent FilePageParent = FXMLLoader.load(getClass().getResource("/nFile/FileShareWindow.fxml"));
-		Scene FilePageScene = new Scene(FilePageParent);
-		Stage app_stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-		app_stage.setScene(FilePageScene);
-		app_stage.show();
+	public void moveToShareScreen(ActionEvent event) throws IOException{
+		String selectedFile = fileListView.getSelectionModel().getSelectedItem();
+		if (selectedFile == null){
+			Alert alert = new Alert(AlertType.INFORMATION);
+			alert.setTitle("Information");
+			alert.setHeaderText(null);
+			alert.setContentText("Please select a file.");
+			alert.showAndWait();
+		}
+		else{
+			//TODO: Get FileID from List View
+			String fileName = selectedFile;
+	    	FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/nFile/FileShareWindow.fxml"));
+	    	Parent root = (Parent)fxmlLoader.load();          
+	    	ShareController controller = fxmlLoader.<ShareController>getController();
+			controller.setFile(fileName);
+			controller.setFileOwnerID(Integer.parseInt(account.get_id()));
+			System.out.println("Moving to ShareController");
+	    	Scene scene = new Scene(root); 
+	    	Stage app_stage = (Stage) ( (Node) event.getSource() ).getScene().getWindow();
+	    	app_stage.setScene(scene);
+	    	app_stage.show();   
+		}
 	}
 
 	@Override
