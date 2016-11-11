@@ -28,8 +28,23 @@ public class Main extends Application {
 	}
 
 	public static void main(String[] args) {
-		System.setProperty("javax.net.debug",  "all");
+		System.setProperty("javax.net.ssl.trustStore", "C:/.keystore");
+//		System.setProperty("javax.net.debug", "ssl");
 		launch(args);
+	}
+	static {
+	    //for localhost testing only(needed if server is running locally)
+	    javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(
+	    new javax.net.ssl.HostnameVerifier(){
+
+	        public boolean verify(String hostname,
+	                javax.net.ssl.SSLSession sslSession) {
+	            if (hostname.equals("localhost")) {
+	                return true;
+	            }
+	            return false;
+	        }
+	    });
 	}
 	
 	@Override
