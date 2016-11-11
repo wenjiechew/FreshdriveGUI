@@ -266,6 +266,7 @@ public class FileController implements Initializable {
 					if (!filescan.isFileInfected()) {
 						inputFile = file;
 						uploadedFileLabel.setText(inputFile.getName());
+						loadingJFXTextArea.setVisible(false);
 						uploadFileBtn.setDisable(false);
 						System.out.println("File selected: " + inputFile.getAbsolutePath());
 						System.out.println("File is ok to go");
@@ -278,6 +279,7 @@ public class FileController implements Initializable {
 					e.printStackTrace();
 					uploadedFileLabel.setText("Invalid File. Try another file.");
 					System.out.println("Invalid File");
+
 					loadingJFXTextArea.setVisible(false);
 
 				}
@@ -385,50 +387,50 @@ public class FileController implements Initializable {
 
 	public void initializeListView() throws IOException, DbxException {
 
-		URL url = new URL(nURLConstants.Constants.retrieveURL);
-		HttpURLConnection con = (HttpURLConnection) url.openConnection();
-		con.setRequestMethod("POST");
-		System.out.println("INITIALIZE LIST VIEW");
-		// Send Post
-		con.setDoOutput(true);
-		// con.setRequestProperty("username", account.getUsername());
-		DataOutputStream out = new DataOutputStream(con.getOutputStream());
-		out.writeBytes("userID=" + account.get_id());
-		out.flush();
-		out.close();
-
-		BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-		String response;
-		String jsonString = "";
-		// JSONArray array =(JSONArray();
-
-		while ((response = in.readLine()) != null) {
-			jsonString = response;
-
-		}
-
-		JSONObject jsonObj = new JSONObject(jsonString);
-		JSONArray arrayJson = jsonObj.getJSONArray("fileNames");
-		System.out.println("jsonObj: " + jsonObj);
-		System.out.println("arrayJson: " + arrayJson);
-		System.out.println("get arrayjson[1]: " + arrayJson.get(0));
-		// JSONObject obj = new JSONObject(arrayJson.get(1).toString());
-		// System.out.println("obj : "+ obj);
-		// System.out.println("obj ID: "+ obj.getString("fileId"));
-		// System.out.println("obj NAME: "+ obj.getString("fileName"));
-		ObservableList<String> data = FXCollections.observableArrayList();
-		fileIdArray = new String[arrayJson.length()];
-		for (int i = 0; i < arrayJson.length(); i++) {
-			JSONObject obj = new JSONObject(arrayJson.get(i).toString());
-			data.add(obj.getString("fileName"));
-			fileIdArray[i] = obj.getString("fileId");
-			// System.out.println("file name: " + arrayJson.getString(i));
-			// Do something with each error here
-		}
-		fileListView.setItems(data);
-
-		// System.out.println("init list view response: "+ jsonString);
-		in.close();
+//		URL url = new URL(nURLConstants.Constants.retrieveURL);
+//		HttpURLConnection con = (HttpURLConnection) url.openConnection();
+//		con.setRequestMethod("POST");
+//		System.out.println("INITIALIZE LIST VIEW");
+//		// Send Post
+//		con.setDoOutput(true);
+//		// con.setRequestProperty("username", account.getUsername());
+//		DataOutputStream out = new DataOutputStream(con.getOutputStream());
+//		out.writeBytes("userID=" + account.get_id());
+//		out.flush();
+//		out.close();
+//
+//		BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+//		String response;
+//		String jsonString = "";
+//		// JSONArray array =(JSONArray();
+//
+//		while ((response = in.readLine()) != null) {
+//			jsonString = response;
+//
+//		}
+//
+//		JSONObject jsonObj = new JSONObject(jsonString);
+//		JSONArray arrayJson = jsonObj.getJSONArray("fileNames");
+//		System.out.println("jsonObj: " + jsonObj);
+//		System.out.println("arrayJson: " + arrayJson);
+//		System.out.println("get arrayjson[1]: " + arrayJson.get(0));
+//		// JSONObject obj = new JSONObject(arrayJson.get(1).toString());
+//		// System.out.println("obj : "+ obj);
+//		// System.out.println("obj ID: "+ obj.getString("fileId"));
+//		// System.out.println("obj NAME: "+ obj.getString("fileName"));
+//		ObservableList<String> data = FXCollections.observableArrayList();
+//		fileIdArray = new String[arrayJson.length()];
+//		for (int i = 0; i < arrayJson.length(); i++) {
+//			JSONObject obj = new JSONObject(arrayJson.get(i).toString());
+//			data.add(obj.getString("fileName"));
+//			fileIdArray[i] = obj.getString("fileId");
+//			// System.out.println("file name: " + arrayJson.getString(i));
+//			// Do something with each error here
+//		}
+//		fileListView.setItems(data);
+//
+//		// System.out.println("init list view response: "+ jsonString);
+//		in.close();
 		// final String APP_KEY = "hlxjjkypee9pfx6";
 		// final String APP_SECRET = "a9akptnjcley8jk";
 		//

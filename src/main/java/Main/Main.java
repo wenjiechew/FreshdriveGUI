@@ -28,7 +28,7 @@ public class Main extends Application {
 	}
 
 	public static void main(String[] args) {
-		System.setProperty("javax.net.ssl.trustStore", "C:/.keystore");
+//		System.setProperty("javax.net.ssl.trustStore", "\\.keystore");
 //		System.setProperty("javax.net.debug", "ssl");
 		launch(args);
 	}

@@ -12,7 +12,13 @@ package fileScan;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.StringWriter;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.File;
 
 import org.apache.commons.io.IOUtils;
@@ -43,8 +49,6 @@ public class FileScan {
 	private static final String URL_FILESCAN = "https://www.virustotal.com/vtapi/v2/file/scan";
 	// api for the file scan report
 	private static final String URL_FILEREPORT = "https://www.virustotal.com/vtapi/v2/file/report";
-	// the key used when making a api call
-	private static final String API_KEY = "8eae5cfab4d8d18cd4a15b1aac7dbd5710558e2667a8394805160f819896a3b4";
 
 	/**
 	 * FileScan constructor method.All the scanning starts here First the file
@@ -53,7 +57,8 @@ public class FileScan {
 	 * here to wait for 1 minute before making an API call again to get the scan
 	 * results. The reason is public API key is only allowed 4 requests/minute
 	 *
-	 * @param file 		file object which is going to be scanned
+	 * @param file
+	 *            file object which is going to be scanned
 	 * @return
 	 */
 	public FileScan(File file) throws IOException, JSONException {
@@ -78,7 +83,7 @@ public class FileScan {
 	 * whether the file is infected or not
 	 * 
 	 * @param
-	 * @return fileInfected 	the boolean value of the infection status
+	 * @return fileInfected the boolean value of the infection status
 	 */
 	public boolean isFileInfected() {
 		return fileInfected;
@@ -99,7 +104,7 @@ public class FileScan {
 		CloseableHttpClient client = HttpClients.createDefault();
 		HttpPost httpPost = new HttpPost(URL_FILESCAN);
 		MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-		builder.addTextBody("apikey", API_KEY);
+		builder.addTextBody("apikey", getAPIkey());
 		builder.addBinaryBody("file", fileToScan, ContentType.APPLICATION_OCTET_STREAM, "file.ext");
 
 		HttpEntity multipart = builder.build();
@@ -135,7 +140,7 @@ public class FileScan {
 		HttpPost httpPost = new HttpPost(URL_FILEREPORT);
 		int positives;
 		MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-		builder.addTextBody("apikey", API_KEY);
+		builder.addTextBody("apikey", getAPIkey());
 		builder.addTextBody("resource", FileScan.resource);
 
 		HttpEntity multipart = builder.build();
@@ -159,20 +164,26 @@ public class FileScan {
 		}
 
 	}
+
 	/**
 	 * This method gets the HTTP response and converts it as a string
-	 * @param response	A closeableHTTPresponse is passed in for the conversion  
-	 * @return string	the converted string response      
+	 * 
+	 * @param response
+	 *            A closeableHTTPresponse is passed in for the conversion
+	 * @return string the converted string response
 	 */
 	protected static String responseAsString(CloseableHttpResponse response) throws IOException {
 		return streamAsString(response.getEntity().getContent());
 	}
+
 	/**
 	 * This makes an api request through a HTTP POST request for getting the
-	 * file scan's results. It is essentially the same as the scanresults method.
-	 * However instead of checking the response,this first checks whether the response
-	 * status.If the response status is 0.It means the request rate for a minute has been met
-	 * and the program need to wait until it the file scanned results are out 
+	 * file scan's results. It is essentially the same as the scanresults
+	 * method. However instead of checking the response,this first checks
+	 * whether the response status.If the response status is 0.It means the
+	 * request rate for a minute has been met and the program need to wait until
+	 * it the file scanned results are out
+	 * 
 	 * @param
 	 * @return
 	 */
@@ -181,7 +192,7 @@ public class FileScan {
 		CloseableHttpClient client = HttpClients.createDefault();
 		HttpPost httpPost = new HttpPost(URL_FILEREPORT);
 		MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-		builder.addTextBody("apikey", API_KEY);
+		builder.addTextBody("apikey", getAPIkey());
 		builder.addTextBody("resource", FileScan.resource);
 
 		HttpEntity multipart = builder.build();
@@ -200,15 +211,51 @@ public class FileScan {
 		}
 
 	}
+
 	/**
 	 * This method gets the InputStream and converts it to a string
-	 * @param inputStream	InputStream object for covnersion   
-	 * @return string	the converted InputStream    
+	 * 
+	 * @param inputStream
+	 *            InputStream object for covnersion
+	 * @return string the converted InputStream
 	 */
 	protected static String streamAsString(InputStream inputStream) throws IOException {
 		StringWriter writer = new StringWriter();
 		IOUtils.copy(inputStream, writer, "UTF-8");
 		return writer.toString();
 	}
+	/**
+	 * This method makes a http post request to get the virus scan API key to use for api requests	
+	 * 
+	 * @param
+	 * @return apiKey this is the api key which will be used for api requests
+	 */
 
+	protected static String getAPIkey() {
+		String apiKey = null;
+		try {
+			URL url = new URL(nURLConstants.Constants.virusScanURL);
+			HttpURLConnection con = (HttpURLConnection) url.openConnection();
+
+			// Adding Header
+			con.setRequestMethod("POST");
+
+			// Response from Server
+			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+			String response;
+
+			while ((response = in.readLine()) != null) {
+				apiKey = response;
+			}
+			in.close();
+
+			System.out.println(apiKey);
+			return apiKey;
+		} catch (MalformedURLException ex) {
+			System.out.println(ex);
+		} catch (IOException ex) {
+			System.out.println(ex);
+		}
+		return apiKey;
+	}
 }
