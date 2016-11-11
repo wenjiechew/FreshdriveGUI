@@ -70,7 +70,7 @@ public class FileController implements Initializable {
 	private String result;
 	private File inputFile;
 	static final int BUFFER_SIZE = 524288000;
-	private static DbxClient client;
+//	private static DbxClient client;
 	final FileChooser fileChooser = new FileChooser();
 
 	Account account = Account.getAccount();
@@ -254,7 +254,7 @@ public class FileController implements Initializable {
 		// page
 
 		if (file != null) {
-			if (file.length() <= BUFFER_SIZE) {
+			if (file.length() <= BUFFER_SIZE) {				
 				try {
 					// does the virus scan
 					FileScan filescan = new FileScan(file);
@@ -270,12 +270,10 @@ public class FileController implements Initializable {
 						uploadedFileLabel.setText(inputFile.getName());
 						System.out.println("File selected: " + inputFile.getAbsolutePath());
 						System.out.println("File is ok to go");
-						loadingJFXTextArea.setVisible(false);
-						uploadFileBtn.setDisable(false);
+						progressBar.setVisible(false);
 
 					} else {
 						System.out.println("File is virus infected");
-						loadingJFXTextArea.setVisible(false);
 						progressBar.setVisible(false);
 
 					}
@@ -290,22 +288,42 @@ public class FileController implements Initializable {
 			} else {
 				loadingJFXTextArea.setVisible(false);
 				progressBar.setVisible(false);
+				System.out.println("File too big");
+				
+				
 
 			}
-		} else {
-
+		}else {
+			
 			System.out.println("Invalid File");
 			loadingJFXTextArea.setVisible(false);
 			progressBar.setVisible(false);
 		}
 	}
 
-	public void moveToShareScreen(ActionEvent event) throws IOException {
-		Parent FilePageParent = FXMLLoader.load(getClass().getResource("/nFile/FileShareWindow.fxml"));
-		Scene FilePageScene = new Scene(FilePageParent);
-		Stage app_stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-		app_stage.setScene(FilePageScene);
-		app_stage.show();
+	public void moveToShareScreen(ActionEvent event) throws IOException{
+		String selectedFile = fileListView.getSelectionModel().getSelectedItem();
+		if (selectedFile == null){
+			Alert alert = new Alert(AlertType.INFORMATION);
+			alert.setTitle("Information");
+			alert.setHeaderText(null);
+			alert.setContentText("Please select a file.");
+			alert.showAndWait();
+		}
+		else{
+			//TODO: Get FileID from List View
+			String fileName = selectedFile;
+	    	FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/nFile/FileShareWindow.fxml"));
+	    	Parent root = (Parent)fxmlLoader.load();          
+	    	ShareController controller = fxmlLoader.<ShareController>getController();
+			controller.setFile(fileName);
+			controller.setFileOwnerID(Integer.parseInt(account.get_id()));
+			System.out.println("Moving to ShareController");
+	    	Scene scene = new Scene(root); 
+	    	Stage app_stage = (Stage) ( (Node) event.getSource() ).getScene().getWindow();
+	    	app_stage.setScene(scene);
+	    	app_stage.show();   
+		}
 	}
 
 	@Override
@@ -314,7 +332,7 @@ public class FileController implements Initializable {
 		// TODO Auto-generated method stub
 
 		progressBar.setVisible(false);
-
+		uploadFileBtn.setDisable(true);
 		// try {
 		// initializeListView();
 		// } catch (IOException e) {
@@ -363,9 +381,19 @@ public class FileController implements Initializable {
 
 		JSONObject jsonObj = new JSONObject(jsonString);
 		JSONArray arrayJson = jsonObj.getJSONArray("fileNames");
+		System.out.println("jsonObj: "+jsonObj);
+		System.out.println("arrayJson: "+arrayJson);
+		System.out.println("get arrayjson[1]: "+arrayJson.get(1));
+//		JSONObject obj = new JSONObject(arrayJson.get(1).toString());
+//		System.out.println("obj : "+ obj);
+//		System.out.println("obj ID: "+ obj.getString("fileId"));
+//		System.out.println("obj NAME: "+ obj.getString("fileName"));
 		ObservableList<String> data = FXCollections.observableArrayList();
+		String[] fileIdArray = new String[arrayJson.length()];
 		for (int i = 0; i < arrayJson.length(); i++) {
-			data.add(arrayJson.getString(i));
+			JSONObject obj = new JSONObject(arrayJson.get(i).toString());
+			data.add(obj.getString("fileName"));
+			fileIdArray[i] = obj.getString("fileId");
 			// System.out.println("file name: " + arrayJson.getString(i));
 			// Do something with each error here
 		}
