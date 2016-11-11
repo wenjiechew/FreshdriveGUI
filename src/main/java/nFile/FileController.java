@@ -41,6 +41,7 @@ import nObjectModel.Account;
 import com.dropbox.core.*;
 import com.dropbox.core.DbxException;
 import com.google.gson.Gson;
+import com.jfoenix.controls.JFXTextArea;
 
 public class FileController implements Initializable {
 	@FXML
@@ -58,9 +59,13 @@ public class FileController implements Initializable {
 	@FXML
 	private Label uploadedFileLabel;
 	@FXML
+	private Label loadingLabel;
+	@FXML
 	private Button uploadFileBtn;
 	@FXML
 	private ListView<String> fileListView;
+	@FXML
+	private JFXTextArea loadingJFXTextArea;
 
 	private String result;
 	private File inputFile;
@@ -236,6 +241,10 @@ public class FileController implements Initializable {
 
 	public void handleUploadButton(ActionEvent event) throws IOException, DbxException {
 
+		loadingJFXTextArea.appendText(
+				"The file is being scanned. This may take a few minutes and the program will be unresponsive during this period."
+						+ "Thank you for your patience.");
+		loadingJFXTextArea.setVisible(true);
 		// opens up file dialog for user to choose
 		File file = fileChooser.showOpenDialog(app_stage);
 		// inputFile = file;
@@ -243,9 +252,9 @@ public class FileController implements Initializable {
 		// check if valid file
 		// Upon successful registration, show confirmation and go back to login
 		// page
-		progressBar.setVisible(true);
+
 		if (file != null) {
-			if (file.length() <= BUFFER_SIZE) {				
+			if (file.length() <= BUFFER_SIZE) {
 				try {
 					// does the virus scan
 					FileScan filescan = new FileScan(file);
@@ -261,10 +270,12 @@ public class FileController implements Initializable {
 						uploadedFileLabel.setText(inputFile.getName());
 						System.out.println("File selected: " + inputFile.getAbsolutePath());
 						System.out.println("File is ok to go");
-						progressBar.setVisible(false);
+						loadingJFXTextArea.setVisible(false);
+						uploadFileBtn.setDisable(false);
 
 					} else {
 						System.out.println("File is virus infected");
+						loadingJFXTextArea.setVisible(false);
 						progressBar.setVisible(false);
 
 					}
@@ -272,24 +283,19 @@ public class FileController implements Initializable {
 					e.printStackTrace();
 					uploadedFileLabel.setText("Invalid File. Try another file.");
 					System.out.println("Invalid File");
+					loadingJFXTextArea.setVisible(false);
 					progressBar.setVisible(false);
 
 				}
 			} else {
+				loadingJFXTextArea.setVisible(false);
 				progressBar.setVisible(false);
-				System.out.println("File too big");
-				
-				Alert alert = new Alert(AlertType.WARNING);
-				alert.setTitle("Warning Dialog");
-				alert.setHeaderText("Warning!");
-				alert.setContentText("File size exceeds 500MB. Please choose another file.");
-
-				alert.showAndWait();
 
 			}
-		}else {
-			
+		} else {
+
 			System.out.println("Invalid File");
+			loadingJFXTextArea.setVisible(false);
 			progressBar.setVisible(false);
 		}
 	}
