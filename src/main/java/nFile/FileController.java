@@ -217,6 +217,13 @@ public class FileController implements Initializable {
 					alert.setContentText("File already exists. Please choose another file or rename your file.");
 
 					alert.showAndWait();
+				}else if (result.equals("File uploaded")){
+					Alert alert = new Alert(AlertType.CONFIRMATION);
+					alert.setTitle("Success Dialog");
+					alert.setHeaderText("Success!");
+					alert.setContentText("File has been uploaded!.");
+
+					alert.showAndWait();
 				}
 				in.close();
 
