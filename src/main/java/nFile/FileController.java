@@ -357,9 +357,19 @@ public class FileController implements Initializable {
 
 		JSONObject jsonObj = new JSONObject(jsonString);
 		JSONArray arrayJson = jsonObj.getJSONArray("fileNames");
+		System.out.println("jsonObj: "+jsonObj);
+		System.out.println("arrayJson: "+arrayJson);
+		System.out.println("get arrayjson[1]: "+arrayJson.get(1));
+//		JSONObject obj = new JSONObject(arrayJson.get(1).toString());
+//		System.out.println("obj : "+ obj);
+//		System.out.println("obj ID: "+ obj.getString("fileId"));
+//		System.out.println("obj NAME: "+ obj.getString("fileName"));
 		ObservableList<String> data = FXCollections.observableArrayList();
+		String[] fileIdArray = new String[arrayJson.length()];
 		for (int i = 0; i < arrayJson.length(); i++) {
-			data.add(arrayJson.getString(i));
+			JSONObject obj = new JSONObject(arrayJson.get(i).toString());
+			data.add(obj.getString("fileName"));
+			fileIdArray[i] = obj.getString("fileId");
 			// System.out.println("file name: " + arrayJson.getString(i));
 			// Do something with each error here
 		}
