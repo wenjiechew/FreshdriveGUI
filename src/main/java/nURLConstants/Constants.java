@@ -9,6 +9,7 @@ public class Constants {
 	public final static String sharingURL = mainURL + "ShareFile";
 	public final static String uploadURL = mainURL + "Upload";
 	public final static String sharingListURL = mainURL + "SharingList";
+	public final static String ownershipURL = mainURL + "ValidateOwner";
 
 	public final static String retrieveURL = mainURL + "Retrieve";
 

@@ -48,15 +48,10 @@ public class ShareController implements Initializable {
 	@FXML
 	private ListView<String> listViewItem;
 	ObservableList<String> userList = FXCollections.observableArrayList();
-	private String fileName;
-	private int fileOwnerID;
+	private int fileID;
 	
-	public void setFile(String fileName){
-	    this.fileName = fileName;
-	}
-	
-	public void setFileOwnerID(int userID){
-	    this.fileOwnerID = userID;
+	public void setFileID(int fileID){
+	    this.fileID = fileID;
 	}
 	
 	@Override
@@ -79,7 +74,7 @@ public class ShareController implements Initializable {
             @Override
             public void handle(WorkerStateEvent event) {
         		//Get the list of users owner has shared to for this specific file
-        		getSharedUsers(fileOwnerID, fileName);
+        		getSharedUsers(fileID);
         		errorLabel.setText("");
             }
         });
@@ -107,7 +102,7 @@ public class ShareController implements Initializable {
     	app_stage.show();
 	}
 
-	public void getSharedUsers(int fileOwnerID, String fileName){
+	public void getSharedUsers(int fileID){
 		String result = null;
 		try {	
 			URL url = new URL(nURLConstants.Constants.sharingListURL);
@@ -119,7 +114,7 @@ public class ShareController implements Initializable {
 			//Send Post
 			con.setDoOutput(true);
 			DataOutputStream out = new DataOutputStream(con.getOutputStream());
-			out.writeBytes("ownerID=" + fileOwnerID + "&filename=" + fileName);
+			out.writeBytes("fileID=" + fileID);
 			out.flush();
 			out.close();
 			
@@ -174,7 +169,7 @@ public class ShareController implements Initializable {
 			//Send Post
 			con.setDoOutput(true);
 			DataOutputStream out = new DataOutputStream(con.getOutputStream());
-			out.writeBytes("users="+ listViewItem.getItems().toString()+"&ownerID=" + fileOwnerID + "&filename=" + fileName);
+			out.writeBytes("users="+ listViewItem.getItems().toString()+"&fileID=" + fileID);
 			out.flush();
 			out.close();
 			
