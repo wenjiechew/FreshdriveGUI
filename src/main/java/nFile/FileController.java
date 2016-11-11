@@ -41,6 +41,7 @@ import nObjectModel.Account;
 import com.dropbox.core.*;
 import com.dropbox.core.DbxException;
 import com.google.gson.Gson;
+import com.jfoenix.controls.JFXTextArea;
 
 public class FileController implements Initializable {
 	@FXML
@@ -61,12 +62,15 @@ public class FileController implements Initializable {
 	private Button uploadFileBtn;
 	@FXML
 	private ListView<String> fileListView;
+	@FXML
+	private JFXTextArea loadingJFXTextArea;
 
 	private String result;
 	private File inputFile;
 	static final int BUFFER_SIZE = 524288000;
-	private static DbxClient client;
+	// private static DbxClient client;
 	final FileChooser fileChooser = new FileChooser();
+	String[] fileIdArray;
 
 	Account account = Account.getAccount();
 	private Stage app_stage;
@@ -236,6 +240,10 @@ public class FileController implements Initializable {
 
 	public void handleUploadButton(ActionEvent event) throws IOException, DbxException {
 
+		loadingJFXTextArea.appendText(
+				"The file is being scanned. This may take a few minutes and the program will be unresponsive during this period."
+						+ "Thank you for your patience.");
+		loadingJFXTextArea.setVisible(true);
 		// opens up file dialog for user to choose
 		File file = fileChooser.showOpenDialog(app_stage);
 		// inputFile = file;
@@ -243,9 +251,9 @@ public class FileController implements Initializable {
 		// check if valid file
 		// Upon successful registration, show confirmation and go back to login
 		// page
-		progressBar.setVisible(true);
+
 		if (file != null) {
-			if (file.length() <= BUFFER_SIZE) {				
+			if (file.length() <= BUFFER_SIZE) {
 				try {
 					// does the virus scan
 					FileScan filescan = new FileScan(file);
@@ -256,50 +264,96 @@ public class FileController implements Initializable {
 					// not
 
 					if (!filescan.isFileInfected()) {
-						// TODO: if file is not infected do necessary
 						inputFile = file;
 						uploadedFileLabel.setText(inputFile.getName());
+						loadingJFXTextArea.setVisible(false);
+						uploadFileBtn.setDisable(false);
 						System.out.println("File selected: " + inputFile.getAbsolutePath());
 						System.out.println("File is ok to go");
-						progressBar.setVisible(false);
 
 					} else {
 						System.out.println("File is virus infected");
-						progressBar.setVisible(false);
 
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
 					uploadedFileLabel.setText("Invalid File. Try another file.");
 					System.out.println("Invalid File");
-					progressBar.setVisible(false);
+
+					loadingJFXTextArea.setVisible(false);
 
 				}
 			} else {
-				progressBar.setVisible(false);
+				loadingJFXTextArea.setVisible(false);
 				System.out.println("File too big");
-				
-				Alert alert = new Alert(AlertType.WARNING);
-				alert.setTitle("Warning Dialog");
-				alert.setHeaderText("Warning!");
-				alert.setContentText("File size exceeds 500MB. Please choose another file.");
-
-				alert.showAndWait();
 
 			}
-		}else {
-			
+		} else {
+
 			System.out.println("Invalid File");
-			progressBar.setVisible(false);
+			loadingJFXTextArea.setVisible(false);
 		}
 	}
 
 	public void moveToShareScreen(ActionEvent event) throws IOException {
-		Parent FilePageParent = FXMLLoader.load(getClass().getResource("/nFile/FileShareWindow.fxml"));
-		Scene FilePageScene = new Scene(FilePageParent);
-		Stage app_stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-		app_stage.setScene(FilePageScene);
-		app_stage.show();
+		int selectedFile = fileListView.getSelectionModel().getSelectedIndex();
+		if (selectedFile == -1) {
+			Alert alert = new Alert(AlertType.INFORMATION);
+			alert.setTitle("Information");
+			alert.setHeaderText(null);
+			alert.setContentText("Please select a file.");
+			alert.showAndWait();
+		} else {
+			int fileID = Integer.parseInt(fileIdArray[selectedFile]);
+			String result = null;
+			try {
+				URL url = new URL(nURLConstants.Constants.ownershipURL);
+				HttpURLConnection con = (HttpURLConnection) url.openConnection();
+
+				// Adding Header
+				con.setRequestMethod("POST");
+
+				// Send Post
+				con.setDoOutput(true);
+				DataOutputStream out = new DataOutputStream(con.getOutputStream());
+				out.writeBytes("userID=" + account.get_id() + "&fileID=" + fileID);
+				out.flush();
+				out.close();
+
+				// Response from Server
+				BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+				String response;
+
+				while ((response = in.readLine()) != null) {
+					result = response;
+				}
+				in.close();
+
+				if (result.equals("true")) {
+					// If user is the owner of the selected file, move on to
+					// sharing options
+					FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/nFile/FileShareWindow.fxml"));
+					Parent root = (Parent) fxmlLoader.load();
+					ShareController controller = fxmlLoader.<ShareController> getController();
+					controller.setFileID(fileID);
+					System.out.println("Moving to ShareController");
+					Scene scene = new Scene(root);
+					Stage app_stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+					app_stage.setScene(scene);
+					app_stage.show();
+				} else {
+					// If user is not the owner of the selected file, prompt
+					// alert to notify
+					Alert alert = new Alert(AlertType.WARNING);
+					alert.setTitle("Warning: Permission Denied");
+					alert.setHeaderText(null);
+					alert.setContentText("Only file owners have the option to share files.");
+					alert.showAndWait();
+				}
+			} catch (Exception ex) {
+				System.out.print("moveToShareScreen(): " + ex);
+			}
+		}
 	}
 
 	@Override
@@ -308,7 +362,7 @@ public class FileController implements Initializable {
 		// TODO Auto-generated method stub
 
 		progressBar.setVisible(false);
-
+		uploadFileBtn.setDisable(true);
 		// try {
 		// initializeListView();
 		// } catch (IOException e) {
@@ -333,40 +387,50 @@ public class FileController implements Initializable {
 
 	public void initializeListView() throws IOException, DbxException {
 
-		URL url = new URL(nURLConstants.Constants.retrieveURL);
-		HttpURLConnection con = (HttpURLConnection) url.openConnection();
-		con.setRequestMethod("POST");
-		System.out.println("INITIALIZE LIST VIEW");
-		// Send Post
-		con.setDoOutput(true);
-		// con.setRequestProperty("username", account.getUsername());
-		DataOutputStream out = new DataOutputStream(con.getOutputStream());
-		out.writeBytes("userID=" + account.get_id());
-		out.flush();
-		out.close();
-
-		BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-		String response;
-		String jsonString = "";
-		// JSONArray array =(JSONArray();
-
-		while ((response = in.readLine()) != null) {
-			jsonString = response;
-
-		}
-
-		JSONObject jsonObj = new JSONObject(jsonString);
-		JSONArray arrayJson = jsonObj.getJSONArray("fileNames");
-		ObservableList<String> data = FXCollections.observableArrayList();
-		for (int i = 0; i < arrayJson.length(); i++) {
-			data.add(arrayJson.getString(i));
-			// System.out.println("file name: " + arrayJson.getString(i));
-			// Do something with each error here
-		}
-		fileListView.setItems(data);
-
-		// System.out.println("init list view response: "+ jsonString);
-		in.close();
+//		URL url = new URL(nURLConstants.Constants.retrieveURL);
+//		HttpURLConnection con = (HttpURLConnection) url.openConnection();
+//		con.setRequestMethod("POST");
+//		System.out.println("INITIALIZE LIST VIEW");
+//		// Send Post
+//		con.setDoOutput(true);
+//		// con.setRequestProperty("username", account.getUsername());
+//		DataOutputStream out = new DataOutputStream(con.getOutputStream());
+//		out.writeBytes("userID=" + account.get_id());
+//		out.flush();
+//		out.close();
+//
+//		BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+//		String response;
+//		String jsonString = "";
+//		// JSONArray array =(JSONArray();
+//
+//		while ((response = in.readLine()) != null) {
+//			jsonString = response;
+//
+//		}
+//
+//		JSONObject jsonObj = new JSONObject(jsonString);
+//		JSONArray arrayJson = jsonObj.getJSONArray("fileNames");
+//		System.out.println("jsonObj: " + jsonObj);
+//		System.out.println("arrayJson: " + arrayJson);
+//		System.out.println("get arrayjson[1]: " + arrayJson.get(0));
+//		// JSONObject obj = new JSONObject(arrayJson.get(1).toString());
+//		// System.out.println("obj : "+ obj);
+//		// System.out.println("obj ID: "+ obj.getString("fileId"));
+//		// System.out.println("obj NAME: "+ obj.getString("fileName"));
+//		ObservableList<String> data = FXCollections.observableArrayList();
+//		fileIdArray = new String[arrayJson.length()];
+//		for (int i = 0; i < arrayJson.length(); i++) {
+//			JSONObject obj = new JSONObject(arrayJson.get(i).toString());
+//			data.add(obj.getString("fileName"));
+//			fileIdArray[i] = obj.getString("fileId");
+//			// System.out.println("file name: " + arrayJson.getString(i));
+//			// Do something with each error here
+//		}
+//		fileListView.setItems(data);
+//
+//		// System.out.println("init list view response: "+ jsonString);
+//		in.close();
 		// final String APP_KEY = "hlxjjkypee9pfx6";
 		// final String APP_SECRET = "a9akptnjcley8jk";
 		//

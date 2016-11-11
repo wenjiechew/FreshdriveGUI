@@ -15,7 +15,10 @@ import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableArray;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -45,13 +48,37 @@ public class ShareController implements Initializable {
 	@FXML
 	private ListView<String> listViewItem;
 	ObservableList<String> userList = FXCollections.observableArrayList();
+	private int fileID;
+	
+	public void setFileID(int fileID){
+	    this.fileID = fileID;
+	}
 	
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1) {
 		System.out.println("ShareController.initialize()");
 		// TODO Auto-generated method stub
-		//List<String> values = Arrays.asList("one", "two", "three");
-        //listView.setItems(FXCollections.observableList(values));
+		
+		Task<Void> sleeper = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                try {
+            		errorLabel.setText("Retrieving users...");
+                    Thread.sleep(300);
+                } catch (InterruptedException e) {
+                }
+                return null;
+            }
+        };
+        sleeper.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+            @Override
+            public void handle(WorkerStateEvent event) {
+        		//Get the list of users owner has shared to for this specific file
+        		getSharedUsers(fileID);
+        		errorLabel.setText("");
+            }
+        });
+        new Thread(sleeper).start();
 	}
 	
 	@FXML
@@ -74,6 +101,61 @@ public class ShareController implements Initializable {
     	app_stage.setScene(FilePageScene);
     	app_stage.show();
 	}
+
+	public void getSharedUsers(int fileID){
+		String result = null;
+		try {	
+			URL url = new URL(nURLConstants.Constants.sharingListURL);
+			HttpURLConnection con = (HttpURLConnection) url.openConnection();
+			
+			//Adding Header
+			con.setRequestMethod("POST");
+			
+			//Send Post
+			con.setDoOutput(true);
+			DataOutputStream out = new DataOutputStream(con.getOutputStream());
+			out.writeBytes("fileID=" + fileID);
+			out.flush();
+			out.close();
+			
+			//Response from Server
+			BufferedReader in = 
+                new BufferedReader( new InputStreamReader(con.getInputStream()));			
+            String response;
+            
+            while ((response = in.readLine()) != null) {
+                result = response;
+            }
+			in.close();
+			
+			if (result != null)
+			{
+				if (result.equals("File"))
+				{
+					errorLabel.setText("Error in finding file, please click 'Back' and try again.");
+				}
+				else if (result.equals("Unshared")){
+					//userList is empty
+				}
+				else
+				{
+					String userString = result.substring(1, result.length()-1);
+					userList.removeAll(userList);
+					String[] sharedUserList = userString.split(", ");
+					for (int i = 0; i < sharedUserList.length; i++){
+						userList.add(sharedUserList[i]);
+					}
+					listViewItem.setItems(userList);
+				}
+			}
+			else {
+				userList.removeAll(userList);
+			}
+        }
+        catch (Exception ex) {
+            System.out.print("handleSharing(): " + ex);
+        }
+	}
 	
 	public void handleSharing(ActionEvent event){		
 		String result = null;
@@ -87,7 +169,7 @@ public class ShareController implements Initializable {
 			//Send Post
 			con.setDoOutput(true);
 			DataOutputStream out = new DataOutputStream(con.getOutputStream());
-			out.writeBytes("users="+ listViewItem.getItems().toString()+"&fileID=1");
+			out.writeBytes("users="+ listViewItem.getItems().toString()+"&fileID=" + fileID);
 			out.flush();
 			out.close();
 			
