@@ -74,12 +74,11 @@ public class LoginController implements Initializable {
 				displayMsg.setText("Account already logged in.");
 			}
 			else {
+				//Send to 2FA Page to verify emailed OTP
 				Account account = Account.getAccount();
-				account.setUsername(userTextBox.getText());
-				account.set_token(result);
-
-				// To Pass object to the next scene
-				Parent FilePageParent = FXMLLoader.load(getClass().getResource("/nFile/FileObjectWindow.fxml"));
+				account.setUsername(userTextBox.getText()); 
+				
+				Parent FilePageParent = FXMLLoader.load(getClass().getResource("/n2FA/2FAChallengeWindow.fxml"));
 				Scene FilePageScene = new Scene(FilePageParent);
 				Stage app_stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
 				app_stage.setScene(FilePageScene);

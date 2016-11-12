@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import com.jfoenix.controls.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.Pane?>
+
+<Pane fx:id="pane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="243.0" prefWidth="365.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="n2FA.Challenge2FA">
+   <children>
+      <JFXButton fx:id="submitBtn" alignment="CENTER" buttonType="RAISED" layoutX="268.0" layoutY="150.0" onAction="#do2FASubmit" style="-fx-background-color: #FFFFFF;" text="Submit" />
+      <JFXTextField fx:id="otpInput" layoutX="42.0" layoutY="147.0" maxWidth="208.0" minWidth="208.0" prefHeight="31.0" prefWidth="208.0" promptText="enter the one-time password (OTP)" />
+      <Label layoutX="19.0" layoutY="38.0" prefHeight="52.0" prefWidth="327.0" text="An OTP has been sent to the email address registered with the account. " textAlignment="CENTER" wrapText="true">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Label>
+      <Label layoutX="18.0" layoutY="79.0" prefHeight="52.0" prefWidth="346.0" text="Check your email to retrieve your OTP to access FreshDrive. (OTP expires within 3 minutes)" textAlignment="CENTER" wrapText="true">
+         <font>
+            <Font name="System Bold Italic" size="12.0" />
+         </font>
+      </Label>
+   </children>
+</Pane>
