@@ -7,21 +7,23 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.Pane?>
+<?import javafx.scene.text.Font?>
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="nFile.ShareController">
-   <top>
-      <Pane prefHeight="410.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+   <bottom>
+      <Pane prefHeight="427.0" prefWidth="597.0" BorderPane.alignment="CENTER">
          <children>
-            <Button fx:id="shareBtn" layoutX="503.0" layoutY="113.0" mnemonicParsing="false" text="Share" onAction="#handleSharing" />
             <TextField fx:id="userTxtField" layoutX="27.0" layoutY="22.0" prefHeight="31.0" prefWidth="459.0" promptText="Email or username" />
-            <ListView fx:id="listViewItem" editable="true" layoutX="27.0" layoutY="68.0" prefHeight="277.0" prefWidth="459.0" />
+            <ListView fx:id="listViewItem" editable="true" layoutX="27.0" layoutY="88.0" prefHeight="257.0" prefWidth="459.0" />
             <Button fx:id="addBtn" layoutX="503.0" layoutY="22.0" mnemonicParsing="false" onAction="#addUser" text="Add" />
-            <Button fx:id="removeBtn" layoutX="502.0" layoutY="68.0" mnemonicParsing="false" onAction="#removeUser" text="Remove" />
-            <Button fx:id="backBtn" layoutX="503.0" layoutY="157.0" mnemonicParsing="false" onAction="#returnToFileScreen" text="Back" />
-            <Label fx:id="errorLabel" layoutX="27.0" layoutY="361.0" text="" />
+            <Button fx:id="removeBtn" layoutX="503.0" layoutY="88.0" mnemonicParsing="false" onAction="#removeUser" text="Remove" />
+            <Button fx:id="backBtn" layoutX="27.0" layoutY="358.0" mnemonicParsing="false" onAction="#returnToFileScreen" text="Back" />
+            <Label fx:id="errorLabel" layoutX="92.0" layoutY="363.0" />
+            <Label layoutX="27.0" layoutY="59.0" text="Note: To add multiple users, use semi-colon &quot;;&quot; between usernames or emails">
+               <font>
+                  <Font name="System Italic" size="13.0" />
+               </font>
+            </Label>
          </children></Pane>
-   </top>
-   <center>
-      <JFXListView fx:id="listView" BorderPane.alignment="CENTER" />
-   </center>
+   </bottom>
 </BorderPane>

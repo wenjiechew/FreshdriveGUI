@@ -50,21 +50,30 @@ public class ShareController implements Initializable {
 	ObservableList<String> userList = FXCollections.observableArrayList();
 	private int fileID;
 	
+	/**
+	 * Sets the fileID from FileController
+	 * @param fileID
+	 */
 	public void setFileID(int fileID){
 	    this.fileID = fileID;
 	}
 	
+	/**
+	 * Initialises ShareController.
+	 * A sleeping task is created to delay the program by 50 ms,
+	 * It allows for the fileID to be set before continuing with subsequent tasks (i.e. getSharedUsers)
+	 */
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1) {
 		System.out.println("ShareController.initialize()");
-		// TODO Auto-generated method stub
 		
 		Task<Void> sleeper = new Task<Void>() {
             @Override
             protected Void call() throws Exception {
                 try {
+                	//Delay 50ms to ensure that fileID is set during initialisation of controller
             		errorLabel.setText("Retrieving users...");
-                    Thread.sleep(300);
+                    Thread.sleep(50);
                 } catch (InterruptedException e) {
                 }
                 return null;
@@ -75,25 +84,153 @@ public class ShareController implements Initializable {
             public void handle(WorkerStateEvent event) {
         		//Get the list of users owner has shared to for this specific file
         		getSharedUsers(fileID);
-        		errorLabel.setText("");
+        		errorLabel.setText(null);
             }
         });
         new Thread(sleeper).start();
 	}
 	
+	/**
+	 * Grant permission to users as listed in the text field.
+	 * @param event
+	 * @throws IOException
+	 */
 	@FXML
 	public void addUser(ActionEvent event) throws IOException {
-		userList.add(userTxtField.getText());
+		String result = null;
+		try {	
+			URL url = new URL(nURLConstants.Constants.sharingURL);
+			HttpURLConnection con = (HttpURLConnection) url.openConnection();
+
+			// Add header to request
+			con.setRequestMethod("POST");
+			String users = userTxtField.getText();
+
+			// Post request to servlet
+			con.setDoOutput(true);
+			DataOutputStream out = new DataOutputStream(con.getOutputStream());
+			out.writeBytes("users="+ users +"&fileID=" + fileID + "&action=add");
+			out.flush();
+			out.close();
+
+			// Response from servlet with a list of unvalidated users (if any) and granted users (if any)
+			BufferedReader in = 
+                new BufferedReader( new InputStreamReader(con.getInputStream()));			
+            String response;
+            
+            while ((response = in.readLine()) != null) {
+                result = response;
+            }
+			in.close();
+			
+			if (result != null)
+			{
+				if (result.equals("File"))
+				{
+					errorLabel.setText("Error in uploading file, please click 'Back' and try again.");
+				}
+				else
+				{
+					//Read response in format: "[errorlist],accepted=[accepteduserlist]"
+					//Split into two strings
+					String[] userLists = result.split(",accepted=");
+					
+					//Remove brackets and print message
+					String errorList = userLists[0].substring(1, userLists[0].length()-1);
+					if (errorList.equals("")){
+						errorLabel.setText("File successfully shared to all users!");
+					}
+					else
+					{
+						errorLabel.setText(errorList + " does not exist.");
+					}
+					
+					//Remove brackets and add to list
+					String acceptedList = userLists[1].substring(1, userLists[1].length()-1);
+					String[] acceptedUsers = acceptedList.split(",");
+					for (int i = 0; i < acceptedUsers.length; i++){
+						if (acceptedUsers[i].equals(""))
+						{
+						}
+						else
+						{
+							userList.add(acceptedUsers[i]);
+						}
+					}
+				}
+			}
+        }
+        catch (Exception ex) {
+            System.out.print("addUser(): " + ex);
+        }
 		listViewItem.setItems(userList);
 		userTxtField.clear();
-		System.out.println(listViewItem.getItems());
 	}
 
+	/**
+	 * Remove permission of selected user from ListView.
+	 * @param event
+	 * @throws IOException
+	 */
 	@FXML
 	public void removeUser(ActionEvent event) throws IOException {
-		userList.removeAll(listViewItem.getSelectionModel().getSelectedItems()); 
+		String removedUser = listViewItem.getSelectionModel().getSelectedItem();
+		
+		String result = null;
+		try {	
+			URL url = new URL(nURLConstants.Constants.sharingURL);
+			HttpURLConnection con = (HttpURLConnection) url.openConnection();
+
+			// Add header to request
+			con.setRequestMethod("POST");
+
+			// Post request to servlet
+			con.setDoOutput(true);
+			DataOutputStream out = new DataOutputStream(con.getOutputStream());
+			out.writeBytes("users="+ removedUser +"&fileID=" + fileID + "&action=remove");
+			out.flush();
+			out.close();
+
+			// Response from servlet
+			// "File": File not found in database
+			// "User": User not found or originally had no permission
+			BufferedReader in = 
+                new BufferedReader( new InputStreamReader(con.getInputStream()));			
+            String response;
+            
+            while ((response = in.readLine()) != null) {
+                result = response;
+            }
+			in.close();
+			
+			if (result != null)
+			{
+				if (result.equals("File"))
+				{
+					errorLabel.setText("Error in uploading file, please click 'Back' and try again.");
+				}
+				else if (result.equals("User"))
+				{
+					errorLabel.setText("Error in validating user, please try again.");
+				}
+				else
+				{
+					userList.remove(removedUser);
+					errorLabel.setText(null);
+				}
+			}
+        }
+        catch (Exception ex) {
+            System.out.print("removeUser(): " + ex);
+        }
+		listViewItem.setItems(userList);
 	}
 	
+	/**
+	 * Switch screen to file repository
+	 * @param event
+	 * @throws IOException
+	 */
 	public void returnToFileScreen(ActionEvent event) throws IOException {
 		Parent FilePageParent = FXMLLoader.load(getClass().getResource("/nFile/FileObjectWindow.fxml"));
     	Scene FilePageScene = new Scene(FilePageParent);
@@ -102,23 +239,30 @@ public class ShareController implements Initializable {
     	app_stage.show();
 	}
 
+	/**
+	 * Retrieve a list of user who has access to file
+	 * @param fileID
+	 */
 	public void getSharedUsers(int fileID){
 		String result = null;
 		try {	
 			URL url = new URL(nURLConstants.Constants.sharingListURL);
 			HttpURLConnection con = (HttpURLConnection) url.openConnection();
-			
-			//Adding Header
+
+			// Add header to request
 			con.setRequestMethod("POST");
-			
-			//Send Post
+
+			// Post request to servlet
 			con.setDoOutput(true);
 			DataOutputStream out = new DataOutputStream(con.getOutputStream());
 			out.writeBytes("fileID=" + fileID);
 			out.flush();
 			out.close();
-			
-			//Response from Server
+
+			// Response from servlet 
+			// "File": File not found in database
+			// "Unshared": Only owner has access to this specific file
+			// List of shared users
 			BufferedReader in = 
                 new BufferedReader( new InputStreamReader(con.getInputStream()));			
             String response;
@@ -139,9 +283,12 @@ public class ShareController implements Initializable {
 				}
 				else
 				{
+					//Receives list of users in format [user1, user2]
+					//Removes bracklet and splits string into individual users
 					String userString = result.substring(1, result.length()-1);
 					userList.removeAll(userList);
 					String[] sharedUserList = userString.split(", ");
+					//Add users into a List to display on ListView
 					for (int i = 0; i < sharedUserList.length; i++){
 						userList.add(sharedUserList[i]);
 					}
@@ -153,59 +300,7 @@ public class ShareController implements Initializable {
 			}
         }
         catch (Exception ex) {
-            System.out.print("handleSharing(): " + ex);
-        }
-	}
-	
-	public void handleSharing(ActionEvent event){		
-		String result = null;
-		try {	
-			URL url = new URL(nURLConstants.Constants.sharingURL);
-			HttpURLConnection con = (HttpURLConnection) url.openConnection();
-			
-			//Adding Header
-			con.setRequestMethod("POST");
-			
-			//Send Post
-			con.setDoOutput(true);
-			DataOutputStream out = new DataOutputStream(con.getOutputStream());
-			out.writeBytes("users="+ listViewItem.getItems().toString()+"&fileID=" + fileID);
-			out.flush();
-			out.close();
-			
-			//Response from Server
-			BufferedReader in = 
-                new BufferedReader( new InputStreamReader(con.getInputStream()));			
-            String response;
-            
-            while ((response = in.readLine()) != null) {
-                result = response;
-            }
-			in.close();
-			
-			if (result != null)
-			{
-				if (result.equals("File"))
-				{
-					errorLabel.setText("Error in uploading file, please click 'Back' and try again.");
-				}
-				else
-				{
-					String userString = result.substring(1, result.length()-1);
-					errorLabel.setText(userString + " does not exist.");
-					userList.removeAll(userList);
-					String[] userErrorList = userString.split(", ");
-					for (int i = 0; i < userErrorList.length; i++){
-						userList.add(userErrorList[i]);
-					}
-				}
-			}
-			else {
-				userList.removeAll(userList);
-			}
-        }
-        catch (Exception ex) {
-            System.out.print("handleSharing(): " + ex);
+            System.out.print("getSharedUsers(): " + ex);
         }
 	}
 }

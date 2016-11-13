@@ -253,6 +253,7 @@ public class FileController implements Initializable {
 		loadingJFXTextArea.setVisible(true);
 		// opens up file dialog for user to choose
 		File file = fileChooser.showOpenDialog(app_stage);
+		
 		// inputFile = file;
 
 		// check if valid file
@@ -274,11 +275,15 @@ public class FileController implements Initializable {
 						inputFile = file;
 						uploadedFileLabel.setText(inputFile.getName());
 						loadingJFXTextArea.setVisible(false);
+						loadingJFXTextArea.setText("");
 						uploadFileBtn.setDisable(false);
 						System.out.println("File selected: " + inputFile.getAbsolutePath());
 						System.out.println("File is ok to go");
 
 					} else {
+						loadingJFXTextArea.setVisible(false);
+						loadingJFXTextArea.setText("");
+						uploadedFileLabel.setText("File is virus infected. Try another file");
 						System.out.println("File is virus infected");
 
 					}
@@ -286,24 +291,39 @@ public class FileController implements Initializable {
 					e.printStackTrace();
 					uploadedFileLabel.setText("Invalid File. Try another file.");
 					System.out.println("Invalid File");
+					loadingJFXTextArea.setText("");
 
 					loadingJFXTextArea.setVisible(false);
 
 				}
 			} else {
 				loadingJFXTextArea.setVisible(false);
+				loadingJFXTextArea.setText("");
 				System.out.println("File too big");
+				uploadedFileLabel.setText("File too big. Try another file.");
 
 			}
 		} else {
-
+			uploadedFileLabel.setText("Invalid File. Try another file.");
 			System.out.println("Invalid File");
+			loadingJFXTextArea.setText("");
 			loadingJFXTextArea.setVisible(false);
 		}
 	}
 
+	/**
+	 * Switches screen to sharing screen. Ensures that a file has been selected
+	 * (an alert will be prompted otherwise). Checks the ownership of the file,
+	 * if current user is not the owner, a notification will be shown. Moves to
+	 * next screen, passing the selected file ID for to retrieve list of users
+	 * who has access.
+	 * 
+	 * @param event
+	 * @throws IOException
+	 */
 	public void moveToShareScreen(ActionEvent event) throws IOException {
 		int selectedFile = fileListView.getSelectionModel().getSelectedIndex();
+		// Check if file is selected, else prompt alert
 		if (selectedFile == -1) {
 			Alert alert = new Alert(AlertType.INFORMATION);
 			alert.setTitle("Information");
@@ -317,17 +337,17 @@ public class FileController implements Initializable {
 				URL url = new URL(nURLConstants.Constants.ownershipURL);
 				HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
-				// Adding Header
+				// Add header to request
 				con.setRequestMethod("POST");
 
-				// Send Post
+				// Post request to servlet
 				con.setDoOutput(true);
 				DataOutputStream out = new DataOutputStream(con.getOutputStream());
 				out.writeBytes("userID=" + account.get_id() + "&fileID=" + fileID);
 				out.flush();
 				out.close();
 
-				// Response from Server
+				// Response from servlet in boolean
 				BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
 				String response;
 
@@ -343,7 +363,6 @@ public class FileController implements Initializable {
 					Parent root = (Parent) fxmlLoader.load();
 					ShareController controller = fxmlLoader.<ShareController>getController();
 					controller.setFileID(fileID);
-					System.out.println("Moving to ShareController");
 					Scene scene = new Scene(root);
 					Stage app_stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
 					app_stage.setScene(scene);
