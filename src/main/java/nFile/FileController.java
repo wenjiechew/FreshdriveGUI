@@ -217,7 +217,7 @@ public class FileController implements Initializable {
 					alert.setContentText("File already exists. Please choose another file or rename your file.");
 
 					alert.showAndWait();
-				}else if (result.equals("File uploaded")){
+				} else if (result.equals("File uploaded")) {
 					Alert alert = new Alert(AlertType.CONFIRMATION);
 					alert.setTitle("Success Dialog");
 					alert.setHeaderText("Success!");
@@ -341,7 +341,7 @@ public class FileController implements Initializable {
 					// sharing options
 					FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/nFile/FileShareWindow.fxml"));
 					Parent root = (Parent) fxmlLoader.load();
-					ShareController controller = fxmlLoader.<ShareController> getController();
+					ShareController controller = fxmlLoader.<ShareController>getController();
 					controller.setFileID(fileID);
 					System.out.println("Moving to ShareController");
 					Scene scene = new Scene(root);
@@ -361,6 +361,57 @@ public class FileController implements Initializable {
 				System.out.print("moveToShareScreen(): " + ex);
 			}
 		}
+	}
+
+	public void handleDownloadBtn(ActionEvent event) throws IOException {
+		int selectedFile = fileListView.getSelectionModel().getSelectedIndex();
+		if (selectedFile == -1) {
+			Alert alert = new Alert(AlertType.INFORMATION);
+			alert.setTitle("Information");
+			alert.setHeaderText(null);
+			alert.setContentText("Please select a file.");
+			alert.showAndWait();
+		} else {
+			int fileID = Integer.parseInt(fileIdArray[selectedFile]);
+			try {
+				URL url = new URL(nURLConstants.Constants.downloadURL);
+				HttpURLConnection con = (HttpURLConnection) url.openConnection();
+
+				// Adding Header
+				con.setRequestMethod("POST");
+
+				// Send Post
+				con.setDoOutput(true);
+				DataOutputStream out = new DataOutputStream(con.getOutputStream());
+				out.writeBytes("fileID=" + fileID);
+				out.flush();
+				out.close();
+
+				// Response from Server
+				BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+				String response;
+				String result = null;
+				while ((response = in.readLine()) != null) {
+					result = response;
+				}
+				in.close();
+
+				if (result.equals("true")) {
+
+				} else {
+					// If user is not the owner of the selected file, prompt
+					// alert to notify
+					Alert alert = new Alert(AlertType.WARNING);
+					alert.setTitle("Warning: Permission Denied");
+					alert.setHeaderText(null);
+					alert.setContentText("Only file owners have the option to share files.");
+					alert.showAndWait();
+				}
+			} catch (Exception ex) {
+				System.out.print("download(): " + ex);
+			}
+		}
+
 	}
 
 	@Override
@@ -418,9 +469,9 @@ public class FileController implements Initializable {
 
 		JSONObject jsonObj = new JSONObject(jsonString);
 		JSONArray arrayJson = jsonObj.getJSONArray("fileNames");
-//		System.out.println("jsonObj: " + jsonObj);
-//		System.out.println("arrayJson: " + arrayJson);
-//		System.out.println("get arrayjson[1]: " + arrayJson.get(0));
+		// System.out.println("jsonObj: " + jsonObj);
+		// System.out.println("arrayJson: " + arrayJson);
+		// System.out.println("get arrayjson[1]: " + arrayJson.get(0));
 		// JSONObject obj = new JSONObject(arrayJson.get(1).toString());
 		// System.out.println("obj : "+ obj);
 		// System.out.println("obj ID: "+ obj.getString("fileId"));
@@ -431,7 +482,7 @@ public class FileController implements Initializable {
 			JSONObject obj = new JSONObject(arrayJson.get(i).toString());
 			data.add(obj.getString("fileName"));
 			fileIdArray[i] = obj.getString("fileId");
-			// System.out.println("file name: " + arrayJson.getString(i));
+			System.out.println("file name: " + obj.getString("fileName"));
 			// Do something with each error here
 		}
 		fileListView.setItems(data);

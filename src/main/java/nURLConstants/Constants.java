@@ -12,6 +12,7 @@ public class Constants {
 	public final static String ownershipURL = mainURL + "ValidateOwner";
 
 	public final static String retrieveURL = mainURL + "Retrieve";
+	public final static String downloadURL = mainURL + "Download";
 
 	public final static String otpURL = mainURL + "VerifyOTP";
 	public final static String virusScanURL = mainURL + "ScanFile";
