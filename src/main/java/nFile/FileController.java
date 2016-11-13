@@ -18,6 +18,8 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import javax.swing.JFileChooser;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -403,8 +405,21 @@ public class FileController implements Initializable {
 				con.setDoOutput(true);
 				DataOutputStream out = new DataOutputStream(con.getOutputStream());
 				out.writeBytes("fileID=" + fileID);
+				
+				JFileChooser chooser = new JFileChooser(); 
+				String choosertitle = "Select a directory";
+				   
+			    chooser.setCurrentDirectory(new java.io.File("."));
+			    chooser.setDialogTitle(choosertitle);
+			    chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+			    //
+			    // disable the "All files" option.
+			    //
+			   
 				out.flush();
 				out.close();
+				
+				
 
 				// Response from Server
 				BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
@@ -415,15 +430,19 @@ public class FileController implements Initializable {
 				}
 				in.close();
 
-				if (result.equals("true")) {
-
+				if (result.equals("File has been downloaded")) {
+					Alert alert = new Alert(AlertType.CONFIRMATION);
+					alert.setTitle("Download success");
+					alert.setHeaderText(null);
+					alert.setContentText("Your file has been downloaded into your download folder.");
+					alert.showAndWait();
 				} else {
 					// If user is not the owner of the selected file, prompt
 					// alert to notify
-					Alert alert = new Alert(AlertType.WARNING);
-					alert.setTitle("Warning: Permission Denied");
+					Alert alert = new Alert(AlertType.ERROR);
+					alert.setTitle("Error: Download failed");
 					alert.setHeaderText(null);
-					alert.setContentText("Only file owners have the option to share files.");
+					alert.setContentText("Download has failed. Try again or contact your administrator.");
 					alert.showAndWait();
 				}
 			} catch (Exception ex) {
