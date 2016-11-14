@@ -11,6 +11,7 @@
 package fileScan;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -43,6 +44,8 @@ import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import nObjectModel.Account;
 
 public class FileScan {
 
@@ -275,6 +278,13 @@ public class FileScan {
 
 			// Adding Header
 			con.setRequestMethod("POST");
+			
+			//send Post
+			con.setDoOutput(true);
+			DataOutputStream out = new DataOutputStream( con.getOutputStream() );
+			out.writeBytes("username=" + Account.getAccount().getUsername() + "&user_token=" + Account.getAccount().get_token());
+			out.flush();
+			out.close();
 
 			// Response from Server
 			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
