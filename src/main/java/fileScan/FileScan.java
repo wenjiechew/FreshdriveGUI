@@ -296,7 +296,14 @@ public class FileScan {
 			in.close();
 
 			System.out.println(apiKey);
-			return apiKey;
+			if (apiKey == "1"){
+				System.out.println("Error geting Scan Key");
+			}
+			else{
+				return apiKey;
+			}
+			
+			
 		} catch (MalformedURLException ex) {
 			System.out.println(ex);
 		} catch (IOException ex) {
