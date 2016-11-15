@@ -162,7 +162,7 @@ public class FileController implements Initializable {
 
 			// get the properties for the files information
 			con.setRequestProperty("filePath", filePath);
-
+			con.setRequestProperty("usertoken", account.get_token());
 			con.setRequestProperty("fileName", uploadFile.getName());
 			con.setRequestProperty("fileLength", String.valueOf(uploadFile.length()));
 			con.setRequestProperty("username", account.getUsername());
@@ -224,7 +224,12 @@ public class FileController implements Initializable {
 					alert.setTitle("Success Dialog");
 					alert.setHeaderText("Success!");
 					alert.setContentText("File has been uploaded!.");
-
+					alert.showAndWait();
+				} else if(result.equals("unverified-token")){
+					Alert alert = new Alert(AlertType.ERROR);
+					alert.setTitle("ERROR");
+					alert.setHeaderText("Unable to authorize user to take action.");
+					alert.setContentText("The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
 					alert.showAndWait();
 				}
 				in.close();
@@ -270,8 +275,7 @@ public class FileController implements Initializable {
 
 					// System.out.println(filescan.isFileInfected());
 
-					// this result determines whether the file has a virus or
-					// not
+					// this result determines whether the file has a virus or not
 
 					if (!filescan.isFileInfected()) {
 						inputFile = file;
