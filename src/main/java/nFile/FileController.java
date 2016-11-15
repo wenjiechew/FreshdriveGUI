@@ -11,6 +11,8 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -26,9 +28,11 @@ import javax.swing.JFileChooser;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import fileScan.FileScan;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -69,8 +73,6 @@ public class FileController implements Initializable {
 	private Button uploadFileBtn;
 	@FXML
 	private ListView<String> fileListView;
-	@FXML
-	private JFXTextArea loadingJFXTextArea;
 
 	private String result;
 	private File inputFile;
@@ -167,7 +169,7 @@ public class FileController implements Initializable {
 
 			// get the properties for the files information
 			con.setRequestProperty("filePath", filePath);
-
+			con.setRequestProperty("usertoken", account.get_token());
 			con.setRequestProperty("fileName", uploadFile.getName());
 			con.setRequestProperty("fileLength", String.valueOf(uploadFile.length()));
 			con.setRequestProperty("username", account.getUsername());
@@ -229,7 +231,12 @@ public class FileController implements Initializable {
 					alert.setTitle("Success Dialog");
 					alert.setHeaderText("Success!");
 					alert.setContentText("File has been uploaded!.");
-
+					alert.showAndWait();
+				} else if(result.equals("unverified-token")){
+					Alert alert = new Alert(AlertType.ERROR);
+					alert.setTitle("ERROR");
+					alert.setHeaderText("Unable to authorize user to take action.");
+					alert.setContentText("The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
 					alert.showAndWait();
 				}
 				in.close();
@@ -252,15 +259,16 @@ public class FileController implements Initializable {
 		initializeListView();
 	}
 
-	public void handleUploadButton(ActionEvent event) throws IOException, DbxException {
-
-		loadingJFXTextArea.appendText(
-				"The file is being scanned. This may take a few minutes and the program will be unresponsive during this period."
-						+ "Thank you for your patience.");
-		loadingJFXTextArea.setVisible(true);
+	public void handleUploadButton(ActionEvent event)
+			throws IOException, DbxException, KeyManagementException, NoSuchAlgorithmException {
+		uploadedFileLabel.setText("");
+		uploadFileBtn.setText("Scanning");
+		uploadFileBtn.setDisable(true);
+		uploadBtn.setDisable(true);
+		// loadingJFXTextArea.setVisible(true);
 		// opens up file dialog for user to choose
 		File file = fileChooser.showOpenDialog(app_stage);
-		
+
 		// inputFile = file;
 
 		// check if valid file
@@ -273,48 +281,87 @@ public class FileController implements Initializable {
 					// does the virus scan
 					FileScan filescan = new FileScan(file);
 
+					new Thread(new Runnable() {
+						public void run() {
+							while (filescan.responseStatus == 0) {
+								// wait
+								try {
+									Thread.sleep(60000);
+								} catch (InterruptedException ex) {
+									Thread.currentThread().interrupt();
+								}
+								try {
+									filescan.checkResponseStatus();
+								} catch (KeyManagementException | JSONException | NoSuchAlgorithmException
+										| IOException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+
+							}
+							try {
+								filescan.scanResults();
+								if (!filescan.isFileInfected()) {
+									inputFile = file;
+									Platform.runLater(new Runnable() {
+										@Override
+										public void run() {
+											uploadedFileLabel.setText(inputFile.getName());
+											uploadedFileLabel.setText(inputFile.getName());
+											uploadFileBtn.setDisable(false);
+											uploadFileBtn.setText("Upload");
+											uploadBtn.setDisable(false);
+										}
+									});
+
+									System.out.println("File selected: " + inputFile.getAbsolutePath());
+									System.out.println("File is ok to go");
+
+								} else {
+									Platform.runLater(new Runnable() {
+										@Override
+										public void run() {
+											uploadFileBtn.setText("Upload");
+											uploadBtn.setDisable(false);
+											uploadedFileLabel.setText("File is virus infected. Try another file");
+										}
+									});
+
+									System.out.println("File is virus infected");
+
+								}
+							} catch (KeyManagementException | JSONException | NoSuchAlgorithmException
+									| IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+					}).start();
+
 					// System.out.println(filescan.isFileInfected());
 
-					// this result determines whether the file has a virus or
-					// not
+					// this result determines whether the file has a virus or not
 
-					if (!filescan.isFileInfected()) {
-						inputFile = file;
-						uploadedFileLabel.setText(inputFile.getName());
-						loadingJFXTextArea.setVisible(false);
-						loadingJFXTextArea.setText("");
-						uploadFileBtn.setDisable(false);
-						System.out.println("File selected: " + inputFile.getAbsolutePath());
-						System.out.println("File is ok to go");
-
-					} else {
-						loadingJFXTextArea.setVisible(false);
-						loadingJFXTextArea.setText("");
-						uploadedFileLabel.setText("File is virus infected. Try another file");
-						System.out.println("File is virus infected");
-
-					}
 				} catch (Exception e) {
 					e.printStackTrace();
 					uploadedFileLabel.setText("Invalid File. Try another file.");
 					System.out.println("Invalid File");
-					loadingJFXTextArea.setText("");
-
-					loadingJFXTextArea.setVisible(false);
+					uploadFileBtn.setText("Upload");
+					uploadBtn.setDisable(false);
 
 				}
 			} else {
-				loadingJFXTextArea.setVisible(false);
-				loadingJFXTextArea.setText("");
 				System.out.println("File too big");
+				uploadFileBtn.setText("Upload");
+				uploadBtn.setDisable(false);
 				uploadedFileLabel.setText("File too big. Try another file.");
 
 			}
 		} else {
 			uploadedFileLabel.setText("Invalid File. Try another file.");
 			System.out.println("Invalid File");
-			loadingJFXTextArea.setText("");
-			loadingJFXTextArea.setVisible(false);
+			uploadFileBtn.setText("Upload");
+			uploadBtn.setDisable(false);
 		}
 	}
 
@@ -368,7 +415,7 @@ public class FileController implements Initializable {
 					// sharing options
 					FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/nFile/FileShareWindow.fxml"));
 					Parent root = (Parent) fxmlLoader.load();
-					ShareController controller = fxmlLoader.<ShareController>getController();
+					ShareController controller = fxmlLoader.<ShareController> getController();
 					controller.setFileID(fileID);
 					Scene scene = new Scene(root);
 					Stage app_stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -411,6 +458,7 @@ public class FileController implements Initializable {
 				con.setDoOutput(true);
 				DataOutputStream out = new DataOutputStream(con.getOutputStream());
 				out.writeBytes("fileID=" + fileID);
+
 				
 				//Select directory to place file in
 				JFileChooser chooser = new JFileChooser(); 
@@ -437,6 +485,7 @@ public class FileController implements Initializable {
 				filePath = filePath.replace("\\", "\\\\");
 				
 				
+
 
 				// Response from Server
 				BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));

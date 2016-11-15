@@ -25,10 +25,12 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
 import nObjectModel.Account;
 
@@ -97,74 +99,83 @@ public class ShareController implements Initializable {
 	 */
 	@FXML
 	public void addUser(ActionEvent event) throws IOException {
-		String result = null;
-		try {	
-			URL url = new URL(nURLConstants.Constants.sharingURL);
-			HttpURLConnection con = (HttpURLConnection) url.openConnection();
-
-			// Add header to request
-			con.setRequestMethod("POST");
-			String users = userTxtField.getText();
-
-			// Post request to servlet
-			con.setDoOutput(true);
-			DataOutputStream out = new DataOutputStream(con.getOutputStream());
-			out.writeBytes("users="+ users +"&fileID=" + fileID + "&action=add");
-			out.flush();
-			out.close();
-
-			// Response from servlet with a list of unvalidated users (if any) and granted users (if any)
-			BufferedReader in = 
-                new BufferedReader( new InputStreamReader(con.getInputStream()));			
-            String response;
-            
-            while ((response = in.readLine()) != null) {
-                result = response;
-            }
-			in.close();
-			
-			if (result != null)
-			{
-				if (result.equals("File"))
+		if (userTxtField.getText().equals("")){
+			Alert alert = new Alert(AlertType.WARNING);
+			alert.setTitle("Warning");
+			alert.setHeaderText(null);
+			alert.setContentText("Please enter an username or email.");
+			alert.showAndWait();
+		}
+		else {
+			String result = null;
+			try {	
+				URL url = new URL(nURLConstants.Constants.sharingURL);
+				HttpURLConnection con = (HttpURLConnection) url.openConnection();
+	
+				// Add header to request
+				con.setRequestMethod("POST");
+				String users = userTxtField.getText();
+	
+				// Post request to servlet
+				con.setDoOutput(true);
+				DataOutputStream out = new DataOutputStream(con.getOutputStream());
+				out.writeBytes("users="+ users +"&fileID=" + fileID + "&action=add");
+				out.flush();
+				out.close();
+	
+				// Response from servlet with a list of unvalidated users (if any) and granted users (if any)
+				BufferedReader in = 
+	                new BufferedReader( new InputStreamReader(con.getInputStream()));			
+	            String response;
+	            
+	            while ((response = in.readLine()) != null) {
+	                result = response;
+	            }
+				in.close();
+				
+				if (result != null)
 				{
-					errorLabel.setText("Error in uploading file, please click 'Back' and try again.");
-				}
-				else
-				{
-					//Read response in format: "[errorlist],accepted=[accepteduserlist]"
-					//Split into two strings
-					String[] userLists = result.split(",accepted=");
-					
-					//Remove brackets and print message
-					String errorList = userLists[0].substring(1, userLists[0].length()-1);
-					if (errorList.equals("")){
-						errorLabel.setText("File successfully shared to all users!");
+					if (result.equals("File"))
+					{
+						errorLabel.setText("Error in uploading file, please click 'Back' and try again.");
 					}
 					else
 					{
-						errorLabel.setText(errorList + " does not exist.");
-					}
-					
-					//Remove brackets and add to list
-					String acceptedList = userLists[1].substring(1, userLists[1].length()-1);
-					String[] acceptedUsers = acceptedList.split(",");
-					for (int i = 0; i < acceptedUsers.length; i++){
-						if (acceptedUsers[i].equals(""))
-						{
+						//Read response in format: "[errorlist],accepted=[accepteduserlist]"
+						//Split into two strings
+						String[] userLists = result.split(",accepted=");
+						
+						//Remove brackets and print message
+						String errorList = userLists[0].substring(1, userLists[0].length()-1);
+						if (errorList.equals("")){
+							errorLabel.setText("File successfully shared to all users!");
 						}
 						else
 						{
-							userList.add(acceptedUsers[i]);
+							errorLabel.setText(errorList + " does not exist.");
+						}
+						
+						//Remove brackets and add to list
+						String acceptedList = userLists[1].substring(1, userLists[1].length()-1);
+						String[] acceptedUsers = acceptedList.split(",");
+						for (int i = 0; i < acceptedUsers.length; i++){
+							if (acceptedUsers[i].equals(""))
+							{
+							}
+							else
+							{
+								userList.add(acceptedUsers[i]);
+							}
 						}
 					}
 				}
-			}
-        }
-        catch (Exception ex) {
-            System.out.print("addUser(): " + ex);
-        }
-		listViewItem.setItems(userList);
-		userTxtField.clear();
+	        }
+	        catch (Exception ex) {
+	            System.out.print("addUser(): " + ex);
+	        }
+			listViewItem.setItems(userList);
+			userTxtField.clear();
+		}
 	}
 
 	/**

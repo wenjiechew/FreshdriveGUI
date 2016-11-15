@@ -11,58 +11,77 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.Pane?>
 
-<AnchorPane prefHeight="522.0" prefWidth="674.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="nFile.FileController">
+<AnchorPane prefHeight="522.0" prefWidth="674.0"
+	xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+	fx:controller="nFile.FileController">
 	<children>
-		<JFXButton fx:id="logoutBtn" layoutX="606.0" layoutY="9.0" onAction="#handleLogoutBtn" style="-fx-background-color: blue;" text="Logout" textFill="WHITE" />
-		<JFXButton fx:id="shareBtn" layoutX="523.0" layoutY="9.0" onAction="#moveToShareScreen" style="-fx-background-color: blue;" text="Share Files" textFill="WHITE" />
-		<TitledPane animated="false" layoutX="14.0" layoutY="43.0" prefHeight="170.0" prefWidth="645.0" text="Upload">
+		<JFXButton fx:id="logoutBtn" layoutX="606.0" layoutY="9.0"
+			onAction="#handleLogoutBtn" style="-fx-background-color: blue;" text="Logout"
+			textFill="WHITE" />
+		<JFXButton fx:id="shareBtn" layoutX="523.0" layoutY="9.0"
+			onAction="#moveToShareScreen" style="-fx-background-color: blue;"
+			text="Share Files" textFill="WHITE" />
+		<TitledPane animated="false" layoutX="14.0" layoutY="43.0"
+			prefHeight="170.0" prefWidth="645.0" text="Upload">
 			<content>
-				<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+				<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0"
+					prefWidth="200.0">
 					<children>
 						<Label layoutX="14.0" layoutY="14.0" text="File chosen: ">
 							<font>
 								<Font name="System Bold" size="12.0" />
 							</font>
 						</Label>
-						<JFXButton fx:id="uploadBtn" layoutX="549.0" layoutY="11.0" onAction="#handleUploadButton" prefHeight="26.0" prefWidth="80.0" style="-fx-background-color: blue;" text="Choose File" textFill="WHITE" />
+						<JFXButton fx:id="uploadBtn" layoutX="549.0" layoutY="11.0"
+							onAction="#handleUploadButton" prefHeight="26.0" prefWidth="80.0"
+							style="-fx-background-color: blue;" text="Choose File" textFill="WHITE" />
 						<Label layoutX="14.0" layoutY="59.0" text="Expiry Date: ">
 							<font>
 								<Font name="System Bold" size="12.0" />
 							</font>
 						</Label>
-						<Button fx:id="uploadFileBtn" disable="true" layoutX="535.0" layoutY="107.0" mnemonicParsing="false" onAction="#handleUploadFileBtn" prefHeight="29.0" prefWidth="94.0" text="Upload" />
-						<Label fx:id="uploadedFileLabel" layoutX="86.0" layoutY="16.0" prefHeight="17.0" prefWidth="456.0" text="No file uploaded" textFill="RED" />
-						<DatePicker fx:id="expiryDatePicker" layoutX="86.0" layoutY="55.0" />
-						<Label fx:id="loadingLabel" layoutX="14.0" layoutY="86.0" prefHeight="43.0" prefWidth="459.0" textFill="RED" visible="false" wrapText="true" />
+						<Button fx:id="uploadFileBtn" disable="true" layoutX="535.0"
+							layoutY="107.0" mnemonicParsing="false" onAction="#handleUploadFileBtn"
+							prefHeight="29.0" prefWidth="94.0" text="Upload" />
+						<Label fx:id="uploadedFileLabel" layoutX="86.0" layoutY="16.0"
+							prefHeight="17.0" prefWidth="456.0" text="No file uploaded"
+							textFill="RED" />
+						<DatePicker fx:id="expiryDatePicker" layoutX="86.0"
+							layoutY="55.0" />
+						<Label fx:id="loadingLabel" layoutX="14.0" layoutY="86.0"
+							prefHeight="43.0" prefWidth="459.0" textFill="RED" visible="false"
+							wrapText="true" />
 					</children>
 				</AnchorPane>
 			</content>
 		</TitledPane>
-		<TitledPane animated="false" layoutX="14.0" layoutY="220.0" prefHeight="290.0" prefWidth="645.0" text="Files uploaded">
+		<TitledPane animated="false" layoutX="14.0" layoutY="220.0"
+			prefHeight="290.0" prefWidth="645.0" text="Files uploaded">
 			<content>
 
-				<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="232.0" prefWidth="643.0">
+				<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="232.0"
+					prefWidth="643.0">
 					<children>
-						<ListView fx:id="fileListView" layoutX="141.0" layoutY="15.0" prefHeight="208.0" prefWidth="491.0" />
+						<ListView fx:id="fileListView" layoutX="141.0" layoutY="15.0"
+							prefHeight="208.0" prefWidth="491.0" />
 
 						<Label layoutX="14.0" layoutY="14.0" text="List of files uploaded:">
 							<font>
 								<Font name="System Bold" size="12.0" />
 							</font>
 						</Label>
+<<<<<<< HEAD
                   <Button fx:id="downloadBtn" layoutX="561.0" layoutY="231.0" mnemonicParsing="false" onAction="#handleDownloadBtn" text="Download" />
                   <Button fx:id="refreshBtn" layoutX="493.0" layoutY="231.0" mnemonicParsing="false" onAction="#handleRefreshBtn" text="Refresh" />
+=======
+						<Button fx:id="downloadBtn" layoutX="561.0" layoutY="231.0"
+							mnemonicParsing="false" onAction="#handleDownloadBtn" text="Download" />
+>>>>>>> cb9206c7e0074e1ac4ae9b10fa6c22911a460783
 					</children>
 				</AnchorPane>
 			</content>
 		</TitledPane>
-
-		<JFXTextArea fx:id="loadingJFXTextArea" editable="false" layoutX="-4.0" layoutY="2.0" maxWidth="674.0" minWidth="652.0" prefHeight="514.0" prefWidth="674.0" visible="false" wrapText="true">
-
-			<font>
-				<Font size="42.0" />
-			</font>
-		</JFXTextArea>
-		<JFXProgressBar fx:id="progressBar" layoutX="245.0" layoutY="230.0" />
+		<JFXProgressBar fx:id="progressBar" layoutX="245.0"
+			layoutY="230.0" />
 	</children>
 </AnchorPane>

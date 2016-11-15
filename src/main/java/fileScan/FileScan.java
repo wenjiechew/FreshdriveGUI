@@ -10,6 +10,10 @@
 
 package fileScan;
 
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -17,21 +21,31 @@ import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.File;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
+
+import nObjectModel.Account;
 
 public class FileScan {
 
@@ -43,7 +57,7 @@ public class FileScan {
 	// this var is the id of the file when sent to the api for scanning
 	private static String resource;
 	// this var is response code of the reply coming from the api
-	private static int responseStatus;
+	public static int responseStatus;
 
 	// api for the file scan
 	private static final String URL_FILESCAN = "https://www.virustotal.com/vtapi/v2/file/scan";
@@ -61,20 +75,20 @@ public class FileScan {
 	 *            file object which is going to be scanned
 	 * @return
 	 */
-	public FileScan(File file) throws IOException, JSONException {
+	public FileScan(File file) throws IOException, JSONException, KeyManagementException, NoSuchAlgorithmException {
 		FileScan.fileToScan = file;
 		scanFile();
 		checkResponseStatus();
-		while (FileScan.responseStatus == 0) {
-			// wait
-			try {
-				Thread.sleep(60000);
-			} catch (InterruptedException ex) {
-				Thread.currentThread().interrupt();
-			}
-			FileScan.checkResponseStatus();
-		}
-		FileScan.scanResults();
+//		while (FileScan.responseStatus == 0) {
+//			// wait
+//			try {
+//				Thread.sleep(60000);
+//			} catch (InterruptedException ex) {
+//				Thread.currentThread().interrupt();
+//			}
+//			FileScan.checkResponseStatus();
+//		}
+//		FileScan.scanResults();
 
 	}
 
@@ -99,9 +113,16 @@ public class FileScan {
 	 * @return
 	 */
 
-	protected static void scanFile() throws IOException, JSONException {
+	protected static void scanFile()
+			throws IOException, JSONException, KeyManagementException, NoSuchAlgorithmException {
 
-		CloseableHttpClient client = HttpClients.createDefault();
+		SSLContext sslcontext = SSLContexts.custom().build();
+		sslcontext.init(null, new X509TrustManager[] { new HttpsTrustManager() }, new SecureRandom());
+		@SuppressWarnings("deprecation")
+		SSLConnectionSocketFactory factory = new SSLConnectionSocketFactory(sslcontext,
+				SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
+
+		CloseableHttpClient client = HttpClients.custom().setSSLSocketFactory(factory).build();
 		HttpPost httpPost = new HttpPost(URL_FILESCAN);
 		MultipartEntityBuilder builder = MultipartEntityBuilder.create();
 		builder.addTextBody("apikey", getAPIkey());
@@ -111,6 +132,7 @@ public class FileScan {
 		httpPost.setEntity(multipart);
 
 		CloseableHttpResponse response1 = client.execute(httpPost);
+
 		try {
 			HttpEntity entity1 = response1.getEntity();
 			String responseBody = responseAsString(response1);
@@ -135,10 +157,16 @@ public class FileScan {
 	 * @return
 	 */
 
-	protected static void scanResults() throws IOException, JSONException {
-		CloseableHttpClient client = HttpClients.createDefault();
+	public  void scanResults()
+			throws IOException, JSONException, KeyManagementException, NoSuchAlgorithmException {
+		SSLContext sslcontext = SSLContexts.custom().build();
+		sslcontext.init(null, new X509TrustManager[] { new HttpsTrustManager() }, new SecureRandom());
+		@SuppressWarnings("deprecation")
+		SSLConnectionSocketFactory factory = new SSLConnectionSocketFactory(sslcontext,
+				SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
+
+		CloseableHttpClient client = HttpClients.custom().setSSLSocketFactory(factory).build();
 		HttpPost httpPost = new HttpPost(URL_FILEREPORT);
-		int positives;
 		MultipartEntityBuilder builder = MultipartEntityBuilder.create();
 		builder.addTextBody("apikey", getAPIkey());
 		builder.addTextBody("resource", FileScan.resource);
@@ -147,6 +175,8 @@ public class FileScan {
 		httpPost.setEntity(multipart);
 
 		CloseableHttpResponse response1 = client.execute(httpPost);
+		int positives;
+
 		try {
 			HttpEntity entity1 = response1.getEntity();
 			String responseBody = responseAsString(response1);
@@ -188,8 +218,15 @@ public class FileScan {
 	 * @return
 	 */
 
-	protected static void checkResponseStatus() throws IOException, JSONException {
-		CloseableHttpClient client = HttpClients.createDefault();
+	public  void checkResponseStatus()
+			throws IOException, JSONException, KeyManagementException, NoSuchAlgorithmException {
+		SSLContext sslcontext = SSLContexts.custom().build();
+		sslcontext.init(null, new X509TrustManager[] { new HttpsTrustManager() }, new SecureRandom());
+		@SuppressWarnings("deprecation")
+		SSLConnectionSocketFactory factory = new SSLConnectionSocketFactory(sslcontext,
+				SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
+
+		CloseableHttpClient client = HttpClients.custom().setSSLSocketFactory(factory).build();
 		HttpPost httpPost = new HttpPost(URL_FILEREPORT);
 		MultipartEntityBuilder builder = MultipartEntityBuilder.create();
 		builder.addTextBody("apikey", getAPIkey());
@@ -224,8 +261,10 @@ public class FileScan {
 		IOUtils.copy(inputStream, writer, "UTF-8");
 		return writer.toString();
 	}
+
 	/**
-	 * This method makes a http post request to get the virus scan API key to use for api requests	
+	 * This method makes a http post request to get the virus scan API key to
+	 * use for api requests
 	 * 
 	 * @param
 	 * @return apiKey this is the api key which will be used for api requests
@@ -239,6 +278,13 @@ public class FileScan {
 
 			// Adding Header
 			con.setRequestMethod("POST");
+			
+			//send Post
+			con.setDoOutput(true);
+			DataOutputStream out = new DataOutputStream( con.getOutputStream() );
+			out.writeBytes("username=" + Account.getAccount().getUsername() + "&user_token=" + Account.getAccount().get_token());
+			out.flush();
+			out.close();
 
 			// Response from Server
 			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
@@ -250,7 +296,14 @@ public class FileScan {
 			in.close();
 
 			System.out.println(apiKey);
-			return apiKey;
+			if (apiKey == "1"){
+				System.out.println("Error geting Scan Key");
+			}
+			else{
+				return apiKey;
+			}
+			
+			
 		} catch (MalformedURLException ex) {
 			System.out.println(ex);
 		} catch (IOException ex) {
@@ -258,4 +311,5 @@ public class FileScan {
 		}
 		return apiKey;
 	}
+
 }
