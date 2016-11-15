@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -18,8 +19,12 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import javax.swing.JFileChooser;
 
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -386,6 +391,7 @@ public class FileController implements Initializable {
 
 	public void handleDownloadBtn(ActionEvent event) throws IOException {
 		int selectedFile = fileListView.getSelectionModel().getSelectedIndex();
+		String fileName = fileListView.getSelectionModel().getSelectedItem();
 		if (selectedFile == -1) {
 			Alert alert = new Alert(AlertType.INFORMATION);
 			alert.setTitle("Information");
@@ -406,6 +412,7 @@ public class FileController implements Initializable {
 				DataOutputStream out = new DataOutputStream(con.getOutputStream());
 				out.writeBytes("fileID=" + fileID);
 				
+				//Select directory to place file in
 				JFileChooser chooser = new JFileChooser(); 
 				String choosertitle = "Select a directory";
 				   
@@ -415,9 +422,19 @@ public class FileController implements Initializable {
 			    //
 			    // disable the "All files" option.
 			    //
+			    if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+			        System.out.println("getCurrentDirectory(): " + chooser.getCurrentDirectory());
+			        System.out.println("getSelectedFile() : " + chooser.getSelectedFile());
+			      } else {
+			        System.out.println("No Selection ");
+			      }
 			   
 				out.flush();
 				out.close();
+				
+				String filePath = chooser.getSelectedFile().toString();
+				// replace the single backslash with double backslash
+				filePath = filePath.replace("\\", "\\\\");
 				
 				
 
@@ -429,20 +446,39 @@ public class FileController implements Initializable {
 					result = response;
 				}
 				in.close();
+				//parse response string back to bytes
+				String[] byteValues = result.substring(1, result.length() - 1).split(",");
+				byte[] bytes = new byte[byteValues.length];
 
-				if (result.equals("File has been downloaded")) {
-					Alert alert = new Alert(AlertType.CONFIRMATION);
-					alert.setTitle("Download success");
-					alert.setHeaderText(null);
-					alert.setContentText("Your file has been downloaded into your download folder.");
-					alert.showAndWait();
-				} else {
-					// If user is not the owner of the selected file, prompt
-					// alert to notify
+				for (int i=0, len=bytes.length; i<len; i++) {
+				   bytes[i] = Byte.parseByte(byteValues[i].trim());     
+				}
+				
+				System.out.println("URL: "  + result);
+				//Create a new file to store the bytes in
+				File newFile = new File(filePath+"\\" + fileName);
+				newFile.setWritable(true);
+				String ext1 = FilenameUtils.getExtension(newFile.getPath());
+				System.out.println("EXTENSION "+ext1);
+				//Set an output stream to put file in
+				FileOutputStream output = new FileOutputStream(newFile);
+//				
+				//Write the bytes into the outputstream to create the file
+				output.write(bytes);
+				output.close();
+				if (result.equals("Download Fail")) {
+					// alert to notify download fail.
 					Alert alert = new Alert(AlertType.ERROR);
 					alert.setTitle("Error: Download failed");
 					alert.setHeaderText(null);
 					alert.setContentText("Download has failed. Try again or contact your administrator.");
+					alert.showAndWait();
+				} else {
+					// If no fail msg then alert success
+					Alert alert = new Alert(AlertType.CONFIRMATION);
+					alert.setTitle("Download success");
+					alert.setHeaderText(null);
+					alert.setContentText("Your file has been downloaded into your chosen folder.");
 					alert.showAndWait();
 				}
 			} catch (Exception ex) {
@@ -459,15 +495,7 @@ public class FileController implements Initializable {
 
 		progressBar.setVisible(false);
 		uploadFileBtn.setDisable(true);
-		// try {
-		// initializeListView();
-		// } catch (IOException e) {
-		// // TODO Auto-generated catch block
-		//// e.printStackTrace();
-		// } catch (DbxException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
+
 
 		try {
 			initializeListView();
@@ -553,6 +581,16 @@ public class FileController implements Initializable {
 		// fileListView.setItems(data);
 		// System.out.println("Refresh List View");
 
+	}
+	
+	public void handleRefreshBtn(ActionEvent action) throws IOException {
+		try {
+			initializeListView();
+		} catch (DbxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 
 }
