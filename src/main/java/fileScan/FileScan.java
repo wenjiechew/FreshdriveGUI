@@ -57,7 +57,7 @@ public class FileScan {
 	// this var is the id of the file when sent to the api for scanning
 	private static String resource;
 	// this var is response code of the reply coming from the api
-	private static int responseStatus;
+	public static int responseStatus;
 
 	// api for the file scan
 	private static final String URL_FILESCAN = "https://www.virustotal.com/vtapi/v2/file/scan";
@@ -79,16 +79,16 @@ public class FileScan {
 		FileScan.fileToScan = file;
 		scanFile();
 		checkResponseStatus();
-		while (FileScan.responseStatus == 0) {
-			// wait
-			try {
-				Thread.sleep(60000);
-			} catch (InterruptedException ex) {
-				Thread.currentThread().interrupt();
-			}
-			FileScan.checkResponseStatus();
-		}
-		FileScan.scanResults();
+//		while (FileScan.responseStatus == 0) {
+//			// wait
+//			try {
+//				Thread.sleep(60000);
+//			} catch (InterruptedException ex) {
+//				Thread.currentThread().interrupt();
+//			}
+//			FileScan.checkResponseStatus();
+//		}
+//		FileScan.scanResults();
 
 	}
 
@@ -157,7 +157,7 @@ public class FileScan {
 	 * @return
 	 */
 
-	protected static void scanResults()
+	public  void scanResults()
 			throws IOException, JSONException, KeyManagementException, NoSuchAlgorithmException {
 		SSLContext sslcontext = SSLContexts.custom().build();
 		sslcontext.init(null, new X509TrustManager[] { new HttpsTrustManager() }, new SecureRandom());
@@ -218,7 +218,7 @@ public class FileScan {
 	 * @return
 	 */
 
-	protected static void checkResponseStatus()
+	public  void checkResponseStatus()
 			throws IOException, JSONException, KeyManagementException, NoSuchAlgorithmException {
 		SSLContext sslcontext = SSLContexts.custom().build();
 		sslcontext.init(null, new X509TrustManager[] { new HttpsTrustManager() }, new SecureRandom());
