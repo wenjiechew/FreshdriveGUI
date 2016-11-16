@@ -1,3 +1,9 @@
+/**
+ * Controller for the Login JavaFX file, 
+ * where all operations triggered from that window will be serviced.
+ *      
+ */
+
 package nLogin;
 
 import java.io.BufferedReader;
@@ -35,6 +41,20 @@ public class LoginController implements Initializable {
 
 	private String result;
 
+	/**
+	 * This function basically handles what happens when the user tries to log
+	 * in. It will first get the user name from the textbox and the password.
+	 * The credentials would then be sent to the server for validation to check
+	 * if the credentials match the one in the database and send an email to
+	 * verified email for the one time password. The GUI would then change to
+	 * the challengewindow.fxml,to await the user's input of OTP sent to the
+	 * email
+	 * 
+	 * @param ActionEvent
+	 *            the event being passed is the mouse event.In this case will be
+	 *            the clicking of the register button
+	 * @return
+	 */
 	public void handleLoginBtn(ActionEvent event) {
 		try {
 			URL url = new URL(nURLConstants.Constants.loginURL);
@@ -59,25 +79,21 @@ public class LoginController implements Initializable {
 				result = response;
 			}
 			in.close();
-			
-			//Where result is either error or the token key
-			System.out.println(result);
 
 			// 1 = Failed
 			if (result.contentEquals("1")) {
 				displayMsg.setTextFill(Color.web("#FF0000"));
 				displayMsg.setText("Login failed.");
-				// Optionally display number of attempts left (if doing account lock)
-			} 
-			else if(result.contentEquals("active-token")){
+				// Optionally display number of attempts left (if doing account
+				// lock)
+			} else if (result.contentEquals("active-token")) {
 				displayMsg.setTextFill(Color.web("#FF0000"));
 				displayMsg.setText("Account already logged in.");
-			}
-			else {
-				//Send to 2FA Page to verify emailed OTP
+			} else {
+				// Send to 2FA Page to verify emailed OTP
 				Account account = Account.getAccount();
-				account.setUsername(userTextBox.getText()); 
-				
+				account.setUsername(userTextBox.getText());
+
 				Parent FilePageParent = FXMLLoader.load(getClass().getResource("/n2FA/2FAChallengeWindow.fxml"));
 				Scene FilePageScene = new Scene(FilePageParent);
 				Stage app_stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -92,6 +108,16 @@ public class LoginController implements Initializable {
 		}
 	}
 
+	/**
+	 * This function basically handles what happens when a new user tries to
+	 * register. The GUI would then change to the Register.fxml,to await the
+	 * user's input for the registration details sent to the email
+	 * 
+	 * @param event
+	 *            the event being passed is the mouse event.In this case will be
+	 *            the clicking of the mouse
+	 * @return
+	 */
 	public void handleRegistration(ActionEvent event) {
 		// Move to Registration page
 		try {
@@ -105,10 +131,18 @@ public class LoginController implements Initializable {
 		}
 	}
 
-	@Override // This method is called by the FXMLLoader when initialization is complete
+	/**
+	 * Initialize the screen and setup the login window to be displayed to user
+	 * 
+	 * @param location
+	 *            The location used to resolve relative paths for the root
+	 *            object, or null if the location is not known.resources
+	 * @param resources
+	 *            The resources used to localize the root object, or null if the
+	 *            root object was not localized.
+	 */
+	@Override
 	public void initialize(URL fxmlFileLocation, ResourceBundle resources) {
-		System.out.println("LoginController.initialize()");
-		// assert loginBtn != null : "fx:id=\"loginBtn\" was not injected: check your FXML file 'login.fxml'.";
-		// initialize your logic here: all @FXML variables will have been injected
+
 	}
 }
