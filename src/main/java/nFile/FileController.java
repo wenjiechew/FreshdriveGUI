@@ -50,13 +50,10 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import nObjectModel.Account;
 
-import com.google.gson.Gson;
-import com.jfoenix.controls.JFXTextArea;
 
 public class FileController implements Initializable {
 	@FXML
@@ -81,7 +78,6 @@ public class FileController implements Initializable {
 	private String result;
 	private File inputFile;
 	static final int BUFFER_SIZE = 1048576;
-//	static final int FILE_MAX_SIZE = 1048576;
 	final FileChooser fileChooser = new FileChooser();
 	String[] fileIdArray;
 
@@ -93,7 +89,7 @@ public class FileController implements Initializable {
 	 * Performs action for the logout button press, to send a logout request to the server.
 	 *
 	 * @param  		ActionEvent triggered by button press
-	 * @return      
+	 * @throws		IOException      
 	 */
 	public void handleLogoutBtn(ActionEvent event) throws IOException {
 		try {
@@ -140,9 +136,9 @@ public class FileController implements Initializable {
 			}
 
 		} catch (MalformedURLException ex) {
-			// a real program would need to handle this exception
+			System.out.println("MalformedURLException in handleLogoutBtn()" + ex);
 		} catch (IOException ex) {
-			// a real program would need to handle this exception
+			System.out.println("IOException in handleLogoutBtn()" + ex);
 		}
 	}
 
@@ -163,9 +159,8 @@ public class FileController implements Initializable {
 			con.setUseCaches(false);
 			// Adding Header
 			con.setRequestMethod("POST");
-			// get the filepath from inputFile
+			//Get the file path of the inputFile
 			String filePath = inputFile.getPath();
-			// replace the single backslash with double backslash
 			filePath = filePath.replace("\\", "\\\\");
 			File uploadFile = new File(filePath);
 
@@ -193,17 +188,7 @@ public class FileController implements Initializable {
 			con.setRequestProperty("ownerID", account.get_id());
 			con.setRequestProperty("createdOn", currentDate);
 			con.setRequestProperty("expiryDate", expireDate);
-			System.out.println("File Name: " + uploadFile.getName());
-
-			System.out.println("File Length: " + String.valueOf(uploadFile.length()));
-			System.out.println("USERNAME: " + account.getUsername());
-			System.out.println("File to upload: " + filePath);
-			System.out.println("File created on: " + dateFormat.format(date));
-			System.out.println("Expiry date: " + expireDate);
-			System.out.println("Owner ID: " + account.get_id());
-
-			System.out.println("File Length: " + String.valueOf(uploadFile.length()));
-			System.out.println("USERNAME: " + account.getUsername());
+			
 
 			// opens output stream of the HTTP connection for writing data
 			OutputStream out = con.getOutputStream();
@@ -598,7 +583,7 @@ public class FileController implements Initializable {
 		} catch (IOException e) {
 
 			// TODO Auto-generated catch block
-			// e.printStackTrace();
+			 e.printStackTrace();
 		} 
 
 	}
