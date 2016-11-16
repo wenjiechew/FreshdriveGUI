@@ -55,8 +55,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import nObjectModel.Account;
 
-import com.dropbox.core.*;
-import com.dropbox.core.DbxException;
 import com.google.gson.Gson;
 import com.jfoenix.controls.JFXTextArea;
 
@@ -82,13 +80,14 @@ public class FileController implements Initializable {
 
 	private String result;
 	private File inputFile;
-	static final int BUFFER_SIZE = 524288000;
-	// private static DbxClient client;
+	static final int BUFFER_SIZE = 1048576;
+//	static final int FILE_MAX_SIZE = 1048576;
 	final FileChooser fileChooser = new FileChooser();
 	String[] fileIdArray;
 
 	Account account = Account.getAccount();
 	private Stage app_stage;
+
 
 	/**
 	 * Performs action for the logout button press, to send a logout request to the server.
@@ -146,15 +145,17 @@ public class FileController implements Initializable {
 			// a real program would need to handle this exception
 		}
 	}
+
 	
 	/**
 	 * Performs action for the Upload button press, to send a request to the server 
 	 * to send and upload the user's chosen file.
 	 *
 	 * @param  		ActionEvent triggered by button press
-	 * @throws		IOException, DBxException      
+	 * @throws		IOException      
 	 */
-	public void handleUploadFileBtn(ActionEvent event) throws IOException, DbxException {
+	public void handleUploadFileBtn(ActionEvent event) throws IOException {
+
 		try {
 			URL url = new URL(nURLConstants.Constants.uploadURL);
 			HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -226,7 +227,6 @@ public class FileController implements Initializable {
 
 			// Response from Server
 			int responseCode = con.getResponseCode();
-			// String error = con.getErrorStream().toString();
 			if (responseCode == con.HTTP_OK) {
 				BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
 				String response;
@@ -271,12 +271,13 @@ public class FileController implements Initializable {
 			}
 
 		} catch (MalformedURLException ex) {
-			// a real program would need to handle this exception
+			System.out.println("MalformedURLException in handleUploadFileBtn");
 		} catch (IOException ex) {
-			// a real program would need to handle this exception
+			System.out.println("IOException in handleUploadFileBtn");
 		}
 		initializeListView();
 	}
+
 	
 	/**
 	 * Performs action for the Choose file button press for user to select 
@@ -284,9 +285,11 @@ public class FileController implements Initializable {
 	 * Chosen file will be sent for a virus scan to prevent malicious files from entering the system. 
 	 * 
 	 * @param event
+	 * @throws IOException, KeyManagementException, NoSuchAlgorithmException
+
 	 */
 	public void handleUploadButton(ActionEvent event)
-			throws IOException, DbxException, KeyManagementException, NoSuchAlgorithmException {
+			throws IOException, KeyManagementException, NoSuchAlgorithmException {
 		uploadedFileLabel.setText("");
 		uploadFileBtn.setText("Scanning");
 		uploadFileBtn.setDisable(true);
@@ -297,7 +300,10 @@ public class FileController implements Initializable {
 		
 		// check if valid file
 		if (file != null) {
-			if (file.length() <= BUFFER_SIZE) {
+			String ext = FilenameUtils.getExtension(file.getPath());
+			System.out.println("EXTENSION when upload: "+ ext);
+			//Check if file is within the size limit and the file types are valid
+			if (file.length() <= BUFFER_SIZE && !ext.equalsIgnoreCase("exe") && !ext.equalsIgnoreCase("zip") && !ext.equalsIgnoreCase("bin")) {
 				try {
 					// does the virus scan
 					FileScan filescan = new FileScan(file);
@@ -378,10 +384,10 @@ public class FileController implements Initializable {
 
 				}
 			} else {
-				System.out.println("File too big");
+				System.out.println("Invalid File");
 				uploadFileBtn.setText("Upload");
 				uploadBtn.setDisable(false);
-				uploadedFileLabel.setText("File too big. Try another file.");
+				uploadedFileLabel.setText("File is invalid. Try another file.");
 
 			}
 		} else {
@@ -462,6 +468,7 @@ public class FileController implements Initializable {
 			}
 		}
 	}
+
 
 	/**
 	 * Performs action for the download button press, to send a request to the server 
@@ -589,11 +596,13 @@ public class FileController implements Initializable {
 		try {
 			initializeListView();
 		} catch (IOException e) {
-			 e.printStackTrace();
-		} catch (DbxException e) {
-			e.printStackTrace();
-		}
+
+			// TODO Auto-generated catch block
+			// e.printStackTrace();
+		} 
+
 	}
+	
 
 	/**
 	 * Initialize the list view which displays all available files (i.e. uploaded by or shared to the user)
@@ -601,7 +610,8 @@ public class FileController implements Initializable {
 	 * @throws IOException
 	 * @throws DBxException
 	 */
-	public void initializeListView() throws IOException, DbxException {
+	public void initializeListView() throws IOException {
+
 
 		URL url = new URL(nURLConstants.Constants.retrieveURL);
 		HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -634,8 +644,13 @@ public class FileController implements Initializable {
 			System.out.println("file name: " + obj.getString("fileName"));
 		}
 		fileListView.setItems(data);
+
+
 		in.close();
+		
+
 	}
+
 	
 	/**
 	 * Initialize the screen and setup the listview to be displayed to user
@@ -644,9 +659,10 @@ public class FileController implements Initializable {
 	 * @throws IOException
 	 */
 	public void handleRefreshBtn(ActionEvent action) throws IOException {
+
 		try {
 			initializeListView();
-		} catch (DbxException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
