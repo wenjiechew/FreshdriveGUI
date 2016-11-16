@@ -1,3 +1,9 @@
+/**
+ * Controller for the FileObjectWindow JavaFX file, 
+ * where all operations triggered from that window will be serviced.
+ *      
+ */
+
 package nFile;
 
 import java.io.BufferedReader;
@@ -83,6 +89,12 @@ public class FileController implements Initializable {
 	private Stage app_stage;
 
 
+	/**
+	 * Performs action for the logout button press, to send a logout request to the server.
+	 *
+	 * @param  		ActionEvent triggered by button press
+	 * @return      
+	 */
 	public void handleLogoutBtn(ActionEvent event) throws IOException {
 		try {
 			URL url = new URL(nURLConstants.Constants.logoutURL);
@@ -133,17 +145,17 @@ public class FileController implements Initializable {
 			// a real program would need to handle this exception
 		}
 	}
+
+	
 	/**
-	 * The file that has been saved by the file chooser is sent to the server
-	 * through this function. The file name, filelength, file path, the file owner, the date it was created on
-	 * and the expiry date will be sent to the server for processing. The file is converted to its bytes and
-	 * written into the output stream and then sent to the server.
-	 * 
-	 * 
-	 * @param event
-	 * @throws IOException
+	 * Performs action for the Upload button press, to send a request to the server 
+	 * to send and upload the user's chosen file.
+	 *
+	 * @param  		ActionEvent triggered by button press
+	 * @throws		IOException      
 	 */
-	public void handleUploadFileBtn(ActionEvent event) throws IOException{
+	public void handleUploadFileBtn(ActionEvent event) throws IOException {
+
 		try {
 			URL url = new URL(nURLConstants.Constants.uploadURL);
 			HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -158,7 +170,6 @@ public class FileController implements Initializable {
 			File uploadFile = new File(filePath);
 
 			// Send Post
-
 			// get the properties for the files information
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -266,15 +277,16 @@ public class FileController implements Initializable {
 		}
 		initializeListView();
 	}
+
+	
 	/**
-	 * 
-	 * Opens the file chooser for the user to choose the file they wish to upload. The file will be validated
-	 * for the file size and file type to ensure that it is a valid file. The file will then be scanned by a file scanner.
-	 * If it not valid the file will be rejected. If the file is valid, the file will be saved
-	 * and used when uploading to the server
+	 * Performs action for the Choose file button press for user to select 
+	 * the desired file from their local directory which they intend to upload. 
+	 * Chosen file will be sent for a virus scan to prevent malicious files from entering the system. 
 	 * 
 	 * @param event
-	 * @throws IOException, KeyManagementException, NoSuchAlgorithmException 
+	 * @throws IOException, KeyManagementException, NoSuchAlgorithmException
+
 	 */
 	public void handleUploadButton(ActionEvent event)
 			throws IOException, KeyManagementException, NoSuchAlgorithmException {
@@ -282,16 +294,11 @@ public class FileController implements Initializable {
 		uploadFileBtn.setText("Scanning");
 		uploadFileBtn.setDisable(true);
 		uploadBtn.setDisable(true);
-		// loadingJFXTextArea.setVisible(true);
+		
 		// opens up file dialog for user to choose
 		File file = fileChooser.showOpenDialog(app_stage);
-
-		// inputFile = file;
-
+		
 		// check if valid file
-		// Upon successful registration, show confirmation and go back to login
-		// page
-
 		if (file != null) {
 			String ext = FilenameUtils.getExtension(file.getPath());
 			System.out.println("EXTENSION when upload: "+ ext);
@@ -360,19 +367,13 @@ public class FileController implements Initializable {
 					}
 					else
 					{
-						//Show error
+						//Show invalid token error
 						Alert alert = new Alert(AlertType.ERROR);
 						alert.setTitle("ERROR");
 						alert.setHeaderText("Unable to authorize user to take action.");
 						alert.setContentText("The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
 						alert.showAndWait();
 					}
-
-
-
-					// System.out.println(filescan.isFileInfected());
-
-					// this result determines whether the file has a virus or not
 
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -467,12 +468,11 @@ public class FileController implements Initializable {
 			}
 		}
 	}
+
+
 	/**
-	 * 
-	 * Downloads the file from the file server. Prompts an alert if no file has 
-	 * been selected. Passes the ID of the file to get the file path of the actual
-	 * file and returns back the bytes. Bytes will be parsed back into a file and saved
-	 * into the file directory chosen by the user
+	 * Performs action for the download button press, to send a request to the server 
+	 * to retrieve and download the user's chosen file.
 	 * 
 	 * @param event
 	 * @throws IOException
@@ -498,7 +498,7 @@ public class FileController implements Initializable {
 				// Send Post
 				con.setDoOutput(true);
 				DataOutputStream out = new DataOutputStream(con.getOutputStream());
-				out.writeBytes("fileID=" + fileID);
+				out.writeBytes("fileID=" + fileID+"&username="+Account.getAccount().getUsername()+"&token="+Account.getAccount().get_token());
 
 				
 				//Select directory to place file in
@@ -525,9 +525,6 @@ public class FileController implements Initializable {
 				// replace the single backslash with double backslash
 				filePath = filePath.replace("\\", "\\\\");
 				
-				
-
-
 				// Response from Server
 				BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
 				String response;
@@ -557,14 +554,21 @@ public class FileController implements Initializable {
 				output.write(bytes);
 				output.close();
 				if (result.equals("Download Fail")) {
-					// alert to notify download fail.
+					//Alert to notify download fail.
 					Alert alert = new Alert(AlertType.ERROR);
 					alert.setTitle("Error: Download failed");
 					alert.setHeaderText(null);
 					alert.setContentText("Download has failed. Try again or contact your administrator.");
 					alert.showAndWait();
-				} else {
-					// If no fail msg then alert success
+				} else if(result.equals("unverified-token")){
+					//Alert for invalid token error
+					Alert alert = new Alert(AlertType.ERROR);
+					alert.setTitle("ERROR");
+					alert.setHeaderText("Unable to authorize user to take action.");
+					alert.setContentText("The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
+					alert.showAndWait();
+				}else {
+					// If no fail message then alert success
 					Alert alert = new Alert(AlertType.CONFIRMATION);
 					alert.setTitle("Download success");
 					alert.setHeaderText(null);
@@ -577,34 +581,37 @@ public class FileController implements Initializable {
 		}
 
 	}
-
+	
+	/**
+	 * Initialize the screen and setup the listview to be displayed to user
+	 * 
+	 * @param  	location	The location used to resolve relative paths for the root object, or null if the location is not known.resources
+	 * @param	resources	The resources used to localize the root object, or null if the root object was not localized.
+	 */
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		System.out.println("FileController.initialize()");
-		// TODO Auto-generated method stub
-
 		progressBar.setVisible(false);
 		uploadFileBtn.setDisable(true);
-
-
+		
 		try {
 			initializeListView();
 		} catch (IOException e) {
+
 			// TODO Auto-generated catch block
 			// e.printStackTrace();
 		} 
 
 	}
+	
+
 	/**
+	 * Initialize the list view which displays all available files (i.e. uploaded by or shared to the user)
 	 * 
-	 * Retrieves the files that the current user has permission to including their own uploaded 
-	 * files and files that has been shared to them. The retrieved files are then listed on 
-	 * the listView
-	 * 
-	 * @param 
 	 * @throws IOException
+	 * @throws DBxException
 	 */
 	public void initializeListView() throws IOException {
+
 
 		URL url = new URL(nURLConstants.Constants.retrieveURL);
 		HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -621,22 +628,13 @@ public class FileController implements Initializable {
 		BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
 		String response;
 		String jsonString = "";
-		// JSONArray array =(JSONArray();
 
 		while ((response = in.readLine()) != null) {
 			jsonString = response;
-
 		}
 
 		JSONObject jsonObj = new JSONObject(jsonString);
 		JSONArray arrayJson = jsonObj.getJSONArray("fileNames");
-		// System.out.println("jsonObj: " + jsonObj);
-		// System.out.println("arrayJson: " + arrayJson);
-		// System.out.println("get arrayjson[1]: " + arrayJson.get(0));
-		// JSONObject obj = new JSONObject(arrayJson.get(1).toString());
-		// System.out.println("obj : "+ obj);
-		// System.out.println("obj ID: "+ obj.getString("fileId"));
-		// System.out.println("obj NAME: "+ obj.getString("fileName"));
 		ObservableList<String> data = FXCollections.observableArrayList();
 		fileIdArray = new String[arrayJson.length()];
 		for (int i = 0; i < arrayJson.length(); i++) {
@@ -644,22 +642,24 @@ public class FileController implements Initializable {
 			data.add(obj.getString("fileName"));
 			fileIdArray[i] = obj.getString("fileId");
 			System.out.println("file name: " + obj.getString("fileName"));
-			// Do something with each error here
 		}
 		fileListView.setItems(data);
+
 
 		in.close();
 		
 
 	}
+
+	
 	/**
+	 * Initialize the screen and setup the listview to be displayed to user
 	 * 
-	 * Refreshes the list view by calling the initializeListView function again.
-	 * 
-	 * @param event
+	 * @param  action	Actionevent triggered on button click
 	 * @throws IOException
 	 */
-	public void handleRefreshBtn(ActionEvent event) throws IOException {
+	public void handleRefreshBtn(ActionEvent action) throws IOException {
+
 		try {
 			initializeListView();
 		} catch (Exception e) {

@@ -1,3 +1,14 @@
+/**
+*This class file was generated with reference to (http://prasans.info/2014/06/making-https-call-using-apache-httpclient/)
+*This class file is basically implementing X509TrustManager and auto genrating all the methods.HTTpsTrust manager will
+*then trust all clients
+*
+*
+* @author  Dhinakaran
+* @version 1.0
+* @since   2016-nov-14 
+*/
+
 package fileScan;
 
 

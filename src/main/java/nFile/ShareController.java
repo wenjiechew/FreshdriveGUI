@@ -148,7 +148,7 @@ public class ShareController implements Initializable {
 						//Remove brackets and print message
 						String errorList = userLists[0].substring(1, userLists[0].length()-1);
 						if (errorList.equals("")){
-							errorLabel.setText("File successfully shared to all users!");
+							errorLabel.setText("File successfully shared to selected users!");
 						}
 						else
 						{
