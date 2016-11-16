@@ -1,3 +1,9 @@
+/**
+ * Controller for the FileShareWindow JavaFX file, 
+ * where all operations triggered from that window will be serviced.
+ *      
+ */
+
 package nFile;
 
 import java.io.BufferedReader;
