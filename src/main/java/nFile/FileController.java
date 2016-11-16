@@ -219,6 +219,7 @@ public class FileController implements Initializable {
 				while ((response = in.readLine()) != null) {
 					result = response;
 				}
+				System.out.println("RESULT IS "+result);
 				if (result.equals("File already exist")) {
 					Alert alert = new Alert(AlertType.WARNING);
 					alert.setTitle("Warning Dialog");
@@ -226,11 +227,12 @@ public class FileController implements Initializable {
 					alert.setContentText("File already exists. Please choose another file or rename your file.");
 
 					alert.showAndWait();
-				} else if (result.equals("File uploaded")) {
+					
+				} else if (result.equals("File Uploaded")) {
 					uploadedFileLabel.setText("");
 					uploadFileBtn.setText("Upload");
 					uploadFileBtn.setDisable(true);
-					uploadBtn.setDisable(true);
+					uploadBtn.setDisable(false);
 					Alert alert = new Alert(AlertType.CONFIRMATION);
 					alert.setTitle("Success Dialog");
 					alert.setHeaderText("Success!");
@@ -279,6 +281,7 @@ public class FileController implements Initializable {
 		uploadFileBtn.setText("Scanning");
 		uploadFileBtn.setDisable(true);
 		uploadBtn.setDisable(true);
+		progressBar.setVisible(true);
 		
 		// opens up file dialog for user to choose
 		File file = fileChooser.showOpenDialog(app_stage);
@@ -305,8 +308,7 @@ public class FileController implements Initializable {
 									}
 									try {
 										filescan.checkResponseStatus();
-									} catch (KeyManagementException | JSONException | NoSuchAlgorithmException
-											| IOException e) {
+									} catch (Exception e) {
 										// TODO Auto-generated catch block
 										e.printStackTrace();
 									}
@@ -323,6 +325,7 @@ public class FileController implements Initializable {
 												uploadFileBtn.setDisable(false);
 												uploadFileBtn.setText("Upload");
 												uploadBtn.setDisable(false);
+												progressBar.setVisible(false);
 											}
 										});
 
@@ -336,14 +339,14 @@ public class FileController implements Initializable {
 												uploadFileBtn.setText("Upload");
 												uploadBtn.setDisable(false);
 												uploadedFileLabel.setText("File is virus infected. Try another file");
+												progressBar.setVisible(false);
 											}
 										});
 
 										System.out.println("File is virus infected");
 
 									}
-								} catch (KeyManagementException | JSONException | NoSuchAlgorithmException
-										| IOException e) {
+								} catch (Exception e) {
 									// TODO Auto-generated catch block
 									e.printStackTrace();
 								}
@@ -366,6 +369,7 @@ public class FileController implements Initializable {
 					System.out.println("Invalid File");
 					uploadFileBtn.setText("Upload");
 					uploadBtn.setDisable(false);
+					progressBar.setVisible(false);
 
 				}
 			} else {
@@ -373,6 +377,7 @@ public class FileController implements Initializable {
 				uploadFileBtn.setText("Upload");
 				uploadBtn.setDisable(false);
 				uploadedFileLabel.setText("File is invalid. Try another file.");
+				progressBar.setVisible(false);
 
 			}
 		} else {
