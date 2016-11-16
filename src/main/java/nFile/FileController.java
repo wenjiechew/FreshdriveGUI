@@ -361,7 +361,7 @@ public class FileController implements Initializable {
 					}
 					else
 					{
-						//Show error
+						//Show invalid token error
 						Alert alert = new Alert(AlertType.ERROR);
 						alert.setTitle("ERROR");
 						alert.setHeaderText("Unable to authorize user to take action.");
