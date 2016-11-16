@@ -1,3 +1,10 @@
+/**
+ * The account model to instantiate a new account object 
+ * whenever the user is going to be logged in 
+ *
+ *      
+ */
+
 package nObjectModel;
 
 public class Account {
@@ -8,23 +15,31 @@ public class Account {
 	private String password;
 	private String _token;
 
-	//Returns the singleton Account object
-	public static Account getAccount(){
-		if(instance == null) {
-	         instance = new Account();
-	      }
-	      return instance;
-   }
-	
-	//When log out, reset all variables before user logs in again, possibly to another account.
-	public void clearInstance(){
+	/**
+	 * The singleton object method to ensure that any 1 point of time only 1
+	 * instance of account object is exists in the system
+	 * 
+	 * @return Account the singleton Account object
+	 */
+	public static Account getAccount() {
+		if (instance == null) {
+			instance = new Account();
+		}
+		return instance;
+	}
+
+	/**
+	 * When log out, reset all variables before user logs in again, possibly to
+	 * another account.
+	 */
+	public void clearInstance() {
 		instance.set_id(null);
 		instance.set_token(null);
 		instance.setEmail(null);
 		instance.setPassword(null);
 		instance.setUsername(null);
 	}
-	
+
 	public String get_token() {
 		return _token;
 	}
@@ -45,7 +60,6 @@ public class Account {
 		return password;
 	}
 
-	
 	public void set_id(String _id) {
 		this._id = _id;
 	}
@@ -65,7 +79,5 @@ public class Account {
 	public void setEmail(String email) {
 		this.email = email;
 	}
-
-	
 
 }
