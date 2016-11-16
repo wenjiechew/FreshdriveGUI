@@ -483,7 +483,7 @@ public class FileController implements Initializable {
 				// Send Post
 				con.setDoOutput(true);
 				DataOutputStream out = new DataOutputStream(con.getOutputStream());
-				out.writeBytes("fileID=" + fileID+"&username="+Account.getAccount().getUsername()+"&token="+Account.getAccount().get_token());
+				out.writeBytes("fileID=" + fileID+"&username="+Account.getAccount().getUsername()+"&usertoken="+Account.getAccount().get_token());
 
 				
 				//Select directory to place file in
