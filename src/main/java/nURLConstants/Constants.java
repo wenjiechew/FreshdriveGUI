@@ -1,5 +1,5 @@
 package nURLConstants;
-
+ 
 public class Constants {
 //	private final static String mainURL = "https://localhost:8443/FreshdriveServer/";
 	private final static String mainURL = "http://localhost:8080/FreshdriveServer/";
@@ -17,6 +17,5 @@ public class Constants {
 
 	public final static String otpURL = mainURL + "VerifyOTP";
 	public final static String virusScanURL = mainURL + "ScanFile";
-
 
 }
