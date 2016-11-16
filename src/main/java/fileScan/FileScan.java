@@ -63,6 +63,14 @@ public class FileScan {
 	private static final String URL_FILESCAN = "https://www.virustotal.com/vtapi/v2/file/scan";
 	// api for the file scan report
 	private static final String URL_FILEREPORT = "https://www.virustotal.com/vtapi/v2/file/report";
+	// api for the file scan report
+	private static String APIKEY = "";
+
+	private static boolean runningStatus;
+
+	public static boolean isRunningStatus() {
+		return runningStatus;
+	}
 
 	/**
 	 * FileScan constructor method.All the scanning starts here First the file
@@ -77,18 +85,11 @@ public class FileScan {
 	 */
 	public FileScan(File file) throws IOException, JSONException, KeyManagementException, NoSuchAlgorithmException {
 		FileScan.fileToScan = file;
-		scanFile();
-		checkResponseStatus();
-//		while (FileScan.responseStatus == 0) {
-//			// wait
-//			try {
-//				Thread.sleep(60000);
-//			} catch (InterruptedException ex) {
-//				Thread.currentThread().interrupt();
-//			}
-//			FileScan.checkResponseStatus();
-//		}
-//		FileScan.scanResults();
+		getAPIkey();
+		if (runningStatus) {
+			scanFile();
+			checkResponseStatus();
+		}
 
 	}
 
@@ -125,7 +126,7 @@ public class FileScan {
 		CloseableHttpClient client = HttpClients.custom().setSSLSocketFactory(factory).build();
 		HttpPost httpPost = new HttpPost(URL_FILESCAN);
 		MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-		builder.addTextBody("apikey", getAPIkey());
+		builder.addTextBody("apikey", APIKEY);
 		builder.addBinaryBody("file", fileToScan, ContentType.APPLICATION_OCTET_STREAM, "file.ext");
 
 		HttpEntity multipart = builder.build();
@@ -157,8 +158,7 @@ public class FileScan {
 	 * @return
 	 */
 
-	public  void scanResults()
-			throws IOException, JSONException, KeyManagementException, NoSuchAlgorithmException {
+	public void scanResults() throws IOException, JSONException, KeyManagementException, NoSuchAlgorithmException {
 		SSLContext sslcontext = SSLContexts.custom().build();
 		sslcontext.init(null, new X509TrustManager[] { new HttpsTrustManager() }, new SecureRandom());
 		@SuppressWarnings("deprecation")
@@ -168,7 +168,7 @@ public class FileScan {
 		CloseableHttpClient client = HttpClients.custom().setSSLSocketFactory(factory).build();
 		HttpPost httpPost = new HttpPost(URL_FILEREPORT);
 		MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-		builder.addTextBody("apikey", getAPIkey());
+		builder.addTextBody("apikey", APIKEY);
 		builder.addTextBody("resource", FileScan.resource);
 
 		HttpEntity multipart = builder.build();
@@ -218,7 +218,7 @@ public class FileScan {
 	 * @return
 	 */
 
-	public  void checkResponseStatus()
+	public void checkResponseStatus()
 			throws IOException, JSONException, KeyManagementException, NoSuchAlgorithmException {
 		SSLContext sslcontext = SSLContexts.custom().build();
 		sslcontext.init(null, new X509TrustManager[] { new HttpsTrustManager() }, new SecureRandom());
@@ -229,7 +229,7 @@ public class FileScan {
 		CloseableHttpClient client = HttpClients.custom().setSSLSocketFactory(factory).build();
 		HttpPost httpPost = new HttpPost(URL_FILEREPORT);
 		MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-		builder.addTextBody("apikey", getAPIkey());
+		builder.addTextBody("apikey", APIKEY);
 		builder.addTextBody("resource", FileScan.resource);
 
 		HttpEntity multipart = builder.build();
@@ -270,19 +270,20 @@ public class FileScan {
 	 * @return apiKey this is the api key which will be used for api requests
 	 */
 
-	protected static String getAPIkey() {
-		String apiKey = null;
+	protected static void getAPIkey() {
+
 		try {
 			URL url = new URL(nURLConstants.Constants.virusScanURL);
 			HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
 			// Adding Header
 			con.setRequestMethod("POST");
-			
-			//send Post
+
+			// send Post
 			con.setDoOutput(true);
-			DataOutputStream out = new DataOutputStream( con.getOutputStream() );
-			out.writeBytes("username=" + Account.getAccount().getUsername() + "&user_token=" + Account.getAccount().get_token());
+			DataOutputStream out = new DataOutputStream(con.getOutputStream());
+			out.writeBytes("username=" + Account.getAccount().getUsername() + "&user_token="
+					+ Account.getAccount().get_token());
 			out.flush();
 			out.close();
 
@@ -291,25 +292,23 @@ public class FileScan {
 			String response;
 
 			while ((response = in.readLine()) != null) {
-				apiKey = response;
+				APIKEY = response;
 			}
 			in.close();
 
-			System.out.println(apiKey);
-			if (apiKey == "1"){
-				System.out.println("Error geting Scan Key");
+			if (APIKEY.equals("unverified-token")) {
+
+				runningStatus = false;
+			} else {
+				runningStatus = true;
 			}
-			else{
-				return apiKey;
-			}
-			
-			
+
 		} catch (MalformedURLException ex) {
 			System.out.println(ex);
 		} catch (IOException ex) {
 			System.out.println(ex);
 		}
-		return apiKey;
+
 	}
 
 }

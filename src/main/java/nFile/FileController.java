@@ -280,63 +280,76 @@ public class FileController implements Initializable {
 				try {
 					// does the virus scan
 					FileScan filescan = new FileScan(file);
+					if(filescan.isRunningStatus())
+					{
+						new Thread(new Runnable() {
+							public void run() {
+								while (filescan.responseStatus == 0) {
+									// wait
+									try {
+										Thread.sleep(60000);
+									} catch (InterruptedException ex) {
+										Thread.currentThread().interrupt();
+									}
+									try {
+										filescan.checkResponseStatus();
+									} catch (KeyManagementException | JSONException | NoSuchAlgorithmException
+											| IOException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
 
-					new Thread(new Runnable() {
-						public void run() {
-							while (filescan.responseStatus == 0) {
-								// wait
-								try {
-									Thread.sleep(60000);
-								} catch (InterruptedException ex) {
-									Thread.currentThread().interrupt();
 								}
 								try {
-									filescan.checkResponseStatus();
+									filescan.scanResults();
+									if (!filescan.isFileInfected()) {
+										inputFile = file;
+										Platform.runLater(new Runnable() {
+											@Override
+											public void run() {
+												uploadedFileLabel.setText(inputFile.getName());
+												uploadedFileLabel.setText(inputFile.getName());
+												uploadFileBtn.setDisable(false);
+												uploadFileBtn.setText("Upload");
+												uploadBtn.setDisable(false);
+											}
+										});
+
+										System.out.println("File selected: " + inputFile.getAbsolutePath());
+										System.out.println("File is ok to go");
+
+									} else {
+										Platform.runLater(new Runnable() {
+											@Override
+											public void run() {
+												uploadFileBtn.setText("Upload");
+												uploadBtn.setDisable(false);
+												uploadedFileLabel.setText("File is virus infected. Try another file");
+											}
+										});
+
+										System.out.println("File is virus infected");
+
+									}
 								} catch (KeyManagementException | JSONException | NoSuchAlgorithmException
 										| IOException e) {
 									// TODO Auto-generated catch block
 									e.printStackTrace();
 								}
-
 							}
-							try {
-								filescan.scanResults();
-								if (!filescan.isFileInfected()) {
-									inputFile = file;
-									Platform.runLater(new Runnable() {
-										@Override
-										public void run() {
-											uploadedFileLabel.setText(inputFile.getName());
-											uploadedFileLabel.setText(inputFile.getName());
-											uploadFileBtn.setDisable(false);
-											uploadFileBtn.setText("Upload");
-											uploadBtn.setDisable(false);
-										}
-									});
+						}).start();
+					}
+					else
+					{
+						//Show error
+						Alert alert = new Alert(AlertType.ERROR);
+						alert.setTitle("ERROR");
+						alert.setHeaderText("Unable to authorize user to take action.");
+						alert.setContentText("The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
+						alert.showAndWait();
+					}
 
-									System.out.println("File selected: " + inputFile.getAbsolutePath());
-									System.out.println("File is ok to go");
 
-								} else {
-									Platform.runLater(new Runnable() {
-										@Override
-										public void run() {
-											uploadFileBtn.setText("Upload");
-											uploadBtn.setDisable(false);
-											uploadedFileLabel.setText("File is virus infected. Try another file");
-										}
-									});
-
-									System.out.println("File is virus infected");
-
-								}
-							} catch (KeyManagementException | JSONException | NoSuchAlgorithmException
-									| IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-						}
-					}).start();
 
 					// System.out.println(filescan.isFileInfected());
 

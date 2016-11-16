@@ -70,13 +70,15 @@
 								<Font name="System Bold" size="12.0" />
 							</font>
 						</Label>
-<<<<<<< HEAD
-                  <Button fx:id="downloadBtn" layoutX="561.0" layoutY="231.0" mnemonicParsing="false" onAction="#handleDownloadBtn" text="Download" />
-                  <Button fx:id="refreshBtn" layoutX="493.0" layoutY="231.0" mnemonicParsing="false" onAction="#handleRefreshBtn" text="Refresh" />
-=======
+
 						<Button fx:id="downloadBtn" layoutX="561.0" layoutY="231.0"
 							mnemonicParsing="false" onAction="#handleDownloadBtn" text="Download" />
->>>>>>> cb9206c7e0074e1ac4ae9b10fa6c22911a460783
+						<Button fx:id="refreshBtn" layoutX="493.0" layoutY="231.0"
+							mnemonicParsing="false" onAction="#handleRefreshBtn" text="Refresh" />
+
+						<Button fx:id="downloadBtn" layoutX="561.0" layoutY="231.0"
+							mnemonicParsing="false" onAction="#handleDownloadBtn" text="Download" />
+
 					</children>
 				</AnchorPane>
 			</content>
