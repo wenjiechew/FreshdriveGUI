@@ -49,8 +49,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import nObjectModel.Account;
 
-import com.dropbox.core.*;
-import com.dropbox.core.DbxException;
 import com.google.gson.Gson;
 import com.jfoenix.controls.JFXTextArea;
 
@@ -76,16 +74,14 @@ public class FileController implements Initializable {
 
 	private String result;
 	private File inputFile;
-	static final int BUFFER_SIZE = 524288000;
-	// private static DbxClient client;
+	static final int BUFFER_SIZE = 1048576;
+//	static final int FILE_MAX_SIZE = 1048576;
 	final FileChooser fileChooser = new FileChooser();
 	String[] fileIdArray;
 
 	Account account = Account.getAccount();
 	private Stage app_stage;
 
-	// private String username = account.getUsername();
-	// private String userID = account.get_id();
 
 	public void handleLogoutBtn(ActionEvent event) throws IOException {
 		try {
@@ -137,8 +133,17 @@ public class FileController implements Initializable {
 			// a real program would need to handle this exception
 		}
 	}
-
-	public void handleUploadFileBtn(ActionEvent event) throws IOException, DbxException {
+	/**
+	 * The file that has been saved by the file chooser is sent to the server
+	 * through this function. The file name, filelength, file path, the file owner, the date it was created on
+	 * and the expiry date will be sent to the server for processing. The file is converted to its bytes and
+	 * written into the output stream and then sent to the server.
+	 * 
+	 * 
+	 * @param event
+	 * @throws IOException
+	 */
+	public void handleUploadFileBtn(ActionEvent event) throws IOException{
 		try {
 			URL url = new URL(nURLConstants.Constants.uploadURL);
 			HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -211,7 +216,6 @@ public class FileController implements Initializable {
 
 			// Response from Server
 			int responseCode = con.getResponseCode();
-			// String error = con.getErrorStream().toString();
 			if (responseCode == con.HTTP_OK) {
 				BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
 				String response;
@@ -256,15 +260,24 @@ public class FileController implements Initializable {
 			}
 
 		} catch (MalformedURLException ex) {
-			// a real program would need to handle this exception
+			System.out.println("MalformedURLException in handleUploadFileBtn");
 		} catch (IOException ex) {
-			// a real program would need to handle this exception
+			System.out.println("IOException in handleUploadFileBtn");
 		}
 		initializeListView();
 	}
-
+	/**
+	 * 
+	 * Opens the file chooser for the user to choose the file they wish to upload. The file will be validated
+	 * for the file size and file type to ensure that it is a valid file. The file will then be scanned by a file scanner.
+	 * If it not valid the file will be rejected. If the file is valid, the file will be saved
+	 * and used when uploading to the server
+	 * 
+	 * @param event
+	 * @throws IOException, KeyManagementException, NoSuchAlgorithmException 
+	 */
 	public void handleUploadButton(ActionEvent event)
-			throws IOException, DbxException, KeyManagementException, NoSuchAlgorithmException {
+			throws IOException, KeyManagementException, NoSuchAlgorithmException {
 		uploadedFileLabel.setText("");
 		uploadFileBtn.setText("Scanning");
 		uploadFileBtn.setDisable(true);
@@ -280,7 +293,10 @@ public class FileController implements Initializable {
 		// page
 
 		if (file != null) {
-			if (file.length() <= BUFFER_SIZE) {
+			String ext = FilenameUtils.getExtension(file.getPath());
+			System.out.println("EXTENSION when upload: "+ ext);
+			//Check if file is within the size limit and the file types are valid
+			if (file.length() <= BUFFER_SIZE && !ext.equalsIgnoreCase("exe") && !ext.equalsIgnoreCase("zip") && !ext.equalsIgnoreCase("bin")) {
 				try {
 					// does the virus scan
 					FileScan filescan = new FileScan(file);
@@ -367,10 +383,10 @@ public class FileController implements Initializable {
 
 				}
 			} else {
-				System.out.println("File too big");
+				System.out.println("Invalid File");
 				uploadFileBtn.setText("Upload");
 				uploadBtn.setDisable(false);
-				uploadedFileLabel.setText("File too big. Try another file.");
+				uploadedFileLabel.setText("File is invalid. Try another file.");
 
 			}
 		} else {
@@ -451,7 +467,16 @@ public class FileController implements Initializable {
 			}
 		}
 	}
-
+	/**
+	 * 
+	 * Downloads the file from the file server. Prompts an alert if no file has 
+	 * been selected. Passes the ID of the file to get the file path of the actual
+	 * file and returns back the bytes. Bytes will be parsed back into a file and saved
+	 * into the file directory chosen by the user
+	 * 
+	 * @param event
+	 * @throws IOException
+	 */
 	public void handleDownloadBtn(ActionEvent event) throws IOException {
 		int selectedFile = fileListView.getSelectionModel().getSelectedIndex();
 		String fileName = fileListView.getSelectionModel().getSelectedItem();
@@ -567,14 +592,19 @@ public class FileController implements Initializable {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			// e.printStackTrace();
-		} catch (DbxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		} 
 
 	}
-
-	public void initializeListView() throws IOException, DbxException {
+	/**
+	 * 
+	 * Retrieves the files that the current user has permission to including their own uploaded 
+	 * files and files that has been shared to them. The retrieved files are then listed on 
+	 * the listView
+	 * 
+	 * @param 
+	 * @throws IOException
+	 */
+	public void initializeListView() throws IOException {
 
 		URL url = new URL(nURLConstants.Constants.retrieveURL);
 		HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -618,40 +648,21 @@ public class FileController implements Initializable {
 		}
 		fileListView.setItems(data);
 
-		// System.out.println("init list view response: "+ jsonString);
 		in.close();
-		// final String APP_KEY = "hlxjjkypee9pfx6";
-		// final String APP_SECRET = "a9akptnjcley8jk";
-		//
-		// DbxAppInfo appInfo = new DbxAppInfo(APP_KEY, APP_SECRET);
-		// DbxRequestConfig config = new DbxRequestConfig("FreshDrive",
-		// Locale.getDefault().toString());
-		//
-		// // access token for the dropbox account. may need to encrypt this
-		// String accessToken =
-		// "-TcOHePlr9AAAAAAAAAACMWGsYvDXPTDcThy6nM8r0hwG-Mz5cEqtDxcDygkg9i3";
-		//
-		// client = new DbxClient(config, accessToken);
-		// System.out.println("Logged on to dropbox");
-		// DbxEntry.WithChildren listing =
-		// client.getMetadataWithChildren("/"+username);
-		// System.out.println("Files in the root path:");
-		// ObservableList<String> data = FXCollections.observableArrayList();
-		// for (DbxEntry child : listing.children) {
-		//
-		// data.add(child.name);
-		// System.out.println(" " + child.name);
-		// }
-		// // listView.setItems(data);
-		// fileListView.setItems(data);
-		// System.out.println("Refresh List View");
+		
 
 	}
-	
-	public void handleRefreshBtn(ActionEvent action) throws IOException {
+	/**
+	 * 
+	 * Refreshes the list view by calling the initializeListView function again.
+	 * 
+	 * @param event
+	 * @throws IOException
+	 */
+	public void handleRefreshBtn(ActionEvent event) throws IOException {
 		try {
 			initializeListView();
-		} catch (DbxException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
