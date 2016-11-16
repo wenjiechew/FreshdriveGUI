@@ -119,7 +119,7 @@ public class ShareController implements Initializable {
 				// Post request to servlet
 				con.setDoOutput(true);
 				DataOutputStream out = new DataOutputStream(con.getOutputStream());
-				out.writeBytes("users="+ users +"&fileID=" + fileID + "&action=add");
+				out.writeBytes("users="+ users +"&fileID=" + fileID + "&username=" + Account.getAccount().getUsername() +  "&token=" + Account.getAccount().get_token() + "&action=add");
 				out.flush();
 				out.close();
 	
@@ -198,7 +198,7 @@ public class ShareController implements Initializable {
 			// Post request to servlet
 			con.setDoOutput(true);
 			DataOutputStream out = new DataOutputStream(con.getOutputStream());
-			out.writeBytes("users="+ removedUser +"&fileID=" + fileID + "&action=remove");
+			out.writeBytes("users="+ removedUser +"&fileID=" + fileID + "&username=" + Account.getAccount().getUsername() +  "&token=" + Account.getAccount().get_token() +  "&action=remove");
 			out.flush();
 			out.close();
 
@@ -285,7 +285,14 @@ public class ShareController implements Initializable {
 			
 			if (result != null)
 			{
-				if (result.equals("File"))
+				if(result.equals("unverified-token")){
+					Alert alert = new Alert(AlertType.ERROR);
+					alert.setTitle("ERROR");
+					alert.setHeaderText("Unable to authorize user to take action.");
+					alert.setContentText("The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
+					alert.showAndWait();
+				}
+				else if (result.equals("File"))
 				{
 					errorLabel.setText("Error in finding file, please click 'Back' and try again.");
 				}
