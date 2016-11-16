@@ -227,6 +227,10 @@ public class FileController implements Initializable {
 
 					alert.showAndWait();
 				} else if (result.equals("File uploaded")) {
+					uploadedFileLabel.setText("");
+					uploadFileBtn.setText("Upload");
+					uploadFileBtn.setDisable(true);
+					uploadBtn.setDisable(true);
 					Alert alert = new Alert(AlertType.CONFIRMATION);
 					alert.setTitle("Success Dialog");
 					alert.setHeaderText("Success!");
@@ -307,7 +311,6 @@ public class FileController implements Initializable {
 										Platform.runLater(new Runnable() {
 											@Override
 											public void run() {
-												uploadedFileLabel.setText(inputFile.getName());
 												uploadedFileLabel.setText(inputFile.getName());
 												uploadFileBtn.setDisable(false);
 												uploadFileBtn.setText("Upload");
