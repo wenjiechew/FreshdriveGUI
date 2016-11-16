@@ -77,7 +77,7 @@ public class FileController implements Initializable {
 
 	private String result;
 	private File inputFile;
-	static final int BUFFER_SIZE = 1048576;
+	static final int BUFFER_SIZE = 33554432;
 	final FileChooser fileChooser = new FileChooser();
 	String[] fileIdArray;
 
