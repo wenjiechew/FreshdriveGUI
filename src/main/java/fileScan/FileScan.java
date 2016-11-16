@@ -13,7 +13,6 @@ package fileScan;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -22,11 +21,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.cert.CertificateException;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.X509TrustManager;
@@ -66,18 +62,29 @@ public class FileScan {
 	// api for the file scan report
 	private static String APIKEY = "";
 
+	// var to store the boolean on whether the file scan is able to proceed
+	// after verification of the token
+	// if false means the user is not allowed to fun the file scan
 	private static boolean runningStatus;
 
+	/**
+	 * get method for runningStatus var.This is for other class files to know
+	 * whether can proceed with the file status
+	 * 
+	 * @param
+	 * @return runningStatus the boolean value of the running status
+	 */
 	public static boolean isRunningStatus() {
 		return runningStatus;
 	}
 
 	/**
 	 * FileScan constructor method.All the scanning starts here First the file
-	 * which is passed in is being assigned Next it runs the
-	 * scanFile,responsestatus and scanresults methods there is thread sleep
-	 * here to wait for 1 minute before making an API call again to get the scan
-	 * results. The reason is public API key is only allowed 4 requests/minute
+	 * which is passed in is being assigned to the var. Next it then tries get
+	 * the API key to access the virustotal api If getting the API key is
+	 * successfull,The runningStatus variable will be set as true.Then the
+	 * method would then send the file for scanning and check the responseStatus
+	 * of the file scan report
 	 *
 	 * @param file
 	 *            file object which is going to be scanned
@@ -108,7 +115,8 @@ public class FileScan {
 	 * This method makes an api request through a HTTP POST request to send the
 	 * file to the api for scanning.Once the file is sent to the api for
 	 * scanning,the api returns a resource id.This is then stored as a variable
-	 * as above
+	 * as above. The http post request is secure HTTPS call using the Apache
+	 * HTTP Client Library
 	 * 
 	 * @param
 	 * @return
@@ -152,7 +160,9 @@ public class FileScan {
 	 * set above Next with the results which was given by the api,the method
 	 * then counts the number of scan engines which reports that the file is
 	 * virus infected through the positives JSON tag If there is more than 0
-	 * positives,the file would then be determined to be infected with virus
+	 * positives,the file would then be determined to be infected with virus The
+	 * http post request is secure HTTPS call using the Apache HTTP Client
+	 * Library
 	 * 
 	 * @param
 	 * @return
@@ -212,7 +222,8 @@ public class FileScan {
 	 * method. However instead of checking the response,this first checks
 	 * whether the response status.If the response status is 0.It means the
 	 * request rate for a minute has been met and the program need to wait until
-	 * it the file scanned results are out
+	 * it the file scanned results are out.The http post request is secure HTTPS
+	 * call using the Apache HTTP Client Library
 	 * 
 	 * @param
 	 * @return
@@ -264,7 +275,11 @@ public class FileScan {
 
 	/**
 	 * This method makes a http post request to get the virus scan API key to
-	 * use for api requests
+	 * use for api requests.Since the API key is stored in the FreshDrive
+	 * server,to reterive the API key from the server,the user will first be
+	 * validated on his user token,if it is validated sucessfully the API key
+	 * will be returned sucessfully and the running status will be set as
+	 * true(which means the user is able to carry on with the file scanning
 	 * 
 	 * @param
 	 * @return apiKey this is the api key which will be used for api requests

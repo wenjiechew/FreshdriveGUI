@@ -54,7 +54,6 @@
 						<Button fx:id="downloadBtn" layoutX="561.0" layoutY="231.0" mnemonicParsing="false" onAction="#handleDownloadBtn" text="Download" />
 						<Button fx:id="refreshBtn" layoutX="493.0" layoutY="231.0" mnemonicParsing="false" onAction="#handleRefreshBtn" text="Refresh" />
 
-						<Button fx:id="downloadBtn" layoutX="561.0" layoutY="231.0" mnemonicParsing="false" onAction="#handleDownloadBtn" text="Download" />
 
 					</children>
 				</AnchorPane>
