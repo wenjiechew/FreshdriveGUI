@@ -50,6 +50,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import nObjectModel.Account;
@@ -492,26 +493,18 @@ public class FileController implements Initializable {
 
 				
 				//Select directory to place file in
-				JFileChooser chooser = new JFileChooser(); 
 				String choosertitle = "Select a directory";
-				   
-			    chooser.setCurrentDirectory(new java.io.File("."));
-			    chooser.setDialogTitle(choosertitle);
-			    chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+				DirectoryChooser chooser = new DirectoryChooser();  
+				chooser.setInitialDirectory(new java.io.File("."));
+			    chooser.setTitle(choosertitle);
 			    //
-			    // disable the "All files" option.
-			    //
-			    if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-			        System.out.println("getCurrentDirectory(): " + chooser.getCurrentDirectory());
-			        System.out.println("getSelectedFile() : " + chooser.getSelectedFile());
-			      } else {
-			        System.out.println("No Selection ");
-			      }
+			    File selectedDirectory = chooser.showDialog(app_stage);
+			    System.out.println("getCurrentDirectory(): " + selectedDirectory.getAbsolutePath());
 			   
 				out.flush();
 				out.close();
 				
-				String filePath = chooser.getSelectedFile().toString();
+				String filePath = selectedDirectory.getAbsolutePath();
 				// replace the single backslash with double backslash
 				filePath = filePath.replace("\\", "\\\\");
 				
@@ -582,7 +575,6 @@ public class FileController implements Initializable {
 	public void initialize(URL location, ResourceBundle resources) {
 		progressBar.setVisible(false);
 		uploadFileBtn.setDisable(true);
-		
 		try {
 			initializeListView();
 		} catch (IOException e) {
