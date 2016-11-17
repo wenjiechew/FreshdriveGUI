@@ -140,7 +140,14 @@ public class ShareController implements Initializable {
 				in.close();
 
 				if (result != null) {
-					if (result.equals("File")) {
+					if (result.equals("unverified-token")) {
+						Alert alert = new Alert(AlertType.ERROR);
+						alert.setTitle("ERROR");
+						alert.setHeaderText("Unable to authorize user to take action.");
+						alert.setContentText(
+								"The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
+						alert.showAndWait();
+					} else if (result.equals("File")) {
 						errorLabel.setText("Error in uploading file, please click 'Back' and try again.");
 					} else {
 						// Read response in format:
@@ -214,7 +221,14 @@ public class ShareController implements Initializable {
 			in.close();
 
 			if (result != null) {
-				if (result.equals("File")) {
+				if (result.equals("unverified-token")) {
+					Alert alert = new Alert(AlertType.ERROR);
+					alert.setTitle("ERROR");
+					alert.setHeaderText("Unable to authorize user to take action.");
+					alert.setContentText(
+							"The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
+					alert.showAndWait();
+				} else if (result.equals("File")) {
 					errorLabel.setText("Error in uploading file, please click 'Back' and try again.");
 				} else if (result.equals("User")) {
 					errorLabel.setText("Error in validating user, please try again.");
@@ -277,14 +291,7 @@ public class ShareController implements Initializable {
 			in.close();
 
 			if (result != null) {
-				if (result.equals("unverified-token")) {
-					Alert alert = new Alert(AlertType.ERROR);
-					alert.setTitle("ERROR");
-					alert.setHeaderText("Unable to authorize user to take action.");
-					alert.setContentText(
-							"The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
-					alert.showAndWait();
-				} else if (result.equals("File")) {
+				if (result.equals("File")) {
 					errorLabel.setText("Error in finding file, please click 'Back' and try again.");
 				} else if (result.equals("Unshared")) {
 					// userList is empty

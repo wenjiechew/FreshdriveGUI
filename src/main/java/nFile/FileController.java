@@ -284,6 +284,7 @@ public class FileController implements Initializable {
 		progressBar.setVisible(true);
 
 		// opens up file dialog for user to choose
+		fileChooser.setTitle("Select file to upload");		
 		File file = fileChooser.showOpenDialog(app_stage);
 
 		// check if valid file
@@ -292,7 +293,7 @@ public class FileController implements Initializable {
 			System.out.println("EXTENSION when upload: " + ext);
 			// Check if file is within the size limit and the file types are
 			// valid
-			if (file.length() <= BUFFER_SIZE && !ext.equalsIgnoreCase("exe") && !ext.equalsIgnoreCase("zip")
+			if (file.length() > 0 && file.length() <= BUFFER_SIZE && !ext.equalsIgnoreCase("exe") && !ext.equalsIgnoreCase("zip")
 					&& !ext.equalsIgnoreCase("bin")) {
 				try {
 					// does the virus scan
@@ -381,6 +382,7 @@ public class FileController implements Initializable {
 
 			}
 		} else {
+			progressBar.setVisible(false);
 			uploadedFileLabel.setText("Invalid File. Try another file.");
 			System.out.println("Invalid File");
 			uploadFileBtn.setText("Upload");
