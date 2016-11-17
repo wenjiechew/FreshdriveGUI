@@ -24,17 +24,10 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.Locale;
 import java.util.ResourceBundle;
 
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.swing.JFileChooser;
-
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import fileScan.FileScan;
@@ -48,12 +41,17 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.ProgressBar;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import nObjectModel.Account;
-
 
 public class FileController implements Initializable {
 	@FXML
@@ -84,12 +82,13 @@ public class FileController implements Initializable {
 	Account account = Account.getAccount();
 	private Stage app_stage;
 
-
 	/**
-	 * Performs action for the logout button press, to send a logout request to the server.
+	 * Performs action for the logout button press, to send a logout request to
+	 * the server.
 	 *
-	 * @param  		ActionEvent triggered by button press
-	 * @throws		IOException      
+	 * @param ActionEvent
+	 *            triggered by button press
+	 * @throws IOException
 	 */
 	public void handleLogoutBtn(ActionEvent event) throws IOException {
 		try {
@@ -142,13 +141,13 @@ public class FileController implements Initializable {
 		}
 	}
 
-	
 	/**
-	 * Performs action for the Upload button press, to send a request to the server 
-	 * to send and upload the user's chosen file.
+	 * Performs action for the Upload button press, to send a request to the
+	 * server to send and upload the user's chosen file.
 	 *
-	 * @param  		ActionEvent triggered by button press
-	 * @throws		IOException      
+	 * @param ActionEvent
+	 *            triggered by button press
+	 * @throws IOException
 	 */
 	public void handleUploadFileBtn(ActionEvent event) throws IOException {
 
@@ -159,7 +158,7 @@ public class FileController implements Initializable {
 			con.setUseCaches(false);
 			// Adding Header
 			con.setRequestMethod("POST");
-			//Get the file path of the inputFile
+			// Get the file path of the inputFile
 			String filePath = inputFile.getPath();
 			filePath = filePath.replace("\\", "\\\\");
 			File uploadFile = new File(filePath);
@@ -188,7 +187,6 @@ public class FileController implements Initializable {
 			con.setRequestProperty("ownerID", account.get_id());
 			con.setRequestProperty("createdOn", currentDate);
 			con.setRequestProperty("expiryDate", expireDate);
-			
 
 			// opens output stream of the HTTP connection for writing data
 			OutputStream out = con.getOutputStream();
@@ -219,7 +217,7 @@ public class FileController implements Initializable {
 				while ((response = in.readLine()) != null) {
 					result = response;
 				}
-				System.out.println("RESULT IS "+result);
+				System.out.println("RESULT IS " + result);
 				if (result.equals("File already exist")) {
 					Alert alert = new Alert(AlertType.WARNING);
 					alert.setTitle("Warning Dialog");
@@ -227,7 +225,7 @@ public class FileController implements Initializable {
 					alert.setContentText("File already exists. Please choose another file or rename your file.");
 
 					alert.showAndWait();
-					
+
 				} else if (result.equals("File Uploaded")) {
 					uploadedFileLabel.setText("");
 					uploadFileBtn.setText("Upload");
@@ -238,11 +236,12 @@ public class FileController implements Initializable {
 					alert.setHeaderText("Success!");
 					alert.setContentText("File has been uploaded!.");
 					alert.showAndWait();
-				} else if(result.equals("unverified-token")){
+				} else if (result.equals("unverified-token")) {
 					Alert alert = new Alert(AlertType.ERROR);
 					alert.setTitle("ERROR");
 					alert.setHeaderText("Unable to authorize user to take action.");
-					alert.setContentText("The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
+					alert.setContentText(
+							"The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
 					alert.showAndWait();
 				}
 				in.close();
@@ -265,15 +264,16 @@ public class FileController implements Initializable {
 		initializeListView();
 	}
 
-	
 	/**
-	 * Performs action for the Choose file button press for user to select 
-	 * the desired file from their local directory which they intend to upload. 
-	 * Chosen file will be sent for a virus scan to prevent malicious files from entering the system. 
+	 * Performs action for the Choose file button press for user to select the
+	 * desired file from their local directory which they intend to upload.
+	 * Chosen file will be sent for a virus scan to prevent malicious files from
+	 * entering the system.
 	 * 
 	 * @param event
-	 * @throws IOException, KeyManagementException, NoSuchAlgorithmException
-
+	 * @throws IOException,
+	 *             KeyManagementException, NoSuchAlgorithmException
+	 * 
 	 */
 	public void handleUploadButton(ActionEvent event)
 			throws IOException, KeyManagementException, NoSuchAlgorithmException {
@@ -282,21 +282,22 @@ public class FileController implements Initializable {
 		uploadFileBtn.setDisable(true);
 		uploadBtn.setDisable(true);
 		progressBar.setVisible(true);
-		
+
 		// opens up file dialog for user to choose
 		File file = fileChooser.showOpenDialog(app_stage);
-		
+
 		// check if valid file
 		if (file != null) {
 			String ext = FilenameUtils.getExtension(file.getPath());
-			System.out.println("EXTENSION when upload: "+ ext);
-			//Check if file is within the size limit and the file types are valid
-			if (file.length() <= BUFFER_SIZE && !ext.equalsIgnoreCase("exe") && !ext.equalsIgnoreCase("zip") && !ext.equalsIgnoreCase("bin")) {
+			System.out.println("EXTENSION when upload: " + ext);
+			// Check if file is within the size limit and the file types are
+			// valid
+			if (file.length() <= BUFFER_SIZE && !ext.equalsIgnoreCase("exe") && !ext.equalsIgnoreCase("zip")
+					&& !ext.equalsIgnoreCase("bin")) {
 				try {
 					// does the virus scan
 					FileScan filescan = new FileScan(file);
-					if(filescan.isRunningStatus())
-					{
+					if (filescan.isRunningStatus()) {
 						new Thread(new Runnable() {
 							public void run() {
 								while (filescan.responseStatus == 0) {
@@ -352,14 +353,13 @@ public class FileController implements Initializable {
 								}
 							}
 						}).start();
-					}
-					else
-					{
-						//Show invalid token error
+					} else {
+						// Show invalid token error
 						Alert alert = new Alert(AlertType.ERROR);
 						alert.setTitle("ERROR");
 						alert.setHeaderText("Unable to authorize user to take action.");
-						alert.setContentText("The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
+						alert.setContentText(
+								"The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
 						alert.showAndWait();
 					}
 
@@ -459,10 +459,9 @@ public class FileController implements Initializable {
 		}
 	}
 
-
 	/**
-	 * Performs action for the download button press, to send a request to the server 
-	 * to retrieve and download the user's chosen file.
+	 * Performs action for the download button press, to send a request to the
+	 * server to retrieve and download the user's chosen file.
 	 * 
 	 * @param event
 	 * @throws IOException
@@ -488,33 +487,25 @@ public class FileController implements Initializable {
 				// Send Post
 				con.setDoOutput(true);
 				DataOutputStream out = new DataOutputStream(con.getOutputStream());
-				out.writeBytes("fileID=" + fileID+"&username="+Account.getAccount().getUsername()+"&usertoken="+Account.getAccount().get_token());
+				out.writeBytes("fileID=" + fileID + "&username=" + Account.getAccount().getUsername() + "&usertoken="
+						+ Account.getAccount().get_token());
 
-				
-				//Select directory to place file in
-				JFileChooser chooser = new JFileChooser(); 
+				// Select directory to place file in
 				String choosertitle = "Select a directory";
-				   
-			    chooser.setCurrentDirectory(new java.io.File("."));
-			    chooser.setDialogTitle(choosertitle);
-			    chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-			    //
-			    // disable the "All files" option.
-			    //
-			    if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-			        System.out.println("getCurrentDirectory(): " + chooser.getCurrentDirectory());
-			        System.out.println("getSelectedFile() : " + chooser.getSelectedFile());
-			      } else {
-			        System.out.println("No Selection ");
-			      }
-			   
+				DirectoryChooser chooser = new DirectoryChooser();
+				chooser.setInitialDirectory(new java.io.File("."));
+				chooser.setTitle(choosertitle);
+				//
+				File selectedDirectory = chooser.showDialog(app_stage);
+				System.out.println("getCurrentDirectory(): " + selectedDirectory.getAbsolutePath());
+
 				out.flush();
 				out.close();
-				
-				String filePath = chooser.getSelectedFile().toString();
+
+				String filePath = selectedDirectory.getAbsolutePath();
 				// replace the single backslash with double backslash
 				filePath = filePath.replace("\\", "\\\\");
-				
+
 				// Response from Server
 				BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
 				String response;
@@ -523,41 +514,42 @@ public class FileController implements Initializable {
 					result = response;
 				}
 				in.close();
-				//parse response string back to bytes
+				// parse response string back to bytes
 				String[] byteValues = result.substring(1, result.length() - 1).split(",");
 				byte[] bytes = new byte[byteValues.length];
 
-				for (int i=0, len=bytes.length; i<len; i++) {
-				   bytes[i] = Byte.parseByte(byteValues[i].trim());     
+				for (int i = 0, len = bytes.length; i < len; i++) {
+					bytes[i] = Byte.parseByte(byteValues[i].trim());
 				}
-				
-				System.out.println("URL: "  + result);
-				//Create a new file to store the bytes in
-				File newFile = new File(filePath+"\\" + fileName);
+
+				System.out.println("URL: " + result);
+				// Create a new file to store the bytes in
+				File newFile = new File(filePath + "\\" + fileName);
 				newFile.setWritable(true);
 				String ext1 = FilenameUtils.getExtension(newFile.getPath());
-				System.out.println("EXTENSION "+ext1);
-				//Set an output stream to put file in
+				System.out.println("EXTENSION " + ext1);
+				// Set an output stream to put file in
 				FileOutputStream output = new FileOutputStream(newFile);
-//				
-				//Write the bytes into the outputstream to create the file
+				//
+				// Write the bytes into the outputstream to create the file
 				output.write(bytes);
 				output.close();
 				if (result.equals("Download Fail")) {
-					//Alert to notify download fail.
+					// Alert to notify download fail.
 					Alert alert = new Alert(AlertType.ERROR);
 					alert.setTitle("Error: Download failed");
 					alert.setHeaderText(null);
 					alert.setContentText("Download has failed. Try again or contact your administrator.");
 					alert.showAndWait();
-				} else if(result.equals("unverified-token")){
-					//Alert for invalid token error
+				} else if (result.equals("unverified-token")) {
+					// Alert for invalid token error
 					Alert alert = new Alert(AlertType.ERROR);
 					alert.setTitle("ERROR");
 					alert.setHeaderText("Unable to authorize user to take action.");
-					alert.setContentText("The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
+					alert.setContentText(
+							"The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
 					alert.showAndWait();
-				}else {
+				} else {
 					// If no fail message then alert success
 					Alert alert = new Alert(AlertType.CONFIRMATION);
 					alert.setTitle("Download success");
@@ -571,37 +563,39 @@ public class FileController implements Initializable {
 		}
 
 	}
-	
+
 	/**
 	 * Initialize the screen and setup the listview to be displayed to user
 	 * 
-	 * @param  	location	The location used to resolve relative paths for the root object, or null if the location is not known.resources
-	 * @param	resources	The resources used to localize the root object, or null if the root object was not localized.
+	 * @param location
+	 *            The location used to resolve relative paths for the root
+	 *            object, or null if the location is not known.resources
+	 * @param resources
+	 *            The resources used to localize the root object, or null if the
+	 *            root object was not localized.
 	 */
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		progressBar.setVisible(false);
 		uploadFileBtn.setDisable(true);
-		
 		try {
 			initializeListView();
 		} catch (IOException e) {
 
 			// TODO Auto-generated catch block
-			 e.printStackTrace();
-		} 
+			e.printStackTrace();
+		}
 
 	}
-	
 
 	/**
-	 * Initialize the list view which displays all available files (i.e. uploaded by or shared to the user)
+	 * Initialize the list view which displays all available files (i.e.
+	 * uploaded by or shared to the user)
 	 * 
 	 * @throws IOException
 	 * @throws DBxException
 	 */
 	public void initializeListView() throws IOException {
-
 
 		URL url = new URL(nURLConstants.Constants.retrieveURL);
 		HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -635,17 +629,15 @@ public class FileController implements Initializable {
 		}
 		fileListView.setItems(data);
 
-
 		in.close();
-		
 
 	}
 
-	
 	/**
 	 * Initialize the screen and setup the listview to be displayed to user
 	 * 
-	 * @param  action	Actionevent triggered on button click
+	 * @param action
+	 *            Actionevent triggered on button click
 	 * @throws IOException
 	 */
 	public void handleRefreshBtn(ActionEvent action) throws IOException {
@@ -656,7 +648,7 @@ public class FileController implements Initializable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
 
 }
