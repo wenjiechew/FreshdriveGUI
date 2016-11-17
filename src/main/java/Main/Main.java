@@ -18,6 +18,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.stage.Stage;
 import nObjectModel.Account;
+import nURLConstants.Constants;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -39,8 +40,8 @@ public class Main extends Application {
 	}
 
 	public static void main(String[] args) {
-		System.setProperty("javax.net.ssl.trustStore", ".keystore");
-		System.setProperty("javax.net.debug", "ssl");
+//		System.setProperty("javax.net.ssl.trustStore", ".keystore");
+//		System.setProperty("javax.net.debug", "ssl");
 		launch(args);
 	}
 
@@ -49,7 +50,7 @@ public class Main extends Application {
 		javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(new javax.net.ssl.HostnameVerifier() {
 
 			public boolean verify(String hostname, javax.net.ssl.SSLSession sslSession) {
-				if (hostname.equals("localhost")) {
+				if (hostname.equals( Constants.hostname )) {
 					return true;
 				}
 				return false;
