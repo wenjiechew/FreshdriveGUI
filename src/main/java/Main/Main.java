@@ -16,13 +16,12 @@ import java.net.URL;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
-import javafx.stage.Stage;
-import nObjectModel.Account;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.stage.Stage;
+import nObjectModel.Account;
 
 public class Main extends Application {
 
@@ -39,8 +38,8 @@ public class Main extends Application {
 	}
 
 	public static void main(String[] args) {
-//		System.setProperty("javax.net.ssl.trustStore", ".keystore");
-//		System.setProperty("javax.net.debug", "ssl");
+		// System.setProperty("javax.net.ssl.trustStore", ".keystore");
+		// System.setProperty("javax.net.debug", "ssl");
 		launch(args);
 	}
 
