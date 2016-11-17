@@ -74,7 +74,6 @@ public class Challenge2FA implements Initializable {
 			in.close();
 
 			// Where result is either error or the token key
-			System.out.println(result);
 			if (loginAttempts < 1) {
 				makeErrorAlert("Authentication failed - No more attempts left.",
 						"The OTP key you entered still did not match the system's records. Please try again after being redirected to the login page.");
@@ -140,7 +139,7 @@ public class Challenge2FA implements Initializable {
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		// TODO Auto-generated method stub
-		System.out.println("Challenge2FA.initialize()");
+		System.out.println("Initialize 2FA");
 	}
 
 	/**
