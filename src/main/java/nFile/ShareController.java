@@ -175,7 +175,7 @@ public class ShareController implements Initializable {
 					}
 				}
 			} catch (Exception ex) {
-				System.out.print("addUser(): " + ex);
+				ex.printStackTrace();
 			}
 			listViewItem.setItems(userList);
 			userTxtField.clear();
@@ -238,7 +238,7 @@ public class ShareController implements Initializable {
 				}
 			}
 		} catch (Exception ex) {
-			System.out.print("removeUser(): " + ex);
+			ex.printStackTrace();
 		}
 		listViewItem.setItems(userList);
 	}
@@ -311,7 +311,7 @@ public class ShareController implements Initializable {
 				userList.removeAll(userList);
 			}
 		} catch (Exception ex) {
-			System.out.print("getSharedUsers(): " + ex);
+			ex.printStackTrace();
 		}
 	}
 }

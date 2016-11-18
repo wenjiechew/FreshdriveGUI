@@ -114,8 +114,6 @@ public class FileController implements Initializable {
 			}
 			in.close();
 
-			System.out.println(result);
-
 			// 1 = Failed
 			if (result.contentEquals("1")) {
 				Alert alert = new Alert(AlertType.ERROR);
@@ -135,9 +133,9 @@ public class FileController implements Initializable {
 			}
 
 		} catch (MalformedURLException ex) {
-			System.out.println("MalformedURLException in handleLogoutBtn()" + ex);
+			ex.printStackTrace();
 		} catch (IOException ex) {
-			System.out.println("IOException in handleLogoutBtn()" + ex);
+			ex.printStackTrace();
 		}
 	}
 
@@ -203,8 +201,6 @@ public class FileController implements Initializable {
 			while ((bytesRead = inputStream.read(buffer)) != -1) {
 				out.write(buffer, 0, bytesRead);
 			}
-
-			System.out.println("Data was written.");
 			out.close();
 			inputStream.close();
 
@@ -217,7 +213,6 @@ public class FileController implements Initializable {
 				while ((response = in.readLine()) != null) {
 					result = response;
 				}
-				System.out.println("RESULT IS " + result);
 				if (result.equals("File already exist")) {
 					Alert alert = new Alert(AlertType.WARNING);
 					alert.setTitle("Warning Dialog");
@@ -245,21 +240,14 @@ public class FileController implements Initializable {
 					alert.showAndWait();
 				}
 				in.close();
-
-				System.out.println(result);
-
-				System.out.println("Server's response: " + result);
-
 			} else {
-
 				System.out.println("Server returned non-OK code: " + responseCode);
-
 			}
 
 		} catch (MalformedURLException ex) {
-			System.out.println("MalformedURLException in handleUploadFileBtn");
+			ex.printStackTrace();
 		} catch (IOException ex) {
-			System.out.println("IOException in handleUploadFileBtn");
+			ex.printStackTrace();
 		}
 		initializeListView();
 	}
@@ -290,7 +278,6 @@ public class FileController implements Initializable {
 		// check if valid file
 		if (file != null) {
 			String ext = FilenameUtils.getExtension(file.getPath());
-			System.out.println("EXTENSION when upload: " + ext);
 			// Check if file is within the size limit and the file types are
 			// valid
 			if (file.length() > 0 && file.length() <= BUFFER_SIZE && !ext.equalsIgnoreCase("exe") && !ext.equalsIgnoreCase("zip")
@@ -311,7 +298,6 @@ public class FileController implements Initializable {
 									try {
 										filescan.checkResponseStatus();
 									} catch (Exception e) {
-										// TODO Auto-generated catch block
 										e.printStackTrace();
 									}
 
@@ -330,10 +316,6 @@ public class FileController implements Initializable {
 												progressBar.setVisible(false);
 											}
 										});
-
-										System.out.println("File selected: " + inputFile.getAbsolutePath());
-										System.out.println("File is ok to go");
-
 									} else {
 										Platform.runLater(new Runnable() {
 											@Override
@@ -344,12 +326,8 @@ public class FileController implements Initializable {
 												progressBar.setVisible(false);
 											}
 										});
-
-										System.out.println("File is virus infected");
-
 									}
 								} catch (Exception e) {
-									// TODO Auto-generated catch block
 									e.printStackTrace();
 								}
 							}
@@ -367,14 +345,12 @@ public class FileController implements Initializable {
 				} catch (Exception e) {
 					e.printStackTrace();
 					uploadedFileLabel.setText("Invalid File. Try another file.");
-					System.out.println("Invalid File");
 					uploadFileBtn.setText("Upload");
 					uploadBtn.setDisable(false);
 					progressBar.setVisible(false);
 
 				}
 			} else {
-				System.out.println("Invalid File");
 				uploadFileBtn.setText("Upload");
 				uploadBtn.setDisable(false);
 				uploadedFileLabel.setText("File is invalid. Try another file.");
@@ -384,7 +360,6 @@ public class FileController implements Initializable {
 		} else {
 			progressBar.setVisible(false);
 			uploadedFileLabel.setText("Invalid File. Try another file.");
-			System.out.println("Invalid File");
 			uploadFileBtn.setText("Upload");
 			uploadBtn.setDisable(false);
 		}
@@ -456,7 +431,7 @@ public class FileController implements Initializable {
 					alert.showAndWait();
 				}
 			} catch (Exception ex) {
-				System.out.print("moveToShareScreen(): " + ex);
+				ex.printStackTrace();
 			}
 		}
 	}
@@ -499,8 +474,6 @@ public class FileController implements Initializable {
 				chooser.setTitle(choosertitle);
 				//
 				File selectedDirectory = chooser.showDialog(app_stage);
-				System.out.println("getCurrentDirectory(): " + selectedDirectory.getAbsolutePath());
-
 				out.flush();
 				out.close();
 
@@ -524,18 +497,17 @@ public class FileController implements Initializable {
 					bytes[i] = Byte.parseByte(byteValues[i].trim());
 				}
 
-				System.out.println("URL: " + result);
 				// Create a new file to store the bytes in
 				File newFile = new File(filePath + "\\" + fileName);
 				newFile.setWritable(true);
-				String ext1 = FilenameUtils.getExtension(newFile.getPath());
-				System.out.println("EXTENSION " + ext1);
+				
 				// Set an output stream to put file in
 				FileOutputStream output = new FileOutputStream(newFile);
-				//
+				
 				// Write the bytes into the outputstream to create the file
 				output.write(bytes);
 				output.close();
+				
 				if (result.equals("Download Fail")) {
 					// Alert to notify download fail.
 					Alert alert = new Alert(AlertType.ERROR);
@@ -560,7 +532,7 @@ public class FileController implements Initializable {
 					alert.showAndWait();
 				}
 			} catch (Exception ex) {
-				System.out.print("download(): " + ex);
+				ex.printStackTrace();
 			}
 		}
 
@@ -578,13 +550,12 @@ public class FileController implements Initializable {
 	 */
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		System.out.println("FileController.initialize()");
 		progressBar.setVisible(false);
 		uploadFileBtn.setDisable(true);
 		try {
 			initializeListView();
 		} catch (IOException e) {
-
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -602,7 +573,6 @@ public class FileController implements Initializable {
 		URL url = new URL(nURLConstants.Constants.retrieveURL);
 		HttpURLConnection con = (HttpURLConnection) url.openConnection();
 		con.setRequestMethod("POST");
-		System.out.println("INITIALIZE LIST VIEW");
 		// Send Post
 		con.setDoOutput(true);
 		// con.setRequestProperty("username", account.getUsername());
@@ -627,7 +597,6 @@ public class FileController implements Initializable {
 			JSONObject obj = new JSONObject(arrayJson.get(i).toString());
 			data.add(obj.getString("fileName"));
 			fileIdArray[i] = obj.getString("fileId");
-			System.out.println("file name: " + obj.getString("fileName"));
 		}
 		fileListView.setItems(data);
 
@@ -647,7 +616,6 @@ public class FileController implements Initializable {
 		try {
 			initializeListView();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

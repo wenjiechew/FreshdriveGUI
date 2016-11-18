@@ -138,7 +138,6 @@ public class Challenge2FA implements Initializable {
 	 */
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		// TODO Auto-generated method stub
 		System.out.println("Initialize 2FA");
 	}
 

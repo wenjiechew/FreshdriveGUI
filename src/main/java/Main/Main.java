@@ -100,14 +100,13 @@ public class Main extends Application {
 					alert.setContentText("There was an error logging out of your account.\nPlease try again!");
 					alert.showAndWait();
 				} else {
-					System.out.println(result);
 					// Clear Account instance
 					account.clearInstance();
 				}
 			} catch (MalformedURLException ex) {
-				// a real program would need to handle this exception
+				ex.printStackTrace();
 			} catch (IOException ex) {
-				// a real program would need to handle this exception
+				ex.printStackTrace();
 			}
 		}
 	}

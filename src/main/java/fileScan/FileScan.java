@@ -319,9 +319,9 @@ public class FileScan {
 			}
 
 		} catch (MalformedURLException ex) {
-			System.out.println(ex);
+			ex.printStackTrace();
 		} catch (IOException ex) {
-			System.out.println(ex);
+			ex.printStackTrace();
 		}
 
 	}

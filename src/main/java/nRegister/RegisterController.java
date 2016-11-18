@@ -111,8 +111,6 @@ public class RegisterController implements Initializable {
 					}
 					in.close();
 
-					System.out.println(result);
-
 					// 1 = Failed
 					if (result.contentEquals("1")) {
 						// TODO Differentiate errors (duplicate username?
@@ -158,7 +156,6 @@ public class RegisterController implements Initializable {
 	 */
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		// TODO Auto-generated method stub
 		System.out.println("RegisterController.initialize()");
 		// remove focus on text fields by default
 		Platform.runLater(() -> pane.requestFocus());
