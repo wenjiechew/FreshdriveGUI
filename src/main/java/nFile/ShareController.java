@@ -149,6 +149,8 @@ public class ShareController implements Initializable {
 						alert.showAndWait();
 					} else if (result.equals("File")) {
 						errorLabel.setText("Error in uploading file, please click 'Back' and try again.");
+					} else if (result.equals("selfShare-Error")){
+						errorLabel.setText("File sharing Error. You can't share to yourself!");
 					} else {
 						// Read response in format:
 						// "[errorlist],accepted=[accepteduserlist]"
