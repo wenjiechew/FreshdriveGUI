@@ -57,7 +57,7 @@ public class FileController implements Initializable {
 	@FXML
 	private Button logoutBtn;
 	@FXML
-	private Button uploadBtn;
+	private Button chooseBtn;
 	@FXML
 	private Button shareBtn;
 	@FXML
@@ -218,14 +218,12 @@ public class FileController implements Initializable {
 					alert.setTitle("Warning Dialog");
 					alert.setHeaderText("Warning!");
 					alert.setContentText("File already exists. Please choose another file or rename your file.");
-
 					alert.showAndWait();
-
 				} else if (result.equals("File Uploaded")) {
 					uploadedFileLabel.setText("");
 					uploadFileBtn.setText("Upload");
 					uploadFileBtn.setDisable(true);
-					uploadBtn.setDisable(false);
+					chooseBtn.setDisable(false);
 					Alert alert = new Alert(AlertType.CONFIRMATION);
 					alert.setTitle("Success Dialog");
 					alert.setHeaderText("Success!");
@@ -270,12 +268,12 @@ public class FileController implements Initializable {
 	 *             KeyManagementException, NoSuchAlgorithmException
 	 * 
 	 */
-	public void handleUploadButton(ActionEvent event)
+	public void handleChooseFileButton(ActionEvent event)
 			throws IOException, KeyManagementException, NoSuchAlgorithmException {
 		uploadedFileLabel.setText("");
 		uploadFileBtn.setText("Scanning");
 		uploadFileBtn.setDisable(true);
-		uploadBtn.setDisable(true);
+		chooseBtn.setDisable(true);
 		progressBar.setVisible(true);
 
 		// opens up file dialog for user to choose
@@ -319,7 +317,7 @@ public class FileController implements Initializable {
 												uploadedFileLabel.setText(inputFile.getName());
 												uploadFileBtn.setDisable(false);
 												uploadFileBtn.setText("Upload");
-												uploadBtn.setDisable(false);
+												chooseBtn.setDisable(false);
 												progressBar.setVisible(false);
 											}
 										});
@@ -328,7 +326,7 @@ public class FileController implements Initializable {
 											@Override
 											public void run() {
 												uploadFileBtn.setText("Upload");
-												uploadBtn.setDisable(false);
+												chooseBtn.setDisable(false);
 												uploadedFileLabel.setText("File is virus infected. Try another file");
 												progressBar.setVisible(false);
 											}
@@ -348,7 +346,7 @@ public class FileController implements Initializable {
 								"The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
 						alert.showAndWait();
 						uploadFileBtn.setText("Upload");
-						uploadBtn.setDisable(false);
+						chooseBtn.setDisable(false);
 						progressBar.setVisible(false);
 					}
 
@@ -356,13 +354,12 @@ public class FileController implements Initializable {
 					e.printStackTrace();
 					uploadedFileLabel.setText("Invalid File. Try another file.");
 					uploadFileBtn.setText("Upload");
-					uploadBtn.setDisable(false);
+					chooseBtn.setDisable(false);
 					progressBar.setVisible(false);
-
 				}
 			} else {
 				uploadFileBtn.setText("Upload");
-				uploadBtn.setDisable(false);
+				chooseBtn.setDisable(false);
 				uploadedFileLabel.setText("File is invalid. Try another file.");
 				progressBar.setVisible(false);
 
@@ -371,7 +368,7 @@ public class FileController implements Initializable {
 			progressBar.setVisible(false);
 			uploadedFileLabel.setText("Invalid File. Try another file.");
 			uploadFileBtn.setText("Upload");
-			uploadBtn.setDisable(false);
+			chooseBtn.setDisable(false);
 		}
 	}
 
