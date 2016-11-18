@@ -340,6 +340,9 @@ public class FileController implements Initializable {
 						alert.setContentText(
 								"The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
 						alert.showAndWait();
+						uploadFileBtn.setText("Upload");
+						uploadBtn.setDisable(false);
+						progressBar.setVisible(false);
 					}
 
 				} catch (Exception e) {
