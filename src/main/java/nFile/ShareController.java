@@ -192,57 +192,66 @@ public class ShareController implements Initializable {
 	 */
 	@FXML
 	public void removeUser(ActionEvent event) throws IOException {
-		String removedUser = listViewItem.getSelectionModel().getSelectedItem();
-
-		String result = null;
-		try {
-			URL url = new URL(nURLConstants.Constants.sharingURL);
-			HttpURLConnection con = (HttpURLConnection) url.openConnection();
-
-			// Add header to request
-			con.setRequestMethod("POST");
-
-			// Post request to servlet
-			con.setDoOutput(true);
-			DataOutputStream out = new DataOutputStream(con.getOutputStream());
-			out.writeBytes(
-					"users=" + removedUser + "&fileID=" + fileID + "&username=" + Account.getAccount().getUsername()
-							+ "&token=" + Account.getAccount().get_token() + "&action=remove");
-			out.flush();
-			out.close();
-
-			// Response from servlet
-			// "File": File not found in database
-			// "User": User not found or originally had no permission
-			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-			String response;
-
-			while ((response = in.readLine()) != null) {
-				result = response;
-			}
-			in.close();
-
-			if (result != null) {
-				if (result.equals("unverified-token")) {
-					Alert alert = new Alert(AlertType.ERROR);
-					alert.setTitle("ERROR");
-					alert.setHeaderText("Unable to authorize user to take action.");
-					alert.setContentText(
-							"The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
-					alert.showAndWait();
-				} else if (result.equals("File")) {
-					errorLabel.setText("Error in uploading file, please click 'Back' and try again.");
-				} else if (result.equals("User")) {
-					errorLabel.setText("Error in validating user, please try again.");
-				} else {
-					userList.remove(removedUser);
-					errorLabel.setText(null);
+		if ( listViewItem.getSelectionModel().getSelectedIndex() == -1){
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setTitle("ERROR");
+			alert.setHeaderText(null);
+			alert.setContentText(
+					"Please select a user!");
+			alert.showAndWait();
+		}else {
+		
+			String removedUser = listViewItem.getSelectionModel().getSelectedItem();		
+			String result = null;
+			try {
+				URL url = new URL(nURLConstants.Constants.sharingURL);
+				HttpURLConnection con = (HttpURLConnection) url.openConnection();
+	
+				// Add header to request
+				con.setRequestMethod("POST");
+	
+				// Post request to servlet
+				con.setDoOutput(true);
+				DataOutputStream out = new DataOutputStream(con.getOutputStream());
+				out.writeBytes(
+						"users=" + removedUser + "&fileID=" + fileID + "&username=" + Account.getAccount().getUsername()
+								+ "&token=" + Account.getAccount().get_token() + "&action=remove");
+				out.flush();
+				out.close();
+	
+				// Response from servlet
+				// "File": File not found in database
+				// "User": User not found or originally had no permission
+				BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+				String response;
+	
+				while ((response = in.readLine()) != null) {
+					result = response;
 				}
+				in.close();
+	
+				if (result != null) {
+					if (result.equals("unverified-token")) {
+						Alert alert = new Alert(AlertType.ERROR);
+						alert.setTitle("ERROR");
+						alert.setHeaderText("Unable to authorize user to take action.");
+						alert.setContentText(
+								"The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
+						alert.showAndWait();
+					} else if (result.equals("File")) {
+						errorLabel.setText("Error in uploading file, please click 'Back' and try again.");
+					} else if (result.equals("User")) {
+						errorLabel.setText("Error in validating user, please try again.");
+					} else {
+						userList.remove(removedUser);
+						errorLabel.setText(null);
+					}
+				}
+			} catch (Exception ex) {
+				ex.printStackTrace();
 			}
-		} catch (Exception ex) {
-			ex.printStackTrace();
+			listViewItem.setItems(userList);
 		}
-		listViewItem.setItems(userList);
 	}
 
 	/**

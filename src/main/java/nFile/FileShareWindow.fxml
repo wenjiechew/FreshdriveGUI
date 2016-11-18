@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import com.jfoenix.controls.JFXButton?>
 <?import com.jfoenix.controls.JFXListView?>
-<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.Pane?>
@@ -13,17 +12,18 @@
    <bottom>
       <Pane prefHeight="427.0" prefWidth="597.0" BorderPane.alignment="CENTER">
          <children>
+         
             <TextField fx:id="userTxtField" layoutX="27.0" layoutY="22.0" prefHeight="31.0" prefWidth="459.0" promptText="Email or username" />
-            <ListView fx:id="listViewItem" editable="true" layoutX="27.0" layoutY="88.0" prefHeight="257.0" prefWidth="459.0" />
-            <Button fx:id="addBtn" layoutX="503.0" layoutY="22.0" mnemonicParsing="false" onAction="#addUser" text="Add" />
-            <Button fx:id="removeBtn" layoutX="503.0" layoutY="88.0" mnemonicParsing="false" onAction="#removeUser" text="Remove" />
-            <Button fx:id="backBtn" layoutX="27.0" layoutY="358.0" mnemonicParsing="false" onAction="#returnToFileScreen" text="Back" />
+            <JFXButton fx:id="addBtn" layoutX="503.0" layoutY="22.0" mnemonicParsing="false" onAction="#addUser" style="-fx-background-color: blue;" text="Add" textFill="WHITE" />
+         	<JFXButton fx:id="removeBtn" layoutX="503.0" layoutY="88.0" mnemonicParsing="false" onAction="#removeUser" style="-fx-background-color: blue;" text="Remove" textFill="WHITE" />
+         	<JFXButton fx:id="backBtn" layoutX="27.0" layoutY="358.0" mnemonicParsing="false" onAction="#returnToFileScreen" style="-fx-background-color: blue;" text="Back" textFill="WHITE" />
             <Label fx:id="errorLabel" layoutX="92.0" layoutY="363.0" />
             <Label layoutX="27.0" layoutY="59.0" text="Note: To add multiple users, use semi-colon &quot;;&quot; between usernames or emails">
                <font>
                   <Font name="System Italic" size="13.0" />
                </font>
             </Label>
+            <JFXListView fx:id="listViewItem" editable="true" layoutX="27.0" layoutY="88.0" prefHeight="257.0" prefWidth="459.0" />
          </children></Pane>
    </bottom>
 </BorderPane>
