@@ -30,6 +30,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
@@ -48,6 +49,8 @@ public class RegisterController implements Initializable {
 	private Button registerBtn;
 	@FXML
 	private Pane pane;
+	@FXML
+	private Hyperlink backLink;
 	private String result;
 
 	/**
@@ -134,11 +137,23 @@ public class RegisterController implements Initializable {
 						app_stage.show();
 					}
 				} catch (MalformedURLException ex) {
-					// a real program would need to handle this exception
+					ex.printStackTrace();
 				} catch (IOException ex) {
-					// a real program would need to handle this exception
+					ex.printStackTrace();
 				}
 			}
+		}
+	}
+	
+	public void handleBack(ActionEvent event){
+		try {
+			Parent loginPageParent = FXMLLoader.load(getClass().getResource("/nLogin/Login.fxml"));
+			Scene loginScene = new Scene(loginPageParent);
+			Stage app_stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+			app_stage.setScene(loginScene);
+			app_stage.show();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 

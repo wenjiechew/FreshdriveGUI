@@ -102,9 +102,9 @@ public class LoginController implements Initializable {
 			}
 
 		} catch (MalformedURLException ex) {
-			// a real program would need to handle this exception
+			ex.printStackTrace();
 		} catch (IOException ex) {
-			// a real program would need to handle this exception
+			ex.printStackTrace();
 		}
 	}
 
