@@ -238,6 +238,13 @@ public class FileController implements Initializable {
 					alert.setContentText(
 							"The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
 					alert.showAndWait();
+				} else if(result.equals("Error")){
+					Alert alert = new Alert(AlertType.ERROR);
+					alert.setTitle("ERROR");
+					alert.setHeaderText("Error has occured.");
+					alert.setContentText(
+							"An unexpected error has occured. Please try uploading again.");
+					alert.showAndWait();
 				}
 				in.close();
 			} else {
