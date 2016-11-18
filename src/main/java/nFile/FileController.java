@@ -71,6 +71,8 @@ public class FileController implements Initializable {
 	@FXML
 	private Button uploadFileBtn;
 	@FXML
+	private Label greetingLbl;
+	@FXML
 	private ListView<String> fileListView;
 
 	private String result;
@@ -560,6 +562,7 @@ public class FileController implements Initializable {
 		System.out.println("FileController.initialize()");
 		progressBar.setVisible(false);
 		uploadFileBtn.setDisable(true);
+		greetingLbl.setText("Hello, "+account.getUsername()+"!");
 		try {
 			initializeListView();
 		} catch (IOException e) {
@@ -584,7 +587,7 @@ public class FileController implements Initializable {
 		con.setDoOutput(true);
 		// con.setRequestProperty("username", account.getUsername());
 		DataOutputStream out = new DataOutputStream(con.getOutputStream());
-		out.writeBytes("userID=" + account.get_id());
+		out.writeBytes("userID=" + account.get_id()+ "&username="+account.getUsername()+"&usertoken="+account.get_token());
 		out.flush();
 		out.close();
 
@@ -595,18 +598,29 @@ public class FileController implements Initializable {
 		while ((response = in.readLine()) != null) {
 			jsonString = response;
 		}
-
-		JSONObject jsonObj = new JSONObject(jsonString);
-		JSONArray arrayJson = jsonObj.getJSONArray("fileNames");
-		ObservableList<String> data = FXCollections.observableArrayList();
-		fileIdArray = new String[arrayJson.length()];
-		for (int i = 0; i < arrayJson.length(); i++) {
-			JSONObject obj = new JSONObject(arrayJson.get(i).toString());
-			data.add(obj.getString("fileName"));
-			fileIdArray[i] = obj.getString("fileId");
+		
+		if(jsonString.equals("unverified-token")){
+			//Display user verification error instead
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setTitle("ERROR");
+			alert.setHeaderText("Unable to authorize user to take action.");
+			alert.setContentText(
+					"The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
+			alert.showAndWait();
 		}
-		fileListView.setItems(data);
-
+		else{
+			//Set list of user's files
+			JSONObject jsonObj = new JSONObject(jsonString);
+			JSONArray arrayJson = jsonObj.getJSONArray("fileNames");
+			ObservableList<String> data = FXCollections.observableArrayList();
+			fileIdArray = new String[arrayJson.length()];
+			for (int i = 0; i < arrayJson.length(); i++) {
+				JSONObject obj = new JSONObject(arrayJson.get(i).toString());
+				data.add(obj.getString("fileName"));
+				fileIdArray[i] = obj.getString("fileId");
+			}
+			fileListView.setItems(data);
+		}
 		in.close();
 
 	}

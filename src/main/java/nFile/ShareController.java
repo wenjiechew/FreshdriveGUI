@@ -285,7 +285,7 @@ public class ShareController implements Initializable {
 			// Post request to servlet
 			con.setDoOutput(true);
 			DataOutputStream out = new DataOutputStream(con.getOutputStream());
-			out.writeBytes("fileID=" + fileID);
+			out.writeBytes("fileID=" + fileID + "&username=" + Account.getAccount().getUsername() + "&usertoken="+Account.getAccount().get_token());
 			out.flush();
 			out.close();
 
@@ -302,7 +302,15 @@ public class ShareController implements Initializable {
 			in.close();
 
 			if (result != null) {
-				if (result.equals("File")) {
+				if(result.equals("unverified-token")){
+					//Display user verification error instead
+					Alert alert = new Alert(AlertType.ERROR);
+					alert.setTitle("ERROR");
+					alert.setHeaderText("Unable to authorize user to take action.");
+					alert.setContentText(
+							"The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
+					alert.showAndWait();
+				} else if (result.equals("File")) {
 					errorLabel.setText("Error in finding file, please click 'Back' and try again.");
 				} else if (result.equals("Unshared")) {
 					// userList is empty
