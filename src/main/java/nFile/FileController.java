@@ -44,6 +44,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -51,6 +52,7 @@ import javafx.scene.control.ProgressBar;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import nObjectModel.Account;
 
 public class FileController implements Initializable {
@@ -150,7 +152,6 @@ public class FileController implements Initializable {
 	 * @throws IOException
 	 */
 	public void handleUploadFileBtn(ActionEvent event) throws IOException {
-
 		try {
 			URL url = new URL(nURLConstants.Constants.uploadURL);
 			HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -579,6 +580,24 @@ public class FileController implements Initializable {
 	 * @throws DBxException
 	 */
 	public void initializeListView() throws IOException {
+		final Callback<DatePicker, DateCell> dayCellFactory = 
+	            new Callback<DatePicker, DateCell>() {
+	                @Override
+	                public DateCell call(final DatePicker datePicker) {
+	                    return new DateCell() {
+	                        @Override
+	                        public void updateItem(LocalDate item, boolean empty) {
+	                            super.updateItem(item, empty);
+	                           
+	                            if (item.isBefore( LocalDate.now() ) ) {
+	                                    setDisable(true);
+	                                    setStyle("-fx-background-color: #ffc0cb;");
+	                            }   
+	                    }
+	                };
+	            }
+	        };				
+		expiryDatePicker.setDayCellFactory(dayCellFactory);
 
 		URL url = new URL(nURLConstants.Constants.retrieveURL);
 		HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -622,6 +641,9 @@ public class FileController implements Initializable {
 			fileListView.setItems(data);
 		}
 		in.close();
+		
+		
+		
 
 	}
 
@@ -633,6 +655,7 @@ public class FileController implements Initializable {
 	 * @throws IOException
 	 */
 	public void handleRefreshBtn(ActionEvent action) throws IOException {
+		
 
 		try {
 			initializeListView();
