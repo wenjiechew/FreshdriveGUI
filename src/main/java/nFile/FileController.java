@@ -499,24 +499,6 @@ public class FileController implements Initializable {
 					result = response;
 				}
 				in.close();
-				// parse response string back to bytes
-				String[] byteValues = result.substring(1, result.length() - 1).split(",");
-				byte[] bytes = new byte[byteValues.length];
-
-				for (int i = 0, len = bytes.length; i < len; i++) {
-					bytes[i] = Byte.parseByte(byteValues[i].trim());
-				}
-
-				// Create a new file to store the bytes in
-				File newFile = new File(filePath + "\\" + fileName);
-				newFile.setWritable(true);
-				
-				// Set an output stream to put file in
-				FileOutputStream output = new FileOutputStream(newFile);
-				
-				// Write the bytes into the outputstream to create the file
-				output.write(bytes);
-				output.close();
 				
 				if (result.equals("Download Fail")) {
 					// Alert to notify download fail.
@@ -525,7 +507,7 @@ public class FileController implements Initializable {
 					alert.setHeaderText(null);
 					alert.setContentText("Download has failed. Try again or contact your administrator.");
 					alert.showAndWait();
-				} else if (result.equals("unverified-token")) {
+				} else if (result.equals("unverified-token") || result.equals("invalid-user")) {
 					// Alert for invalid token error
 					Alert alert = new Alert(AlertType.ERROR);
 					alert.setTitle("ERROR");
@@ -533,7 +515,34 @@ public class FileController implements Initializable {
 					alert.setContentText(
 							"The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
 					alert.showAndWait();
+				} else if (result.equals("permission-denied")) {
+					// Alert for permission denied
+					Alert alert = new Alert(AlertType.ERROR);
+					alert.setTitle("ERROR");
+					alert.setHeaderText("Permission denied.");
+					alert.setContentText(
+							"You do not have permissions to download the file. Please refresh the list. ");
+					alert.showAndWait();
 				} else {
+					// parse response string back to bytes
+					String[] byteValues = result.substring(1, result.length() - 1).split(",");
+					byte[] bytes = new byte[byteValues.length];
+
+					for (int i = 0, len = bytes.length; i < len; i++) {
+						bytes[i] = Byte.parseByte(byteValues[i].trim());
+					}
+
+					// Create a new file to store the bytes in
+					File newFile = new File(filePath + "\\" + fileName);
+					newFile.setWritable(true);
+					
+					// Set an output stream to put file in
+					FileOutputStream output = new FileOutputStream(newFile);
+					
+					// Write the bytes into the outputstream to create the file
+					output.write(bytes);
+					output.close();
+					
 					// If no fail message then alert success
 					Alert alert = new Alert(AlertType.CONFIRMATION);
 					alert.setTitle("Download success");
