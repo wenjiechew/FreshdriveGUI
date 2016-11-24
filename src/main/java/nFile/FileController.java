@@ -155,11 +155,14 @@ public class FileController implements Initializable {
 
 		try {
 			// does the virus scan
-			FileScan filescan = new FileScan(inputFile);
+			FileScan filescan = new FileScan();
+			filescan.setFileToScan(inputFile);
+			filescan.startScan();
+			
 			if (filescan.isRunningStatus()) {
 				new Thread(new Runnable() {
 					public void run() {
-						while (filescan.responseStatus == 0) {
+						while (filescan.getResponseStatus() == 0) {
 							// wait
 							try {
 								Thread.sleep(60000);

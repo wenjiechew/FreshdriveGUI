@@ -50,10 +50,20 @@ public class FileScan {
 	private static boolean fileInfected;
 	// the file object which requires to be scanned
 	private static File fileToScan;
+
+
+	public static void setFileToScan(File fileInput) {
+		fileToScan = fileInput;
+	}
+
 	// this var is the id of the file when sent to the api for scanning
 	private static String resource;
 	// this var is response code of the reply coming from the api
-	public static int responseStatus;
+	private static int responseStatus;
+
+	public int getResponseStatus() {
+		return new Integer(responseStatus);
+	}
 
 	// api for the file scan
 	private static final String URL_FILESCAN = "https://www.virustotal.com/vtapi/v2/file/scan";
@@ -74,29 +84,18 @@ public class FileScan {
 	 * @param
 	 * @return runningStatus the boolean value of the running status
 	 */
-	public static boolean isRunningStatus() {
+	public boolean isRunningStatus() {
 		return new Boolean(runningStatus);
 	}
 
 	/**
-	 * FileScan constructor method.All the scanning starts here First the file
-	 * which is passed in is being assigned to the var. Next it then tries get
-	 * the API key to access the virustotal api If getting the API key is
-	 * successfull,The runningStatus variable will be set as true.Then the
-	 * method would then send the file for scanning and check the responseStatus
-	 * of the file scan report
+	 * FileScan constructor method.
 	 *
 	 * @param file
 	 *            file object which is going to be scanned
 	 * @return
 	 */
-	public FileScan(File file) throws IOException, JSONException, KeyManagementException, NoSuchAlgorithmException {
-		FileScan.fileToScan = file;
-		getAPIkey();
-		if (runningStatus) {
-			scanFile();
-			checkResponseStatus();
-		}
+	public FileScan() throws IOException, JSONException, KeyManagementException, NoSuchAlgorithmException {
 
 	}
 
@@ -196,7 +195,7 @@ public class FileScan {
 		} finally {
 			response1.close();
 			client.close();
-			APIKEY="";
+			APIKEY = "";
 		}
 		if (positives > 0) {
 			FileScan.fileInfected = true;
@@ -325,6 +324,26 @@ public class FileScan {
 			ex.printStackTrace();
 		}
 
+	}
+
+	/**
+	 * All the scanning starts here First the file which is passed in is being
+	 * assigned to the var. Next it then tries get the API key to access the
+	 * virustotal api If getting the API key is successfull,The runningStatus
+	 * variable will be set as true.Then the method would then send the file for
+	 * scanning and check the responseStatus of the file scan report
+	 * 
+	 * @throws IOException
+	 * @throws JSONException
+	 * @throws KeyManagementException
+	 * @throws NoSuchAlgorithmException
+	 */
+	public void startScan() throws IOException, JSONException, KeyManagementException, NoSuchAlgorithmException {
+		getAPIkey();
+		if (runningStatus) {
+			scanFile();
+			checkResponseStatus();
+		}
 	}
 
 }
