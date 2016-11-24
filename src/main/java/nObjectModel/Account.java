@@ -41,7 +41,7 @@ public class Account {
 	}
 
 	public String get_token() {
-		return _token;
+		return new String(_token);
 	}
 
 	public void set_token(String _token) {
@@ -49,15 +49,15 @@ public class Account {
 	}
 
 	public String get_id() {
-		return _id;
+		return new String(_id);
 	}
 
 	public String getUsername() {
-		return username;
+		return new String(username);
 	}
 
 	public String getPassword() {
-		return password;
+		return new String(password);
 	}
 
 	public void set_id(String _id) {
@@ -73,7 +73,7 @@ public class Account {
 	}
 
 	public String getEmail() {
-		return email;
+		return new String(email);
 	}
 
 	public void setEmail(String email) {
