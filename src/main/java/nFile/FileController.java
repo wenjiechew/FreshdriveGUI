@@ -609,6 +609,7 @@ public class FileController implements Initializable {
 					}
 					// Set an output stream to put file in
 					FileOutputStream output = new FileOutputStream(newFile);
+					
 
 					// Write the bytes into the outputstream to create the file
 					output.write(bytes);
