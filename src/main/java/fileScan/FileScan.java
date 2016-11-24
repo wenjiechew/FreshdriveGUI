@@ -196,6 +196,7 @@ public class FileScan {
 		} finally {
 			response1.close();
 			client.close();
+			APIKEY="";
 		}
 		if (positives > 0) {
 			FileScan.fileInfected = true;
