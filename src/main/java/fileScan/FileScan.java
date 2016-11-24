@@ -60,7 +60,7 @@ public class FileScan {
 	// api for the file scan report
 	private static final String URL_FILEREPORT = "https://www.virustotal.com/vtapi/v2/file/report";
 	// api for the file scan report
-	private static String APIKEY = "";
+	private static String APIKEY;
 
 	// var to store the boolean on whether the file scan is able to proceed
 	// after verification of the token
@@ -75,7 +75,7 @@ public class FileScan {
 	 * @return runningStatus the boolean value of the running status
 	 */
 	public static boolean isRunningStatus() {
-		return runningStatus;
+		return new Boolean(runningStatus);
 	}
 
 	/**
@@ -108,7 +108,7 @@ public class FileScan {
 	 * @return fileInfected the boolean value of the infection status
 	 */
 	public boolean isFileInfected() {
-		return fileInfected;
+		return new Boolean(fileInfected);
 	}
 
 	/**

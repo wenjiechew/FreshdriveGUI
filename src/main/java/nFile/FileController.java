@@ -79,7 +79,6 @@ public class FileController implements Initializable {
 	static final int BUFFER_SIZE = 33554432;
 	final FileChooser fileChooser = new FileChooser();
 	String[] fileIdArray;
-	boolean isFileInfected = false;
 
 	Account account = Account.getAccount();
 	private Stage app_stage;
@@ -150,6 +149,9 @@ public class FileController implements Initializable {
 	 * @throws IOException
 	 */
 	public void handleUploadFileBtn(ActionEvent event) throws IOException {
+		uploadFileBtn.setText("Uploading");
+		chooseBtn.setDisable(true);
+		uploadFileBtn.setDisable(true);
 
 		try {
 			// does the virus scan
@@ -173,15 +175,187 @@ public class FileController implements Initializable {
 						}
 						try {
 							filescan.scanResults();
-							isFileInfected = (!filescan.isFileInfected());
 							if (!filescan.isFileInfected()) {
-								Platform.runLater(new Runnable() {
-									@Override
-									public void run() {
-//									TODO: CHECK IF NEEDED
+								try {
+									URL url = new URL(nURLConstants.Constants.uploadURL);
+									HttpURLConnection con = (HttpURLConnection) url.openConnection();
+									con.setDoOutput(true);
+									con.setUseCaches(false);
+									// Adding Header
+									con.setRequestMethod("POST");
+									// Get the file path of the inputFile
+									String filePath = inputFile.getPath();
+									filePath = filePath.replace("\\", "\\\\");
+									File uploadFile = new File(filePath);
 
+									// Send Post
+									// get the properties for the files
+									// information
+									DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+									DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+									Date date = new Date();
+									String currentDate = dateFormat.format(date).toString();
+									LocalDate expiryDate = expiryDatePicker.getValue();
+									String expireDate;
+									if (expiryDate != null) {
+										expireDate = expiryDate.format(formatter);
+									} else {
+										expireDate = "";
 									}
-								});
+
+									// get the properties for the files
+									// information
+									con.setRequestProperty("filePath", filePath);
+									con.setRequestProperty("usertoken", account.get_token());
+									con.setRequestProperty("fileName", uploadFile.getName());
+									con.setRequestProperty("fileLength", String.valueOf(uploadFile.length()));
+									con.setRequestProperty("username", account.getUsername());
+									con.setRequestProperty("filePath",
+											"/" + account.getUsername() + "/" + uploadFile.getName());
+									con.setRequestProperty("ownerID", account.get_id());
+									con.setRequestProperty("createdOn", currentDate);
+									con.setRequestProperty("expiryDate", expireDate);
+
+									// opens output stream of the HTTP
+									// connection for writing data
+									OutputStream out = con.getOutputStream();
+
+									// Opens input stream of the file for
+									// reading data
+									FileInputStream inputStream = new FileInputStream(uploadFile);
+
+									byte[] buffer = new byte[BUFFER_SIZE];
+									int bytesRead = -1;
+
+									System.out.println("Start writing data...");
+
+									// write the file into the outputstream
+									while ((bytesRead = inputStream.read(buffer)) != -1) {
+										out.write(buffer, 0, bytesRead);
+									}
+									out.close();
+									inputStream.close();
+
+									// Response from Server
+									int responseCode = con.getResponseCode();
+									if (responseCode == con.HTTP_OK) {
+										BufferedReader in = new BufferedReader(
+												new InputStreamReader(con.getInputStream()));
+										String response;
+
+										while ((response = in.readLine()) != null) {
+											result = response;
+										}
+										if (result.equals("File already exist")) {
+
+											Platform.runLater(new Runnable() {
+												@Override
+												public void run() {
+													Alert alert = new Alert(AlertType.WARNING);
+													alert.setTitle("Warning Dialog");
+													alert.setHeaderText("Warning!");
+													alert.setContentText(
+															"File already exists. Please choose another file or rename your file.");
+													alert.showAndWait();
+													uploadedFileLabel.setText("");
+													uploadFileBtn.setText("Upload");
+													uploadFileBtn.setDisable(true);
+													chooseBtn.setDisable(false);
+												}
+											});
+										} else if (result.equals("File Uploaded")) {
+
+											Platform.runLater(new Runnable() {
+												@Override
+												public void run() {
+													uploadedFileLabel.setText("");
+													uploadFileBtn.setText("Upload");
+													uploadFileBtn.setDisable(true);
+													chooseBtn.setDisable(false);
+													Alert alert = new Alert(AlertType.CONFIRMATION);
+													alert.setTitle("Success Dialog");
+													alert.setHeaderText("Success!");
+													alert.setContentText("File has been uploaded!.");
+													alert.showAndWait();
+												}
+											});
+
+										} else if (result.equals("unverified-token")) {
+
+											Platform.runLater(new Runnable() {
+												@Override
+												public void run() {
+													Alert alert = new Alert(AlertType.ERROR);
+													alert.setTitle("ERROR");
+													alert.setHeaderText("Unable to authorize user to take action.");
+													alert.setContentText(
+															"The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
+													alert.showAndWait();
+													uploadedFileLabel.setText("");
+													uploadFileBtn.setText("Upload");
+													uploadFileBtn.setDisable(true);
+													chooseBtn.setDisable(false);
+												}
+											});
+										} else if (result.equals("Error")) {
+
+											Platform.runLater(new Runnable() {
+												@Override
+												public void run() {
+													Alert alert = new Alert(AlertType.ERROR);
+													alert.setTitle("ERROR");
+													alert.setHeaderText("Error has occured.");
+													alert.setContentText(
+															"An unexpected error has occured. Please try uploading again.");
+													alert.showAndWait();
+													uploadedFileLabel.setText("");
+													uploadFileBtn.setText("Upload");
+													uploadFileBtn.setDisable(true);
+													chooseBtn.setDisable(false);
+												}
+											});
+										}
+										in.close();
+									} else {
+										System.out.println("Server returned non-OK code: " + responseCode);
+										Platform.runLater(new Runnable() {
+											@Override
+											public void run() {
+
+												uploadedFileLabel.setText("");
+												uploadFileBtn.setText("Upload");
+												uploadFileBtn.setDisable(true);
+												chooseBtn.setDisable(false);
+											}
+										});
+									}
+
+								} catch (MalformedURLException ex) {
+									ex.printStackTrace();
+
+									Platform.runLater(new Runnable() {
+										@Override
+										public void run() {
+											uploadedFileLabel.setText("");
+											uploadFileBtn.setText("Upload");
+											uploadFileBtn.setDisable(true);
+											chooseBtn.setDisable(false);
+										}
+									});
+								} catch (IOException ex) {
+									ex.printStackTrace();
+
+									Platform.runLater(new Runnable() {
+										@Override
+										public void run() {
+											uploadedFileLabel.setText("");
+											uploadFileBtn.setText("Upload");
+											uploadFileBtn.setDisable(true);
+											chooseBtn.setDisable(false);
+										}
+									});
+								}
+
 							} else {
 								Platform.runLater(new Runnable() {
 									@Override
@@ -218,113 +392,6 @@ public class FileController implements Initializable {
 			chooseBtn.setDisable(false);
 		}
 
-		if (!isFileInfected) {
-			try {
-				URL url = new URL(nURLConstants.Constants.uploadURL);
-				HttpURLConnection con = (HttpURLConnection) url.openConnection();
-				con.setDoOutput(true);
-				con.setUseCaches(false);
-				// Adding Header
-				con.setRequestMethod("POST");
-				// Get the file path of the inputFile
-				String filePath = inputFile.getPath();
-				filePath = filePath.replace("\\", "\\\\");
-				File uploadFile = new File(filePath);
-
-				// Send Post
-				// get the properties for the files information
-				DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-				Date date = new Date();
-				String currentDate = dateFormat.format(date).toString();
-				LocalDate expiryDate = expiryDatePicker.getValue();
-				String expireDate;
-				if (expiryDate != null) {
-					expireDate = expiryDate.format(formatter);
-				} else {
-					expireDate = "";
-				}
-
-				// get the properties for the files information
-				con.setRequestProperty("filePath", filePath);
-				con.setRequestProperty("usertoken", account.get_token());
-				con.setRequestProperty("fileName", uploadFile.getName());
-				con.setRequestProperty("fileLength", String.valueOf(uploadFile.length()));
-				con.setRequestProperty("username", account.getUsername());
-				con.setRequestProperty("filePath", "/" + account.getUsername() + "/" + uploadFile.getName());
-				con.setRequestProperty("ownerID", account.get_id());
-				con.setRequestProperty("createdOn", currentDate);
-				con.setRequestProperty("expiryDate", expireDate);
-
-				// opens output stream of the HTTP connection for writing data
-				OutputStream out = con.getOutputStream();
-
-				// Opens input stream of the file for reading data
-				FileInputStream inputStream = new FileInputStream(uploadFile);
-
-				byte[] buffer = new byte[BUFFER_SIZE];
-				int bytesRead = -1;
-
-				System.out.println("Start writing data...");
-
-				// write the file into the outputstream
-				while ((bytesRead = inputStream.read(buffer)) != -1) {
-					out.write(buffer, 0, bytesRead);
-				}
-				out.close();
-				inputStream.close();
-
-				// Response from Server
-				int responseCode = con.getResponseCode();
-				if (responseCode == con.HTTP_OK) {
-					BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-					String response;
-
-					while ((response = in.readLine()) != null) {
-						result = response;
-					}
-					if (result.equals("File already exist")) {
-						Alert alert = new Alert(AlertType.WARNING);
-						alert.setTitle("Warning Dialog");
-						alert.setHeaderText("Warning!");
-						alert.setContentText("File already exists. Please choose another file or rename your file.");
-						alert.showAndWait();
-					} else if (result.equals("File Uploaded")) {
-						uploadedFileLabel.setText("");
-						uploadFileBtn.setText("Upload");
-						uploadFileBtn.setDisable(true);
-						chooseBtn.setDisable(false);
-						Alert alert = new Alert(AlertType.CONFIRMATION);
-						alert.setTitle("Success Dialog");
-						alert.setHeaderText("Success!");
-						alert.setContentText("File has been uploaded!.");
-						alert.showAndWait();
-					} else if (result.equals("unverified-token")) {
-						Alert alert = new Alert(AlertType.ERROR);
-						alert.setTitle("ERROR");
-						alert.setHeaderText("Unable to authorize user to take action.");
-						alert.setContentText(
-								"The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
-						alert.showAndWait();
-					} else if (result.equals("Error")) {
-						Alert alert = new Alert(AlertType.ERROR);
-						alert.setTitle("ERROR");
-						alert.setHeaderText("Error has occured.");
-						alert.setContentText("An unexpected error has occured. Please try uploading again.");
-						alert.showAndWait();
-					}
-					in.close();
-				} else {
-					System.out.println("Server returned non-OK code: " + responseCode);
-				}
-
-			} catch (MalformedURLException ex) {
-				ex.printStackTrace();
-			} catch (IOException ex) {
-				ex.printStackTrace();
-			}
-		}
-
 		initializeListView();
 	}
 
@@ -341,7 +408,6 @@ public class FileController implements Initializable {
 	 */
 	public void handleChooseFileButton(ActionEvent event)
 			throws IOException, KeyManagementException, NoSuchAlgorithmException {
-		
 
 		// opens up file dialog for user to choose
 		fileChooser.setTitle("Select file to upload");
@@ -360,11 +426,11 @@ public class FileController implements Initializable {
 				uploadFileBtn.setText("Upload");
 				chooseBtn.setDisable(false);
 				inputFile = file;
-			}else{
+			} else {
 				uploadedFileLabel.setText("Invalid File");
 				uploadFileBtn.setText("Upload");
 				uploadFileBtn.setDisable(true);
-				
+
 				Alert alert = new Alert(AlertType.ERROR);
 				alert.setTitle("ERROR");
 				alert.setHeaderText("File Invalid.");
@@ -428,7 +494,7 @@ public class FileController implements Initializable {
 					// sharing options
 					FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/nFile/FileShareWindow.fxml"));
 					Parent root = (Parent) fxmlLoader.load();
-					ShareController controller = fxmlLoader.<ShareController>getController();
+					ShareController controller = fxmlLoader.<ShareController> getController();
 					controller.setFileID(fileID);
 					Scene scene = new Scene(root);
 					Stage app_stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
