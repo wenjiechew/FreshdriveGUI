@@ -277,6 +277,12 @@ public class FileController implements Initializable {
 													alert.setHeaderText("Success!");
 													alert.setContentText("File has been uploaded!.");
 													alert.showAndWait();
+													
+													try {
+														initializeListView();
+													} catch (IOException e) {
+														e.printStackTrace();
+													}
 												}
 											});
 
@@ -381,6 +387,7 @@ public class FileController implements Initializable {
 				alert.showAndWait();
 				uploadFileBtn.setText("Upload");
 				chooseBtn.setDisable(false);
+				
 				uploadedFileLabel.setText("");
 				return;
 			}
@@ -392,7 +399,7 @@ public class FileController implements Initializable {
 			chooseBtn.setDisable(false);
 		}
 
-		initializeListView();
+		
 	}
 
 	/**
