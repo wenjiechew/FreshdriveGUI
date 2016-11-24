@@ -151,73 +151,74 @@ public class FileController implements Initializable {
 	 */
 	public void handleUploadFileBtn(ActionEvent event) throws IOException {
 
-		try {
-			// does the virus scan
-			FileScan filescan = new FileScan(inputFile);
-			if (filescan.isRunningStatus()) {
-				new Thread(new Runnable() {
-					public void run() {
-						while (filescan.responseStatus == 0) {
-							// wait
-							try {
-								Thread.sleep(60000);
-							} catch (InterruptedException ex) {
-								Thread.currentThread().interrupt();
+		if (inputFile != null) {
+			try {
+				// does the virus scan
+				FileScan filescan = new FileScan(inputFile);
+				if (filescan.isRunningStatus()) {
+					new Thread(new Runnable() {
+						public void run() {
+							while (filescan.responseStatus == 0) {
+								// wait
+								try {
+									Thread.sleep(60000);
+								} catch (InterruptedException ex) {
+									Thread.currentThread().interrupt();
+								}
+								try {
+									filescan.checkResponseStatus();
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+
 							}
 							try {
-								filescan.checkResponseStatus();
+								filescan.scanResults();
+								isFileInfected = (!filescan.isFileInfected());
+								if (!filescan.isFileInfected()) {
+									Platform.runLater(new Runnable() {
+										@Override
+										public void run() {
+											// TODO: CHECK IF NEEDED
+
+										}
+									});
+								} else {
+									Platform.runLater(new Runnable() {
+										@Override
+										public void run() {
+											uploadFileBtn.setText("Upload");
+											chooseBtn.setDisable(false);
+											uploadedFileLabel.setText("File is virus infected. Try another file");
+										}
+									});
+								}
 							} catch (Exception e) {
 								e.printStackTrace();
 							}
-
 						}
-						try {
-							filescan.scanResults();
-							isFileInfected = (!filescan.isFileInfected());
-							if (!filescan.isFileInfected()) {
-								Platform.runLater(new Runnable() {
-									@Override
-									public void run() {
-//									TODO: CHECK IF NEEDED
+					}).start();
+				} else {
+					// Show invalid token error
+					Alert alert = new Alert(AlertType.ERROR);
+					alert.setTitle("ERROR");
+					alert.setHeaderText("Unable to authorize user to take action.");
+					alert.setContentText(
+							"The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
+					alert.showAndWait();
+					uploadFileBtn.setText("Upload");
+					chooseBtn.setDisable(false);
+					uploadedFileLabel.setText("");
+					return;
+				}
 
-									}
-								});
-							} else {
-								Platform.runLater(new Runnable() {
-									@Override
-									public void run() {
-										uploadFileBtn.setText("Upload");
-										chooseBtn.setDisable(false);
-										uploadedFileLabel.setText("File is virus infected. Try another file");
-									}
-								});
-							}
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					}
-				}).start();
-			} else {
-				// Show invalid token error
-				Alert alert = new Alert(AlertType.ERROR);
-				alert.setTitle("ERROR");
-				alert.setHeaderText("Unable to authorize user to take action.");
-				alert.setContentText(
-						"The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
-				alert.showAndWait();
+			} catch (Exception e) {
+				e.printStackTrace();
+				uploadedFileLabel.setText("Invalid File. Try another file.");
 				uploadFileBtn.setText("Upload");
 				chooseBtn.setDisable(false);
-				uploadedFileLabel.setText("");
-				return;
 			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			uploadedFileLabel.setText("Invalid File. Try another file.");
-			uploadFileBtn.setText("Upload");
-			chooseBtn.setDisable(false);
 		}
-
 		if (!isFileInfected) {
 			try {
 				URL url = new URL(nURLConstants.Constants.uploadURL);
@@ -341,7 +342,6 @@ public class FileController implements Initializable {
 	 */
 	public void handleChooseFileButton(ActionEvent event)
 			throws IOException, KeyManagementException, NoSuchAlgorithmException {
-		
 
 		// opens up file dialog for user to choose
 		fileChooser.setTitle("Select file to upload");
@@ -360,11 +360,11 @@ public class FileController implements Initializable {
 				uploadFileBtn.setText("Upload");
 				chooseBtn.setDisable(false);
 				inputFile = file;
-			}else{
+			} else {
 				uploadedFileLabel.setText("Invalid File");
 				uploadFileBtn.setText("Upload");
 				uploadFileBtn.setDisable(true);
-				
+
 				Alert alert = new Alert(AlertType.ERROR);
 				alert.setTitle("ERROR");
 				alert.setHeaderText("File Invalid.");
@@ -537,7 +537,11 @@ public class FileController implements Initializable {
 					// Create a new file to store the bytes in
 					File newFile = new File(filePath + "\\" + fileName);
 					newFile.setWritable(true);
-
+					
+					//if file already exist in selected directory
+					if(newFile.exists()){
+						newFile = new File(filePath + "\\(Copy) " + fileName);
+					}
 					// Set an output stream to put file in
 					FileOutputStream output = new FileOutputStream(newFile);
 
@@ -549,7 +553,7 @@ public class FileController implements Initializable {
 					Alert alert = new Alert(AlertType.CONFIRMATION);
 					alert.setTitle("Download success");
 					alert.setHeaderText(null);
-					alert.setContentText("Your file has been downloaded into the specified folder.");
+					alert.setContentText("Your file has been downloaded into the specified folder as " + newFile.getName());
 					alert.showAndWait();
 				}
 			} catch (Exception ex) {
