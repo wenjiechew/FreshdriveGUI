@@ -53,7 +53,11 @@ public class Account {
 	}
 
 	public String getUsername() {
-		return new String(username);
+		if (username != null) {
+			return new String(username);
+		} else
+			return username;
+
 	}
 
 	public String getPassword() {
