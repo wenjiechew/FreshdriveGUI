@@ -8,7 +8,7 @@ package nURLConstants;
 public class Constants {
 	public final static String hostname = "localhost";
 
-	private final static String mainURL ="http://"+ hostname + ":8080/FreshdriveServer/";
+	private final static String mainURL ="https://"+ hostname + ":8443/FreshdriveServer/";
 
 	public final static String loginURL = mainURL + "Login";
 	public final static String logoutURL = mainURL + "Logout";
@@ -23,5 +23,6 @@ public class Constants {
 
 	public final static String otpURL = mainURL + "VerifyOTP";
 	public final static String virusScanURL = mainURL + "ScanFile";
+	public final static String deleteURL = mainURL + "Delete";
 
 }

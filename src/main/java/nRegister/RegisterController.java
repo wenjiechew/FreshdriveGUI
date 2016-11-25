@@ -116,8 +116,7 @@ public class RegisterController implements Initializable {
 
 					// 1 = Failed
 					if (result.contentEquals("1")) {
-						// TODO Differentiate errors (duplicate username?
-						// duplicate email?)
+
 						makeErrorAlert("Registration failed",
 								"Please try again later, possibly with a different username or email address.");
 					} else {
@@ -158,8 +157,7 @@ public class RegisterController implements Initializable {
 	}
 
 	/**
-	 * Initialize the screen and setup the register window to be displayed to
-	 * user
+	 * Initialize the screen and setup the register window to be displayed to user
 	 * 
 	 * @param location
 	 *            The location used to resolve relative paths for the root

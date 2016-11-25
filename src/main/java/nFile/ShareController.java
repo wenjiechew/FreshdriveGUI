@@ -11,6 +11,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -80,6 +81,7 @@ public class ShareController implements Initializable {
 					errorLabel.setText("Retrieving users...");
 					Thread.sleep(50);
 				} catch (InterruptedException e) {
+					makeErrorAlert("Operation failed", "Oops, an error has occurred during initialization. Try again, or report to admin if problem persists");
 				}
 				return null;
 			}
@@ -141,12 +143,7 @@ public class ShareController implements Initializable {
 
 				if (result != null) {
 					if (result.equals("unverified-token")) {
-						Alert alert = new Alert(AlertType.ERROR);
-						alert.setTitle("ERROR");
-						alert.setHeaderText("Unable to authorize user to take action.");
-						alert.setContentText(
-								"The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
-						alert.showAndWait();
+						makeErrorAlert("Unable to authorize user to take action.", "The system failed to verify your identity. Please try again, or re-login if the problem persists.");
 					} else if (result.equals("File")) {
 						errorLabel.setText("Error in uploading file, please click 'Back' and try again.");
 					} else if (result.equals("selfShare-Error")){
@@ -176,8 +173,12 @@ public class ShareController implements Initializable {
 						}
 					}
 				}
-			} catch (Exception ex) {
-				ex.printStackTrace();
+			} catch (MalformedURLException ex) {
+				makeErrorAlert("Operation failed", "Oops, an URL error has occurred when trying to share with user. Try again, or report to admin if problem persists");
+			} catch (IOException ex) {
+				makeErrorAlert("Operation failed", "Oops, an IO error has occurred when trying to share with user. Try again, or report to admin if problem persists");
+			}  catch (Exception ex) {
+				makeErrorAlert("Operation failed", "Oops, an error has occurred when trying to share with user. Try again, or report to admin if problem persists");
 			}
 			listViewItem.setItems(userList);
 			userTxtField.clear();
@@ -232,12 +233,7 @@ public class ShareController implements Initializable {
 	
 				if (result != null) {
 					if (result.equals("unverified-token")) {
-						Alert alert = new Alert(AlertType.ERROR);
-						alert.setTitle("ERROR");
-						alert.setHeaderText("Unable to authorize user to take action.");
-						alert.setContentText(
-								"The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
-						alert.showAndWait();
+						makeErrorAlert("Unable to authorize user to take action.", "The system failed to verify your identity. Please try again, or re-login if the problem persists.");
 					} else if (result.equals("File")) {
 						errorLabel.setText("Error in uploading file, please click 'Back' and try again.");
 					} else if (result.equals("User")) {
@@ -247,8 +243,12 @@ public class ShareController implements Initializable {
 						errorLabel.setText(null);
 					}
 				}
+			} catch (MalformedURLException ex) {
+				makeErrorAlert("Operation failed", "Oops, an URL error has occurred when trying to remove user. Try again, or report to admin if problem persists");
+			} catch (IOException ex) {
+				makeErrorAlert("Operation failed", "Oops, an IO error has occurred when trying to remove user. Try again, or report to admin if problem persists");
 			} catch (Exception ex) {
-				ex.printStackTrace();
+				makeErrorAlert("Operation failed", "Oops, error has occurred when trying to remove user. Try again, or report to admin if problem persists");
 			}
 			listViewItem.setItems(userList);
 		}
@@ -304,12 +304,7 @@ public class ShareController implements Initializable {
 			if (result != null) {
 				if(result.equals("unverified-token")){
 					//Display user verification error instead
-					Alert alert = new Alert(AlertType.ERROR);
-					alert.setTitle("ERROR");
-					alert.setHeaderText("Unable to authorize user to take action.");
-					alert.setContentText(
-							"The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
-					alert.showAndWait();
+					makeErrorAlert("Unable to authorize user to take action.", "The system failed to verify your identity. Please try again, or re-login if the problem persists.");
 				} else if (result.equals("File")) {
 					errorLabel.setText("Error in finding file, please click 'Back' and try again.");
 				} else if (result.equals("Unshared")) {
@@ -329,8 +324,31 @@ public class ShareController implements Initializable {
 			} else {
 				userList.removeAll(userList);
 			}
+		} catch (MalformedURLException ex) {
+			makeErrorAlert("Operation failed", "Oops, an URL error has occurred getting the sharing list. Try again, or report to admin if problem persists");
+		} catch (IOException ex) {
+			makeErrorAlert("Operation failed", "Oops, an IO error has occurred getting the sharing list. Try again, or report to admin if problem persists");
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			makeErrorAlert("Operation failed", "Oops, an error has occurred getting the sharing list. Try again, or report to admin if problem persists");
 		}
+	}
+	
+	/**
+	 * This method makes and displays an error alert based on what is being sent
+	 * to the function
+	 * 
+	 * @param head
+	 *            The string of what should be on the alert windows's head bar
+	 * @param msg
+	 *            The message which is supposed to be displayed in the alert
+	 *            window
+	 * 
+	 */
+	public void makeErrorAlert(String head, String msg) {
+		Alert alert = new Alert(AlertType.ERROR);
+		alert.setTitle("ERROR");
+		alert.setHeaderText(head);
+		alert.setContentText(msg);
+		alert.showAndWait();
 	}
 }

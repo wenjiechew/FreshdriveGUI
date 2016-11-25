@@ -52,7 +52,7 @@ public class FileScan {
 	private static File fileToScan;
 
 
-	public static void setFileToScan(File fileInput) {
+	public static void  setFileToScan(File fileInput) {
 		fileToScan = fileInput;
 	}
 
@@ -195,13 +195,19 @@ public class FileScan {
 		} finally {
 			response1.close();
 			client.close();
-			APIKEY = "";
+
+			
 		}
 		if (positives > 0) {
 			FileScan.fileInfected = true;
 		} else {
 			FileScan.fileInfected = false;
 		}
+		APIKEY = "";
+		fileToScan = null;
+		resource=null;
+		responseStatus=0;
+		runningStatus=false;
 
 	}
 
@@ -312,16 +318,17 @@ public class FileScan {
 			in.close();
 
 			if (APIKEY.equals("unverified-token")) {
-
 				runningStatus = false;
 			} else {
 				runningStatus = true;
 			}
 
 		} catch (MalformedURLException ex) {
-			ex.printStackTrace();
+			System.out.println("API URL error");
 		} catch (IOException ex) {
-			ex.printStackTrace();
+			System.out.println("API IO error");
+		} catch (Exception ex){
+			System.out.println("API error");
 		}
 
 	}

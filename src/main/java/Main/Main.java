@@ -104,10 +104,29 @@ public class Main extends Application {
 					account.clearInstance();
 				}
 			} catch (MalformedURLException ex) {
-				ex.printStackTrace();
-			} catch (IOException ex) {
-				ex.printStackTrace();
+				makeErrorAlert("Operation failed", "Oops, a logout URL error has occurred. Try again, or report to admin if problem persists");
+			} catch (Exception ex) {
+				makeErrorAlert("Operation failed", "Oops, a logout error has occurred. Try again, or report to admin if problem persists");
 			}
 		}
+	}
+	
+	/**
+	 * This method makes and displays an error alert based on what is being sent
+	 * to the function
+	 * 
+	 * @param head
+	 *            The string of what should be on the alert windows's head bar
+	 * @param msg
+	 *            The message which is supposed to be displayed in the alert
+	 *            window
+	 * 
+	 */
+	public void makeErrorAlert(String head, String msg) {
+		Alert alert = new Alert(AlertType.ERROR);
+		alert.setTitle("ERROR");
+		alert.setHeaderText(head);
+		alert.setContentText(msg);
+		alert.showAndWait();
 	}
 }

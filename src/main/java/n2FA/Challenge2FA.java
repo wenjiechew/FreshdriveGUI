@@ -35,7 +35,6 @@ public class Challenge2FA implements Initializable {
 	@FXML
 	private TextField otpInput;
 	private String result;
-
 	private int loginAttempts = 3;
 
 	/**
@@ -120,9 +119,11 @@ public class Challenge2FA implements Initializable {
 				app_stage.show();
 			}
 		} catch (MalformedURLException ex) {
-			ex.printStackTrace();
+			makeErrorAlert("Operation failed", "Oops, an URL error has occurred when trying to complete the 2FA. Try again, or report to admin if problem persists");		
 		} catch (IOException ex) {
-			ex.printStackTrace();
+			makeErrorAlert("Operation failed", "Oops, an IO error has occurred when trying to complete the 2FA. Try again, or report to admin if problem persists");
+		} catch (Exception ex) {
+			makeErrorAlert("Operation failed", "Oops, an error has occurred when trying to complete the 2FA. Try again, or report to admin if problem persists");
 		}
 	}
 
@@ -138,7 +139,7 @@ public class Challenge2FA implements Initializable {
 	 */
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		System.out.println("Initialize 2FA");
+		//Initialize 2FA
 	}
 
 	/**
