@@ -44,6 +44,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
@@ -590,21 +591,26 @@ public class FileController implements Initializable {
 					newFile.setWritable(true);
 					// if file already exist in selected directory
 					if (newFile.exists()) {
-						newFile = new File(filePath + "\\(Copy) " + fileName);
+						Alert alert = new Alert(AlertType.CONFIRMATION, "The file already exists. Do you want to replace it?" , ButtonType.YES, ButtonType.NO);
+						alert.showAndWait();
+
+						if (alert.getResult() == ButtonType.YES) {
+							// Set an output stream to put file in
+							FileOutputStream output = new FileOutputStream(newFile);
+
+							// Write the bytes into the outputstream to create the file
+							output.write(bytes);
+							output.close();
+
+							// If no fail message then alert success
+							Alert alertCfm = new Alert(AlertType.CONFIRMATION);
+							alertCfm.setTitle("Download success");
+							alertCfm.setHeaderText(null);
+							alertCfm.setContentText("Your file has been downloaded into the specified folder as " + newFile.getName());
+							alertCfm.showAndWait();
+						}
 					}
-					// Set an output stream to put file in
-					FileOutputStream output = new FileOutputStream(newFile);
-
-					// Write the bytes into the outputstream to create the file
-					output.write(bytes);
-					output.close();
-
-					// If no fail message then alert success
-					Alert alert = new Alert(AlertType.CONFIRMATION);
-					alert.setTitle("Download success");
-					alert.setHeaderText(null);
-					alert.setContentText("Your file has been downloaded into the specified folder as " + newFile.getName());
-					alert.showAndWait();
+					
 				}
 			} catch (Exception ex) {
 				makeErrorAlert("Operation failed", "Oops, a download error has occurred. Try again, or report to admin if problem persists");
