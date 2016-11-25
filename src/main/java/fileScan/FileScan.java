@@ -312,16 +312,17 @@ public class FileScan {
 			in.close();
 
 			if (APIKEY.equals("unverified-token")) {
-
 				runningStatus = false;
 			} else {
 				runningStatus = true;
 			}
 
 		} catch (MalformedURLException ex) {
-			ex.printStackTrace();
+			System.out.println("API URL error");
 		} catch (IOException ex) {
-			ex.printStackTrace();
+			System.out.println("API IO error");
+		} catch (Exception ex){
+			System.out.println("API error");
 		}
 
 	}

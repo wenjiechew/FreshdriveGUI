@@ -102,9 +102,14 @@ public class LoginController implements Initializable {
 			}
 
 		} catch (MalformedURLException ex) {
-			ex.printStackTrace();
+			displayMsg.setTextFill(Color.web("#FF0000"));
+			displayMsg.setText("Login URL error.");
 		} catch (IOException ex) {
-			ex.printStackTrace();
+			displayMsg.setTextFill(Color.web("#FF0000"));
+			displayMsg.setText("Login IO error.");
+		} catch (Exception ex) {
+			displayMsg.setTextFill(Color.web("#FF0000"));
+			displayMsg.setText("Login error.");
 		}
 	}
 
@@ -127,7 +132,11 @@ public class LoginController implements Initializable {
 			app_stage.setScene(registerScene);
 			app_stage.show();
 		} catch (IOException ex) {
-			System.err.println("Caught IOException: " + ex.getMessage());
+			displayMsg.setTextFill(Color.web("#FF0000"));
+			displayMsg.setText("Registration page IO error.");
+		} catch (Exception ex) {
+			displayMsg.setTextFill(Color.web("#FF0000"));
+			displayMsg.setText("Registration page error.");
 		}
 	}
 
@@ -143,7 +152,6 @@ public class LoginController implements Initializable {
 	 */
 	@Override
 	public void initialize(URL fxmlFileLocation, ResourceBundle resources) {
-		System.out.println("LoginController.initialize()");
-
+		System.out.println("Initializing login");
 	}
 }

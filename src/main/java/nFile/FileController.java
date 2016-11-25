@@ -91,7 +91,7 @@ public class FileController implements Initializable {
 	 *            triggered by button press
 	 * @throws IOException
 	 */
-	public void handleLogoutBtn(ActionEvent event) throws IOException {
+	public void handleLogoutBtn(ActionEvent event) {
 		try {
 			URL url = new URL(nURLConstants.Constants.logoutURL);
 			HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -117,11 +117,7 @@ public class FileController implements Initializable {
 
 			// 1 = Failed
 			if (result.contentEquals("1")) {
-				Alert alert = new Alert(AlertType.ERROR);
-				alert.setTitle("ERROR");
-				alert.setHeaderText("Unable to logout");
-				alert.setContentText("There was an error logging out.\nPlease try again!");
-				alert.showAndWait();
+				makeErrorAlert("Unable to logout", "There was an error logging out.\nPlease try again!");
 			} else {
 				// Clear Account instance
 				account.clearInstance();
@@ -134,9 +130,9 @@ public class FileController implements Initializable {
 			}
 
 		} catch (MalformedURLException ex) {
-			ex.printStackTrace();
-		} catch (IOException ex) {
-			ex.printStackTrace();
+			makeErrorAlert("Operation failed", "Oops, a logout URL error has occurred. Try again, or report to admin if problem persists");
+		} catch (Exception ex) {
+			makeErrorAlert("Operation failed", "Oops, a logout error has occurred. Try again, or report to admin if problem persists");
 		}
 	}
 
@@ -168,13 +164,13 @@ public class FileController implements Initializable {
 								Thread.sleep(60000);
 							} catch (InterruptedException ex) {
 								Thread.currentThread().interrupt();
+								makeErrorAlert("Operation failed", "Oops, an thread error has occurred. Try again, or report to admin if problem persists");
 							}
 							try {
 								filescan.checkResponseStatus();
 							} catch (Exception e) {
-								e.printStackTrace();
+								makeErrorAlert("Operation failed", "Oops, an error has occurred when trying to scan the file. Try again, or report to admin if problem persists");
 							}
-
 						}
 						try {
 							filescan.scanResults();
@@ -229,8 +225,6 @@ public class FileController implements Initializable {
 
 									byte[] buffer = new byte[BUFFER_SIZE];
 									int bytesRead = -1;
-
-									System.out.println("Start writing data...");
 
 									// write the file into the outputstream
 									while ((bytesRead = inputStream.read(buffer)) != -1) {
@@ -288,12 +282,7 @@ public class FileController implements Initializable {
 											Platform.runLater(new Runnable() {
 												@Override
 												public void run() {
-													Alert alert = new Alert(AlertType.ERROR);
-													alert.setTitle("ERROR");
-													alert.setHeaderText("Unable to authorize user to take action.");
-													alert.setContentText(
-															"The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
-													alert.showAndWait();
+													makeErrorAlert("Unable to authorize user to take action.", "The system failed to verify your identity. Please try again, or re-login if the problem persists.");
 													uploadedFileLabel.setText("");
 													uploadFileBtn.setText("Upload");
 													uploadFileBtn.setDisable(true);
@@ -305,12 +294,7 @@ public class FileController implements Initializable {
 											Platform.runLater(new Runnable() {
 												@Override
 												public void run() {
-													Alert alert = new Alert(AlertType.ERROR);
-													alert.setTitle("ERROR");
-													alert.setHeaderText("Error has occured.");
-													alert.setContentText(
-															"An unexpected error has occured. Please try uploading again.");
-													alert.showAndWait();
+													makeErrorAlert("Error has occured.","An unexpected error has occured. Please try uploading again."); 									
 													uploadedFileLabel.setText("");
 													uploadFileBtn.setText("Upload");
 													uploadFileBtn.setDisable(true);
@@ -320,11 +304,10 @@ public class FileController implements Initializable {
 										}
 										in.close();
 									} else {
-										System.out.println("Server returned non-OK code: " + responseCode);
 										Platform.runLater(new Runnable() {
 											@Override
 											public void run() {
-
+												makeErrorAlert("Operation failed", "Oops, an upload error has occurred. Try again, or report to admin if problem persists");
 												uploadedFileLabel.setText("");
 												uploadFileBtn.setText("Upload");
 												uploadFileBtn.setDisable(true);
@@ -332,13 +315,11 @@ public class FileController implements Initializable {
 											}
 										});
 									}
-
 								} catch (MalformedURLException ex) {
-									ex.printStackTrace();
-
 									Platform.runLater(new Runnable() {
 										@Override
 										public void run() {
+											makeErrorAlert("Operation failed", "Oops, an upload URL error has occurred. Try again, or report to admin if problem persists");
 											uploadedFileLabel.setText("");
 											uploadFileBtn.setText("Upload");
 											uploadFileBtn.setDisable(true);
@@ -346,11 +327,10 @@ public class FileController implements Initializable {
 										}
 									});
 								} catch (IOException ex) {
-									ex.printStackTrace();
-
 									Platform.runLater(new Runnable() {
 										@Override
 										public void run() {
+											makeErrorAlert("Operation failed", "Oops, an upload IO error has occurred. Try again, or report to admin if problem persists");
 											uploadedFileLabel.setText("");
 											uploadFileBtn.setText("Upload");
 											uploadFileBtn.setDisable(true);
@@ -370,31 +350,23 @@ public class FileController implements Initializable {
 								});
 							}
 						} catch (Exception e) {
-							e.printStackTrace();
+							makeErrorAlert("Operation failed", "Oops, an upload error has occurred. Try again, or report to admin if problem persists");
 						}
 					}
 				}).start();
 			} else {
 				// Show invalid token error
-				Alert alert = new Alert(AlertType.ERROR);
-				alert.setTitle("ERROR");
-				alert.setHeaderText("Unable to authorize user to take action.");
-				alert.setContentText(
-						"The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
-				alert.showAndWait();
+				makeErrorAlert("Unable to authorize user to take action.", "The system failed to verify your identity. Please try again, or re-login if the problem persists.");
 				uploadFileBtn.setText("Upload");
 				chooseBtn.setDisable(false);
 				uploadedFileLabel.setText("");
 				return;
 			}
-
 		} catch (Exception e) {
-			e.printStackTrace();
 			uploadedFileLabel.setText("Invalid File. Try another file.");
 			uploadFileBtn.setText("Upload");
 			chooseBtn.setDisable(false);
 		}
-
 		initializeListView();
 	}
 
@@ -434,11 +406,7 @@ public class FileController implements Initializable {
 				uploadFileBtn.setText("Upload");
 				uploadFileBtn.setDisable(true);
 
-				Alert alert = new Alert(AlertType.ERROR);
-				alert.setTitle("ERROR");
-				alert.setHeaderText("File Invalid.");
-				alert.setContentText("File is invalid. Please try another file.");
-				alert.showAndWait();
+				makeErrorAlert("File Invalid.", "File is invalid. Please try another file.");						
 			}
 		} else {
 			uploadedFileLabel.setText("No file selected.");
@@ -513,7 +481,7 @@ public class FileController implements Initializable {
 					alert.showAndWait();
 				}
 			} catch (Exception ex) {
-				ex.printStackTrace();
+				makeErrorAlert("Operation failed", "Oops, an error has occurred while trying to share. Try again, or report to admin if problem persists");
 			}
 		}
 	}
@@ -574,26 +542,13 @@ public class FileController implements Initializable {
 
 				if (result.equals("Download Fail")) {
 					// Alert to notify download fail.
-					Alert alert = new Alert(AlertType.ERROR);
-					alert.setTitle("Error: Download failed");
-					alert.setHeaderText(null);
-					alert.setContentText("Download has failed. Try again or contact your administrator.");
-					alert.showAndWait();
+					makeErrorAlert("Error: Download failed", "Download has failed. Try again or contact your administrator.");
 				} else if (result.equals("unverified-token") || result.equals("invalid-user")) {
 					// Alert for invalid token error
-					Alert alert = new Alert(AlertType.ERROR);
-					alert.setTitle("ERROR");
-					alert.setHeaderText("Unable to authorize user to take action.");
-					alert.setContentText(
-							"The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
-					alert.showAndWait();
+					makeErrorAlert("Unable to authorize user to take action.", "The system failed to verify your identity. Please try again, or re-login if the problem persists.");
 				} else if (result.equals("permission-denied")) {
 					// Alert for permission denied
-					Alert alert = new Alert(AlertType.ERROR);
-					alert.setTitle("ERROR");
-					alert.setHeaderText("Permission denied.");
-					alert.setContentText("You do not have permissions to download the file. Please refresh the list. ");
-					alert.showAndWait();
+					makeErrorAlert("Permission denied.", "You do not have permissions to download the file. Please refresh the list. ");
 				} else {
 					// parse response string back to bytes
 					String[] byteValues = result.substring(1, result.length() - 1).split(",");
@@ -626,10 +581,9 @@ public class FileController implements Initializable {
 					alert.showAndWait();
 				}
 			} catch (Exception ex) {
-				ex.printStackTrace();
+				makeErrorAlert("Operation failed", "Oops, a download error has occurred. Try again, or report to admin if problem persists");
 			}
 		}
-
 	}
 
 	/**
@@ -644,15 +598,13 @@ public class FileController implements Initializable {
 	 */
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		System.out.println("FileController.initialize()");
 		uploadFileBtn.setDisable(true);
 		greetingLbl.setText("Hello, " + account.getUsername() + "!");
 		try {
 			initializeListView();
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			makeErrorAlert("Operation failed", "Oops, an error has occurred during intialization. Try again, or report to admin if problem persists");
 		}
-
 	}
 
 	/**
@@ -703,12 +655,7 @@ public class FileController implements Initializable {
 
 		if (jsonString.equals("unverified-token")) {
 			// Display user verification error instead
-			Alert alert = new Alert(AlertType.ERROR);
-			alert.setTitle("ERROR");
-			alert.setHeaderText("Unable to authorize user to take action.");
-			alert.setContentText(
-					"The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
-			alert.showAndWait();
+			makeErrorAlert("Unable to authorize user to take action.", "The system failed to verify your identity. Please try again, or re-login if the problem persists.");
 		} else {
 			// Set list of user's files
 			JSONObject jsonObj = new JSONObject(jsonString);
@@ -731,16 +678,33 @@ public class FileController implements Initializable {
 	 * 
 	 * @param action
 	 *            Actionevent triggered on button click
-	 * @throws IOException
 	 */
-	public void handleRefreshBtn(ActionEvent action) throws IOException {
-
+	public void handleRefreshBtn(ActionEvent action){
 		try {
 			initializeListView();
 		} catch (Exception e) {
-			e.printStackTrace();
+			makeErrorAlert("Operation failed", "Oops, an error has occurred when trying to refresh. Try again, or report to admin if problem persists");
 		}
 
+	}
+	
+	/**
+	 * This method makes and displays an error alert based on what is being sent
+	 * to the function
+	 * 
+	 * @param head
+	 *            The string of what should be on the alert windows's head bar
+	 * @param msg
+	 *            The message which is supposed to be displayed in the alert
+	 *            window
+	 * 
+	 */
+	public void makeErrorAlert(String head, String msg) {
+		Alert alert = new Alert(AlertType.ERROR);
+		alert.setTitle("ERROR");
+		alert.setHeaderText(head);
+		alert.setContentText(msg);
+		alert.showAndWait();
 	}
 
 }
