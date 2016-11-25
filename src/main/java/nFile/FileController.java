@@ -48,6 +48,7 @@ import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ProgressBar;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -74,6 +75,9 @@ public class FileController implements Initializable {
 	@FXML
 	private ListView<String> fileListView;
 
+	@FXML
+	private ProgressBar progressBar;
+
 	private String result;
 	private File inputFile;
 	static final int BUFFER_SIZE = 33554432;
@@ -91,7 +95,7 @@ public class FileController implements Initializable {
 	 *            triggered by button press
 	 * @throws IOException
 	 */
-	public void handleLogoutBtn(ActionEvent event) {
+	public void handleLogoutBtn(ActionEvent event) throws IOException {
 		try {
 			URL url = new URL(nURLConstants.Constants.logoutURL);
 			HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -148,13 +152,14 @@ public class FileController implements Initializable {
 		uploadFileBtn.setText("Uploading");
 		chooseBtn.setDisable(true);
 		uploadFileBtn.setDisable(true);
+		progressBar.setVisible(true);
 
 		try {
 			// does the virus scan
 			FileScan filescan = new FileScan();
 			filescan.setFileToScan(inputFile);
 			filescan.startScan();
-			
+
 			if (filescan.isRunningStatus()) {
 				new Thread(new Runnable() {
 					public void run() {
@@ -258,6 +263,8 @@ public class FileController implements Initializable {
 													uploadFileBtn.setText("Upload");
 													uploadFileBtn.setDisable(true);
 													chooseBtn.setDisable(false);
+													progressBar.setVisible(false);
+
 												}
 											});
 										} else if (result.equals("File Uploaded")) {
@@ -269,11 +276,19 @@ public class FileController implements Initializable {
 													uploadFileBtn.setText("Upload");
 													uploadFileBtn.setDisable(true);
 													chooseBtn.setDisable(false);
+													expiryDatePicker.setValue(null);
 													Alert alert = new Alert(AlertType.CONFIRMATION);
 													alert.setTitle("Success Dialog");
 													alert.setHeaderText("Success!");
 													alert.setContentText("File has been uploaded!.");
 													alert.showAndWait();
+													progressBar.setVisible(false);
+
+													try {
+														initializeListView();
+													} catch (IOException e) {
+														makeErrorAlert("Operation failed", "Oops, an error has occurred during intialization. Try again, or report to admin if problem persists");
+													}
 												}
 											});
 
@@ -287,6 +302,7 @@ public class FileController implements Initializable {
 													uploadFileBtn.setText("Upload");
 													uploadFileBtn.setDisable(true);
 													chooseBtn.setDisable(false);
+													progressBar.setVisible(false);
 												}
 											});
 										} else if (result.equals("Error")) {
@@ -299,6 +315,7 @@ public class FileController implements Initializable {
 													uploadFileBtn.setText("Upload");
 													uploadFileBtn.setDisable(true);
 													chooseBtn.setDisable(false);
+													progressBar.setVisible(false);
 												}
 											});
 										}
@@ -312,9 +329,11 @@ public class FileController implements Initializable {
 												uploadFileBtn.setText("Upload");
 												uploadFileBtn.setDisable(true);
 												chooseBtn.setDisable(false);
+												progressBar.setVisible(false);
 											}
 										});
 									}
+
 								} catch (MalformedURLException ex) {
 									Platform.runLater(new Runnable() {
 										@Override
@@ -324,6 +343,7 @@ public class FileController implements Initializable {
 											uploadFileBtn.setText("Upload");
 											uploadFileBtn.setDisable(true);
 											chooseBtn.setDisable(false);
+											progressBar.setVisible(false);
 										}
 									});
 								} catch (IOException ex) {
@@ -335,6 +355,7 @@ public class FileController implements Initializable {
 											uploadFileBtn.setText("Upload");
 											uploadFileBtn.setDisable(true);
 											chooseBtn.setDisable(false);
+											progressBar.setVisible(false);
 										}
 									});
 								}
@@ -346,6 +367,7 @@ public class FileController implements Initializable {
 										uploadFileBtn.setText("Upload");
 										chooseBtn.setDisable(false);
 										uploadedFileLabel.setText("File is virus infected. Try another file");
+										progressBar.setVisible(false);
 									}
 								});
 							}
@@ -359,15 +381,20 @@ public class FileController implements Initializable {
 				makeErrorAlert("Unable to authorize user to take action.", "The system failed to verify your identity. Please try again, or re-login if the problem persists.");
 				uploadFileBtn.setText("Upload");
 				chooseBtn.setDisable(false);
+
 				uploadedFileLabel.setText("");
+				progressBar.setVisible(false);
 				return;
 			}
+
 		} catch (Exception e) {
 			uploadedFileLabel.setText("Invalid File. Try another file.");
 			uploadFileBtn.setText("Upload");
 			chooseBtn.setDisable(false);
+			progressBar.setVisible(false);
+
 		}
-		initializeListView();
+
 	}
 
 	/**
@@ -465,7 +492,7 @@ public class FileController implements Initializable {
 					// sharing options
 					FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/nFile/FileShareWindow.fxml"));
 					Parent root = (Parent) fxmlLoader.load();
-					ShareController controller = fxmlLoader.<ShareController> getController();
+					ShareController controller = fxmlLoader.<ShareController>getController();
 					controller.setFileID(fileID);
 					Scene scene = new Scene(root);
 					Stage app_stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -567,7 +594,6 @@ public class FileController implements Initializable {
 					}
 					// Set an output stream to put file in
 					FileOutputStream output = new FileOutputStream(newFile);
-					
 
 					// Write the bytes into the outputstream to create the file
 					output.write(bytes);
@@ -577,7 +603,7 @@ public class FileController implements Initializable {
 					Alert alert = new Alert(AlertType.CONFIRMATION);
 					alert.setTitle("Download success");
 					alert.setHeaderText(null);
-					alert.setContentText("Your file has been downloaded into the specified folder.");
+					alert.setContentText("Your file has been downloaded into the specified folder as " + newFile.getName());
 					alert.showAndWait();
 				}
 			} catch (Exception ex) {
@@ -600,21 +626,8 @@ public class FileController implements Initializable {
 	public void initialize(URL location, ResourceBundle resources) {
 		uploadFileBtn.setDisable(true);
 		greetingLbl.setText("Hello, " + account.getUsername() + "!");
-		try {
-			initializeListView();
-		} catch (Exception e) {
-			makeErrorAlert("Operation failed", "Oops, an error has occurred during intialization. Try again, or report to admin if problem persists");
-		}
-	}
-
-	/**
-	 * Initialize the list view which displays all available files (i.e.
-	 * uploaded by or shared to the user)
-	 * 
-	 * @throws IOException
-	 * @throws DBxException
-	 */
-	public void initializeListView() throws IOException {
+		progressBar.setVisible(false);
+		expiryDatePicker.setEditable(false);
 		final Callback<DatePicker, DateCell> dayCellFactory = new Callback<DatePicker, DateCell>() {
 			@Override
 			public DateCell call(final DatePicker datePicker) {
@@ -632,6 +645,22 @@ public class FileController implements Initializable {
 			}
 		};
 		expiryDatePicker.setDayCellFactory(dayCellFactory);
+		try {
+			initializeListView();
+		} catch (IOException e) {
+			makeErrorAlert("Operation failed", "Oops, an error has occurred during intialization. Try again, or report to admin if problem persists");
+		}
+
+	}
+
+	/**
+	 * Initialize the list view which displays all available files (i.e.
+	 * uploaded by or shared to the user)
+	 * 
+	 * @throws IOException
+	 * @throws DBxException
+	 */
+	public void initializeListView() throws IOException {
 
 		URL url = new URL(nURLConstants.Constants.retrieveURL);
 		HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -678,8 +707,10 @@ public class FileController implements Initializable {
 	 * 
 	 * @param action
 	 *            Actionevent triggered on button click
+	 * @throws IOException
 	 */
-	public void handleRefreshBtn(ActionEvent action){
+	public void handleRefreshBtn(ActionEvent action) throws IOException {
+
 		try {
 			initializeListView();
 		} catch (Exception e) {

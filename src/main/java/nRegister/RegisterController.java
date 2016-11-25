@@ -116,8 +116,7 @@ public class RegisterController implements Initializable {
 
 					// 1 = Failed
 					if (result.contentEquals("1")) {
-						// TODO Differentiate errors (duplicate username?
-						// duplicate email?)
+
 						makeErrorAlert("Registration failed",
 								"Please try again later, possibly with a different username or email address.");
 					} else {
@@ -137,11 +136,9 @@ public class RegisterController implements Initializable {
 						app_stage.show();
 					}
 				} catch (MalformedURLException ex) {
-					makeErrorAlert("Operation failed", "Oops, a registration URL error has occurred. Try again, or report to admin if problem persists");
+					ex.printStackTrace();
 				} catch (IOException ex) {
-					makeErrorAlert("Operation failed", "Oops, a registration IO error has occurred. Try again, or report to admin if problem persists");
-				} catch (Exception ex) {
-					makeErrorAlert("Operation failed", "Oops, a registration error has occurred. Try again, or report to admin if problem persists");
+					ex.printStackTrace();
 				}
 			}
 		}
@@ -155,9 +152,7 @@ public class RegisterController implements Initializable {
 			app_stage.setScene(loginScene);
 			app_stage.show();
 		} catch (IOException e) {
-			makeErrorAlert("Operation failed", "Oops, an IO error has occurred when returning to Login page. Try again, or report to admin if problem persists");
-		} catch (Exception e) {
-			makeErrorAlert("Operation failed", "Oops, an error has occurred when returning to Login page. Try again, or report to admin if problem persists");
+			e.printStackTrace();
 		}
 	}
 
