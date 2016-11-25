@@ -282,7 +282,7 @@ public class FileController implements Initializable {
 													Alert alert = new Alert(AlertType.CONFIRMATION);
 													alert.setTitle("Success Dialog");
 													alert.setHeaderText("Success!");
-													alert.setContentText("File has been uploaded!.");
+													alert.setContentText("File has been uploaded!");
 													alert.showAndWait();
 													progressBar.setVisible(false);
 
@@ -418,35 +418,42 @@ public class FileController implements Initializable {
 	 */
 	public void handleChooseFileButton(ActionEvent event)
 			throws IOException, KeyManagementException, NoSuchAlgorithmException {
-
-		// opens up file dialog for user to choose
-		fileChooser.setTitle("Select file to upload");
-		File file = fileChooser.showOpenDialog(app_stage);
-
-		// check if valid file
-		if (file != null) {
-			String ext = FilenameUtils.getExtension(file.getPath());
-			// Check if file is within the size limit and the file types are
-			// valid
-			if (file.length() > 0 && file.length() <= BUFFER_SIZE && !ext.equalsIgnoreCase("exe")
-					&& !ext.equalsIgnoreCase("zip") && !ext.equalsIgnoreCase("bin")) {
-
-				uploadedFileLabel.setText(file.getName());
-				uploadFileBtn.setDisable(false);
+		try{
+			// opens up file dialog for user to choose
+			fileChooser.setTitle("Select file to upload");
+			File file = fileChooser.showOpenDialog(app_stage);
+	
+			// check if valid file
+			if (file != null) {
+				String ext = FilenameUtils.getExtension(file.getPath());
+				// Check if file is within the size limit and the file types are
+				// valid
+				if (file.length() > 0 && file.length() <= BUFFER_SIZE && !ext.equalsIgnoreCase("exe")
+						&& !ext.equalsIgnoreCase("zip") && !ext.equalsIgnoreCase("bin")) {
+	
+					uploadedFileLabel.setText(file.getName());
+					uploadFileBtn.setDisable(false);
+					uploadFileBtn.setText("Upload");
+					chooseBtn.setDisable(false);
+					inputFile = file;
+				} else {
+					uploadedFileLabel.setText("Invalid File");
+					uploadFileBtn.setText("Upload");
+					uploadFileBtn.setDisable(true);
+	
+					makeErrorAlert("File Invalid.", "File is invalid. Please try another file.");						
+				}
+			} else {
+				uploadedFileLabel.setText("No file selected.");
 				uploadFileBtn.setText("Upload");
 				chooseBtn.setDisable(false);
-				inputFile = file;
-			} else {
-				uploadedFileLabel.setText("Invalid File");
-				uploadFileBtn.setText("Upload");
-				uploadFileBtn.setDisable(true);
-
-				makeErrorAlert("File Invalid.", "File is invalid. Please try another file.");						
 			}
-		} else {
-			uploadedFileLabel.setText("No file selected.");
+		} catch (RuntimeException ex){
+			uploadedFileLabel.setText("Invalid File");
 			uploadFileBtn.setText("Upload");
-			chooseBtn.setDisable(false);
+			uploadFileBtn.setDisable(true);
+
+			makeErrorAlert("File Invalid.", "File is invalid. Please try another file.");
 		}
 	}
 
