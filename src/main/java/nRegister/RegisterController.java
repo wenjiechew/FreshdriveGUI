@@ -134,10 +134,12 @@ public class RegisterController implements Initializable {
 						app_stage.setScene(loginScene);
 						app_stage.show();
 					}
-				} catch (MalformedURLException ex) {
-					ex.printStackTrace();
+				}  catch (MalformedURLException ex) {
+					makeErrorAlert("Operation failed", "Oops, a registration URL error has occurred. Try again, or report to admin if problem persists");
 				} catch (IOException ex) {
-					ex.printStackTrace();
+					makeErrorAlert("Operation failed", "Oops, a registration IO error has occurred. Try again, or report to admin if problem persists");
+				} catch (Exception ex) {
+					makeErrorAlert("Operation failed", "Oops, a registration error has occurred. Try again, or report to admin if problem persists");
 				}
 			}
 		}
@@ -151,8 +153,9 @@ public class RegisterController implements Initializable {
 			app_stage.setScene(loginScene);
 			app_stage.show();
 		} catch (IOException e) {
-			e.printStackTrace();
-		}
+			makeErrorAlert("Operation failed", "Oops, an IO error has occurred when returning to Login page. Try again, or report to admin if problem persists");
+		} catch (Exception e) {
+			makeErrorAlert("Operation failed", "Oops, an error has occurred when returning to Login page. Try again, or report to admin if problem persists");}
 	}
 
 	/**

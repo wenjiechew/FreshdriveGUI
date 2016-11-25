@@ -337,8 +337,6 @@ public class FileController implements Initializable {
 									}
 
 								} catch (MalformedURLException ex) {
-									ex.printStackTrace();
-
 									Platform.runLater(new Runnable() {
 										@Override
 										public void run() {
@@ -351,8 +349,6 @@ public class FileController implements Initializable {
 										}
 									});
 								} catch (IOException ex) {
-									ex.printStackTrace();
-
 									Platform.runLater(new Runnable() {
 										@Override
 										public void run() {
@@ -377,6 +373,8 @@ public class FileController implements Initializable {
 									}
 								});
 							}
+						} catch(RuntimeException e){
+							makeErrorAlert("Operation failed", "Oops, an upload runtime error has occurred. Try again, or report to admin if problem persists");
 						} catch (Exception e) {
 							makeErrorAlert("Operation failed", "Oops, an upload error has occurred. Try again, or report to admin if problem persists");
 						}
@@ -394,14 +392,12 @@ public class FileController implements Initializable {
 			}
 
 		} catch (Exception e) {
-			e.printStackTrace();
 			uploadedFileLabel.setText("Invalid File. Try another file.");
 			uploadFileBtn.setText("Upload");
 			chooseBtn.setDisable(false);
 			progressBar.setVisible(false);
 
 		}
-
 		initializeListView();
 	}
 
@@ -568,11 +564,9 @@ public class FileController implements Initializable {
 				File selectedDirectory = chooser.showDialog(app_stage);
 				out.flush();
 				out.close();
-				System.out.println(selectedDirectory==null);
 				String filePath = selectedDirectory.getAbsolutePath();
 				// replace the single backslash with double backslash
 				filePath = filePath.replace("\\", "\\\\");
-				System.out.println(filePath);
 				// Response from Server
 				BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
 				String response;
@@ -639,7 +633,6 @@ public class FileController implements Initializable {
 					}
 				}
 			} catch (Exception ex) {
-				ex.printStackTrace();
 				makeErrorAlert("Operation failed", "An error has occurred during the download, please try again.");
 			}
 		}
