@@ -233,8 +233,6 @@ public class FileController implements Initializable {
 									byte[] buffer = new byte[BUFFER_SIZE];
 									int bytesRead = -1;
 
-									System.out.println("Start writing data...");
-
 									// write the file into the outputstream
 									while ((bytesRead = inputStream.read(buffer)) != -1) {
 										out.write(buffer, 0, bytesRead);
@@ -325,7 +323,6 @@ public class FileController implements Initializable {
 										}
 										in.close();
 									} else {
-										System.out.println("Server returned non-OK code: " + responseCode);
 										Platform.runLater(new Runnable() {
 											@Override
 											public void run() {
@@ -564,11 +561,11 @@ public class FileController implements Initializable {
 				File selectedDirectory = chooser.showDialog(app_stage);
 				out.flush();
 				out.close();
-
+				System.out.println(selectedDirectory==null);
 				String filePath = selectedDirectory.getAbsolutePath();
 				// replace the single backslash with double backslash
 				filePath = filePath.replace("\\", "\\\\");
-
+				System.out.println(filePath);
 				// Response from Server
 				BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
 				String response;
@@ -619,11 +616,24 @@ public class FileController implements Initializable {
 							alertCfm.setContentText("Your file has been downloaded into the specified folder as " + newFile.getName());
 							alertCfm.showAndWait();
 						}
+					}else{
+						FileOutputStream output = new FileOutputStream(newFile);
+
+						// Write the bytes into the outputstream to create the file
+						output.write(bytes);
+						output.close();
+
+						// If no fail message then alert success
+						Alert alertCfm = new Alert(AlertType.CONFIRMATION);
+						alertCfm.setTitle("Download success");
+						alertCfm.setHeaderText(null);
+						alertCfm.setContentText("Your file has been downloaded into the specified folder as " + newFile.getName());
+						alertCfm.showAndWait();
 					}
-					
 				}
 			} catch (Exception ex) {
 				ex.printStackTrace();
+				makeErrorAlert("Operation failed", "An error has occurred during the download, please try again.");
 			}
 		}
 	}
@@ -687,7 +697,6 @@ public class FileController implements Initializable {
 		} else {
 			progressBar.setVisible(true);
 			int fileID = Integer.parseInt(fileIdArray[selectedFile]);
-			System.out.println("GUI = " + account.get_id());
 			URL url = new URL(nURLConstants.Constants.deleteURL);
 			HttpURLConnection con = (HttpURLConnection) url.openConnection();
 			con.setRequestMethod("POST");
@@ -713,7 +722,7 @@ public class FileController implements Initializable {
 				progressBar.setVisible(false);
 				
 				// Alert for invalid token error
-				makeErrorAlert("Unable to authorize user to take action.", "The system failed to verify your identity. Please try again, or re-login if the problem persists. ");		
+				//Do nothing, when refreshing will show error message
 				
 			} else if (result.equals("Invalid-NoSuchFile")) {
 				progressBar.setVisible(false);

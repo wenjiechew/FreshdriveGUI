@@ -116,7 +116,6 @@ public class RegisterController implements Initializable {
 
 					// 1 = Failed
 					if (result.contentEquals("1")) {
-
 						makeErrorAlert("Registration failed",
 								"Please try again later, possibly with a different username or email address.");
 					} else {
@@ -169,7 +168,6 @@ public class RegisterController implements Initializable {
 	 */
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		System.out.println("RegisterController.initialize()");
 		// remove focus on text fields by default
 		Platform.runLater(() -> pane.requestFocus());
 	}

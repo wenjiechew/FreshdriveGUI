@@ -105,6 +105,7 @@ public class LoginController implements Initializable {
 			displayMsg.setTextFill(Color.web("#FF0000"));
 			displayMsg.setText("Login URL error.");
 		} catch (IOException ex) {
+			ex.printStackTrace();
 			displayMsg.setTextFill(Color.web("#FF0000"));
 			displayMsg.setText("Login IO error.");
 		} catch (Exception ex) {
@@ -152,6 +153,6 @@ public class LoginController implements Initializable {
 	 */
 	@Override
 	public void initialize(URL fxmlFileLocation, ResourceBundle resources) {
-		System.out.println("Initializing login");
+		//Intialize login
 	}
 }

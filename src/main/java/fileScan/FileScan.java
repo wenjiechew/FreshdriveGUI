@@ -324,11 +324,11 @@ public class FileScan {
 			}
 
 		} catch (MalformedURLException ex) {
-			System.out.println("API URL error");
+			//System.out.println("API URL error");
 		} catch (IOException ex) {
-			System.out.println("API IO error");
+			//System.out.println("API IO error");
 		} catch (Exception ex){
-			System.out.println("API error");
+			//System.out.println("API error");
 		}
 
 	}

@@ -70,8 +70,6 @@ public class ShareController implements Initializable {
 	 */
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1) {
-		System.out.println("ShareController.initialize()");
-
 		Task<Void> sleeper = new Task<Void>() {
 			@Override
 			protected Void call() throws Exception {
@@ -304,7 +302,12 @@ public class ShareController implements Initializable {
 			if (result != null) {
 				if(result.equals("unverified-token")){
 					//Display user verification error instead
-					makeErrorAlert("Unable to authorize user to take action.", "The system failed to verify your identity. Please try again, or re-login if the problem persists.");
+					//makeErrorAlert("Unable to authorize user to take action.", "The system failed to verify your identity. Please try again, or re-login if the problem persists.");
+					Parent FilePageParent = FXMLLoader.load(getClass().getResource("/nFile/FileObjectWindow.fxml"));
+					Scene FilePageScene = new Scene(FilePageParent);
+					Stage app_stage = (Stage) addBtn.getScene().getWindow();
+					app_stage.setScene(FilePageScene);
+					app_stage.show();
 				} else if (result.equals("File")) {
 					errorLabel.setText("Error in finding file, please click 'Back' and try again.");
 				} else if (result.equals("Unshared")) {
