@@ -26,6 +26,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.ResourceBundle;
 
+import javax.net.ssl.HttpsURLConnection;
+
 import org.apache.commons.io.FilenameUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -647,22 +649,7 @@ public class FileController implements Initializable {
 		System.out.println("FileController.initialize()");
 		uploadFileBtn.setDisable(true);
 		greetingLbl.setText("Hello, " + account.getUsername() + "!");
-		try {
-			initializeListView();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-	}
-
-	/**
-	 * Initialize the list view which displays all available files (i.e.
-	 * uploaded by or shared to the user)
-	 * 
-	 * @throws IOException
-	 * @throws DBxException
-	 */
-	public void initializeListView() throws IOException {
+		
 		final Callback<DatePicker, DateCell> dayCellFactory = new Callback<DatePicker, DateCell>() {
 			@Override
 			public DateCell call(final DatePicker datePicker) {
@@ -680,6 +667,104 @@ public class FileController implements Initializable {
 			}
 		};
 		expiryDatePicker.setDayCellFactory(dayCellFactory);
+		
+		
+		try {
+			initializeListView();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+	
+	public void handleDeleteBtn(ActionEvent event) throws IOException {
+		int selectedFile = fileListView.getSelectionModel().getSelectedIndex();
+		
+		//Check for select file from the listView
+		if(selectedFile == -1){
+			Alert alert = new Alert(AlertType.INFORMATION);
+			alert.setTitle("Information");
+			alert.setHeaderText(null);
+			alert.setContentText("Please select a file.");
+			alert.showAndWait();
+		} else {
+			int fileID = Integer.parseInt(fileIdArray[selectedFile]);
+			System.out.println("GUI = " + account.get_id());
+			URL url = new URL(nURLConstants.Constants.deleteURL);
+			HttpURLConnection con = (HttpURLConnection) url.openConnection();
+			con.setRequestMethod("POST");
+			con.setDoOutput(true);
+			
+			DataOutputStream out = new DataOutputStream(con.getOutputStream());
+			out.writeBytes("userID=" + account.get_id() + "&username=" + account.getUsername() + "&usertoken="
+					+ account.get_token() + "&fileID=" +  fileID );
+			
+			out.flush();
+			out.close();
+			
+			String result = null;
+			// Response from servlet in boolean
+			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+			String response;
+
+			while ((response = in.readLine()) != null) {
+				result = response;
+			}
+			in.close();
+			if(result.equals("unverified-token")){
+				// Alert for invalid token error
+				Alert alert = new Alert(AlertType.ERROR);
+				alert.setTitle("ERROR");
+				alert.setHeaderText("Unable to authorize user to take action.");
+				alert.setContentText(
+						"The system failed to verify your identity. Please try again, or re-login if the problem persists. ");
+				alert.showAndWait();
+			} else if (result.equals("Invalid-NoSuchFile")) {
+				// Alert for NoSuch File in Database error
+				Alert alert = new Alert(AlertType.ERROR);
+				alert.setTitle("ERROR");
+				alert.setHeaderText("No Such file in Database");
+				alert.setContentText("Please Select another file");
+				alert.showAndWait();				
+			} else if (result.equals("Invalid-NoPermission")) {
+				// Alert for NoSuch File in Database error
+				Alert alert = new Alert(AlertType.ERROR);
+				alert.setTitle("ERROR");
+				alert.setHeaderText("Permission");
+				alert.setContentText("You do not have permission to the file");
+				alert.showAndWait();
+			} else if (result.equals("Invalid-FileDelete")){
+				// Alert for NoSuch File in Database error
+				Alert alert = new Alert(AlertType.ERROR);
+				alert.setTitle("ERROR");
+				alert.setHeaderText("Error Occur");
+				alert.setContentText("Unable to Delete Selected file, Try Again");
+				alert.showAndWait();
+			} else if (result.equals("Successful") ){
+				// If no fail message then alert success
+				Alert alert = new Alert(AlertType.CONFIRMATION);
+				alert.setTitle("Delete success");
+				alert.setHeaderText(null);
+				alert.setContentText("Your file has been deleted.");
+				alert.showAndWait();
+			}
+			initializeListView();
+		}		
+		
+		
+	}
+	
+	
+
+	/**
+	 * Initialize the list view which displays all available files (i.e.
+	 * uploaded by or shared to the user)
+	 * 
+	 * @throws IOException
+	 * @throws DBxException
+	 */
+	public void initializeListView() throws IOException {
+		
 
 		URL url = new URL(nURLConstants.Constants.retrieveURL);
 		HttpURLConnection con = (HttpURLConnection) url.openConnection();
