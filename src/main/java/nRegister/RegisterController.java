@@ -116,8 +116,7 @@ public class RegisterController implements Initializable {
 
 					// 1 = Failed
 					if (result.contentEquals("1")) {
-						// TODO Differentiate errors (duplicate username?
-						// duplicate email?)
+
 						makeErrorAlert("Registration failed",
 								"Please try again later, possibly with a different username or email address.");
 					} else {

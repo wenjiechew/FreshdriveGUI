@@ -648,7 +648,7 @@ public class FileController implements Initializable {
 					Alert alert = new Alert(AlertType.CONFIRMATION);
 					alert.setTitle("Download success");
 					alert.setHeaderText(null);
-					alert.setContentText("Your file has been downloaded into the specified folder.");
+					alert.setContentText("Your file has been downloaded into the specified folder as " + newFile.getName());
 					alert.showAndWait();
 				}
 			} catch (Exception ex) {

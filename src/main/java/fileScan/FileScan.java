@@ -52,7 +52,7 @@ public class FileScan {
 	private static File fileToScan;
 
 
-	public void setFileToScan(File fileInput) {
+	public static void  setFileToScan(File fileInput) {
 		fileToScan = fileInput;
 	}
 
