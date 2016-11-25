@@ -48,6 +48,7 @@ import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ProgressBar;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -74,12 +75,16 @@ public class FileController implements Initializable {
 	@FXML
 	private ListView<String> fileListView;
 
+	@FXML
+	private ProgressBar progressBar;
+
 	private String result;
 	private File inputFile;
 	static final int BUFFER_SIZE = 33554432;
 	final FileChooser fileChooser = new FileChooser();
 	String[] fileIdArray;
 
+	
 	Account account = Account.getAccount();
 	private Stage app_stage;
 
@@ -152,13 +157,14 @@ public class FileController implements Initializable {
 		uploadFileBtn.setText("Uploading");
 		chooseBtn.setDisable(true);
 		uploadFileBtn.setDisable(true);
+		progressBar.setVisible(true);
 
 		try {
 			// does the virus scan
 			FileScan filescan = new FileScan();
 			filescan.setFileToScan(inputFile);
 			filescan.startScan();
-			
+
 			if (filescan.isRunningStatus()) {
 				new Thread(new Runnable() {
 					public void run() {
@@ -199,9 +205,11 @@ public class FileController implements Initializable {
 									Date date = new Date();
 									String currentDate = dateFormat.format(date).toString();
 									LocalDate expiryDate = expiryDatePicker.getValue();
+									System.out.println("LOCAL DATE: "+expiryDate);
 									String expireDate;
 									if (expiryDate != null) {
 										expireDate = expiryDate.format(formatter);
+										System.out.println("expiryDate "+expireDate);
 									} else {
 										expireDate = "";
 									}
@@ -264,6 +272,8 @@ public class FileController implements Initializable {
 													uploadFileBtn.setText("Upload");
 													uploadFileBtn.setDisable(true);
 													chooseBtn.setDisable(false);
+													progressBar.setVisible(false);
+
 												}
 											});
 										} else if (result.equals("File Uploaded")) {
@@ -275,12 +285,14 @@ public class FileController implements Initializable {
 													uploadFileBtn.setText("Upload");
 													uploadFileBtn.setDisable(true);
 													chooseBtn.setDisable(false);
+													expiryDatePicker.setValue(null);
 													Alert alert = new Alert(AlertType.CONFIRMATION);
 													alert.setTitle("Success Dialog");
 													alert.setHeaderText("Success!");
 													alert.setContentText("File has been uploaded!.");
 													alert.showAndWait();
-													
+													progressBar.setVisible(false);
+
 													try {
 														initializeListView();
 													} catch (IOException e) {
@@ -304,6 +316,7 @@ public class FileController implements Initializable {
 													uploadFileBtn.setText("Upload");
 													uploadFileBtn.setDisable(true);
 													chooseBtn.setDisable(false);
+													progressBar.setVisible(false);
 												}
 											});
 										} else if (result.equals("Error")) {
@@ -321,6 +334,7 @@ public class FileController implements Initializable {
 													uploadFileBtn.setText("Upload");
 													uploadFileBtn.setDisable(true);
 													chooseBtn.setDisable(false);
+													progressBar.setVisible(false);
 												}
 											});
 										}
@@ -335,6 +349,7 @@ public class FileController implements Initializable {
 												uploadFileBtn.setText("Upload");
 												uploadFileBtn.setDisable(true);
 												chooseBtn.setDisable(false);
+												progressBar.setVisible(false);
 											}
 										});
 									}
@@ -349,6 +364,7 @@ public class FileController implements Initializable {
 											uploadFileBtn.setText("Upload");
 											uploadFileBtn.setDisable(true);
 											chooseBtn.setDisable(false);
+											progressBar.setVisible(false);
 										}
 									});
 								} catch (IOException ex) {
@@ -361,6 +377,7 @@ public class FileController implements Initializable {
 											uploadFileBtn.setText("Upload");
 											uploadFileBtn.setDisable(true);
 											chooseBtn.setDisable(false);
+											progressBar.setVisible(false);
 										}
 									});
 								}
@@ -372,6 +389,7 @@ public class FileController implements Initializable {
 										uploadFileBtn.setText("Upload");
 										chooseBtn.setDisable(false);
 										uploadedFileLabel.setText("File is virus infected. Try another file");
+										progressBar.setVisible(false);
 									}
 								});
 							}
@@ -390,8 +408,9 @@ public class FileController implements Initializable {
 				alert.showAndWait();
 				uploadFileBtn.setText("Upload");
 				chooseBtn.setDisable(false);
-				
+
 				uploadedFileLabel.setText("");
+				progressBar.setVisible(false);
 				return;
 			}
 
@@ -400,9 +419,10 @@ public class FileController implements Initializable {
 			uploadedFileLabel.setText("Invalid File. Try another file.");
 			uploadFileBtn.setText("Upload");
 			chooseBtn.setDisable(false);
+			progressBar.setVisible(false);
+
 		}
 
-		
 	}
 
 	/**
@@ -504,7 +524,7 @@ public class FileController implements Initializable {
 					// sharing options
 					FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/nFile/FileShareWindow.fxml"));
 					Parent root = (Parent) fxmlLoader.load();
-					ShareController controller = fxmlLoader.<ShareController> getController();
+					ShareController controller = fxmlLoader.<ShareController>getController();
 					controller.setFileID(fileID);
 					Scene scene = new Scene(root);
 					Stage app_stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -619,7 +639,6 @@ public class FileController implements Initializable {
 					}
 					// Set an output stream to put file in
 					FileOutputStream output = new FileOutputStream(newFile);
-					
 
 					// Write the bytes into the outputstream to create the file
 					output.write(bytes);
@@ -654,22 +673,8 @@ public class FileController implements Initializable {
 		System.out.println("FileController.initialize()");
 		uploadFileBtn.setDisable(true);
 		greetingLbl.setText("Hello, " + account.getUsername() + "!");
-		try {
-			initializeListView();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-	}
-
-	/**
-	 * Initialize the list view which displays all available files (i.e.
-	 * uploaded by or shared to the user)
-	 * 
-	 * @throws IOException
-	 * @throws DBxException
-	 */
-	public void initializeListView() throws IOException {
+		progressBar.setVisible(false);
+		expiryDatePicker.setEditable(false);
 		final Callback<DatePicker, DateCell> dayCellFactory = new Callback<DatePicker, DateCell>() {
 			@Override
 			public DateCell call(final DatePicker datePicker) {
@@ -687,6 +692,22 @@ public class FileController implements Initializable {
 			}
 		};
 		expiryDatePicker.setDayCellFactory(dayCellFactory);
+		try {
+			initializeListView();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	/**
+	 * Initialize the list view which displays all available files (i.e.
+	 * uploaded by or shared to the user)
+	 * 
+	 * @throws IOException
+	 * @throws DBxException
+	 */
+	public void initializeListView() throws IOException {
 
 		URL url = new URL(nURLConstants.Constants.retrieveURL);
 		HttpURLConnection con = (HttpURLConnection) url.openConnection();

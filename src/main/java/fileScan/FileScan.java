@@ -52,7 +52,7 @@ public class FileScan {
 	private static File fileToScan;
 
 
-	public static void setFileToScan(File fileInput) {
+	public void setFileToScan(File fileInput) {
 		fileToScan = fileInput;
 	}
 
@@ -195,13 +195,19 @@ public class FileScan {
 		} finally {
 			response1.close();
 			client.close();
-			APIKEY = "";
+
+			
 		}
 		if (positives > 0) {
 			FileScan.fileInfected = true;
 		} else {
 			FileScan.fileInfected = false;
 		}
+		APIKEY = "";
+		fileToScan = null;
+		resource=null;
+		responseStatus=0;
+		runningStatus=false;
 
 	}
 
